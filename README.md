@@ -8,7 +8,7 @@ PNG image decoder written entirely in JavaScript
 ## Installation
 
 ```
-$ npm install png2
+$ npm install cross-png
 ```
 
 ## Compatibility
@@ -27,7 +27,7 @@ TBD
 
   [MIT](./LICENSE)
 
-[npm-image]: https://img.shields.io/npm/v/png2.svg?style=flat-square
-[npm-url]: https://www.npmjs.com/package/png2
-[download-image]: https://img.shields.io/npm/dm/png2.svg?style=flat-square
-[download-url]: https://www.npmjs.com/package/png2
+[npm-image]: https://img.shields.io/npm/v/cross-png.svg?style=flat-square
+[npm-url]: https://www.npmjs.com/package/cross-png
+[download-image]: https://img.shields.io/npm/dm/cross-png.svg?style=flat-square
+[download-url]: https://www.npmjs.com/package/cross-png
