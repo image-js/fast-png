@@ -1,0 +1,22 @@
+{
+  "name": "png2",
+  "version": "0.0.0",
+  "description": "PNG image decoder written entirely in JavaScript",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/image-js/png-js.git"
+  },
+  "author": "Michaël Zasso",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/image-js/png-js/issues"
+  },
+  "homepage": "https://github.com/image-js/png-js#readme",
+  "dependencies": {
+    "iobuffer": "^1.0.1"
+  }
+}
