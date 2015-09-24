@@ -21,7 +21,7 @@ JavaScript engines.
 
 ### PNG standard
 
-TBD
+Spec can be found at: http://www.w3.org/TR/PNG/
 
 ## License
 
