@@ -146,8 +146,8 @@ class PNGDecoder extends InputBuffer {
         var currentLine, newLine;
 
         for (var i = 0; i < height; i++) {
-            currentLine = data.subarray(offset + 1, bytesPerLine);
-            newLine = newData.subarray(i * bytesPerLine, bytesPerLine);
+            currentLine = data.subarray(offset + 1, offset + 1 + bytesPerLine);
+            newLine = newData.subarray(i * bytesPerLine, offset + 1 + bytesPerLine);
             switch (data[offset]) {
                 case 0:
                     unfilterNone(currentLine, newLine, bytesPerLine);
