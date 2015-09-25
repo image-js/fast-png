@@ -9,7 +9,8 @@ const pngSignature = [137, 80, 78, 71, 13, 10, 26, 10];
 
 class PNGDecoder extends InputBuffer {
     constructor(data) {
-        super(data);
+        var b = data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
+        super(b);
         this._decoded = false;
         this._inflator = new Inflator();
         this._png = null;
@@ -111,9 +112,108 @@ class PNGDecoder extends InputBuffer {
         }
         var data = this._inflator.result;
         this._inflator = null;
-        console.log(data.slice(0, 10));
-        //this._png.data = data;
+
+        if (this._png.filterMethod !== 0) {
+            throw new Error('Filter method ' + this._png.interlaceMethod + ' not supported');
+        }
+
+        if (this._png.interlaceMethod === 0) {
+            this.decodeInterlaceNull(data);
+        } else {
+            throw new Error('Interlace method ' + this._png.interlaceMethod + ' not supported');
+        }
     }
+
+    decodeInterlaceNull(data) {
+
+        var channels;
+        switch (this._png.colourType) {
+            case 0: channels = 1; break;
+            case 2: channels = 3; break;
+            case 3: throw new Error('Indexed-colour images are not supported');
+            case 4: channels = 2; break;
+            case 6: channels = 4; break;
+            default: throw new Error('Unknown colour type: ' + this._png.colourType);
+        }
+
+        const height = this._png.height;
+        const bytesPerPixel = channels * this._png.bitDepth / 8;
+        const bytesPerLine = this._png.width * bytesPerPixel;
+        const newData = new Uint8Array(this._png.height * bytesPerLine);
+
+        var prevLine = new Uint8Array(bytesPerLine);
+        var offset = 0;
+        var currentLine, newLine;
+
+        for (var i = 0; i < height; i++) {
+            currentLine = data.subarray(offset + 1, bytesPerLine);
+            newLine = newData.subarray(i * bytesPerLine, bytesPerLine);
+            switch (data[offset]) {
+                case 0:
+                    unfilterNone(currentLine, newLine, bytesPerLine);
+                    break;
+                case 1:
+                    unfilterSub(currentLine, newLine, bytesPerLine, bytesPerPixel);
+                    break;
+                case 2:
+                    unfilterUp(currentLine, newLine, prevLine, bytesPerLine);
+                    break;
+                case 3:
+                    unfilterAverage(currentLine, newLine, prevLine, bytesPerLine, bytesPerPixel);
+                    break;
+                case 4:
+                    unfilterPaeth(currentLine, newLine, prevLine, bytesPerLine, bytesPerPixel);
+                    break;
+                default: throw new Error('Unsupported filter: ' + data[offset]);
+            }
+            prevLine = newLine;
+            offset += bytesPerLine + 1;
+        }
+
+        this._png.data = newData;
+    }
+
+
 }
 
 module.exports = PNGDecoder;
+
+function unfilterNone(currentLine, newLine, bytesPerLine) {
+    for(var i = 0; i < bytesPerLine; i++) {
+        newLine[i] = currentLine[i];
+    }
+}
+
+function unfilterSub(currentLine, newLine, bytesPerLine, bytesPerPixel) {
+    for(var i = 0; i < bytesPerLine; i++) {
+        newLine[i] = (currentLine[i] + currentLine[i - bytesPerPixel])&0xFF;
+    }
+}
+
+function unfilterUp(currentLine, newLine, prevLine, bytesPerLine) {
+    for(var i = 0; i < bytesPerLine; i++) {
+        newLine[i] = (currentLine[i] + prevLine[i])&0xFF;
+    }
+}
+
+function unfilterAverage(currentLine, newLine, prevLine, bytesPerLine, bytesPerPixel) {
+    for(var i = 0; i < bytesPerLine; i++) {
+        newLine[i] = (currentLine[i] + Math.floor(currentLine[i - bytesPerPixel] + prevLine[i]))&0xFF;
+    }
+}
+
+function unfilterPaeth(currentLine, newLine, prevLine, bytesPerLine, bytesPerPixel) {
+    for(var i = 0; i < bytesPerLine; i++) {
+        newLine[i] = (currentLine[i] + paethPredictor(currentLine[i - bytesPerPixel], prevLine[i], prevLine[i - bytesPerPixel]))&0xFF;
+    }
+}
+
+function paethPredictor(a, b, c) {
+    var p = a + b - c;
+    var pa = Math.abs(p - a);
+    var pb = Math.abs(p - b);
+    var pc = Math.abs(p - c);
+    if (pa <= pb && pa <= pc) return a;
+    else if (pb <= pc) return b;
+    else return c;
+}
