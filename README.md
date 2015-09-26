@@ -8,7 +8,7 @@ PNG image decoder written entirely in JavaScript
 ## Installation
 
 ```
-$ npm install cross-png
+$ npm install fast-png
 ```
 
 ## Compatibility
@@ -27,7 +27,7 @@ Spec can be found at: http://www.w3.org/TR/PNG/
 
   [MIT](./LICENSE)
 
-[npm-image]: https://img.shields.io/npm/v/cross-png.svg?style=flat-square
-[npm-url]: https://www.npmjs.com/package/cross-png
-[download-image]: https://img.shields.io/npm/dm/cross-png.svg?style=flat-square
-[download-url]: https://www.npmjs.com/package/cross-png
+[npm-image]: https://img.shields.io/npm/v/fast-png.svg?style=flat-square
+[npm-url]: https://www.npmjs.com/package/fast-png
+[download-image]: https://img.shields.io/npm/dm/fast-png.svg?style=flat-square
+[download-url]: https://www.npmjs.com/package/fast-png

@@ -1,5 +1,5 @@
 {
-  "name": "cross-png",
+  "name": "fast-png",
   "version": "0.0.0",
   "description": "PNG image decoder written entirely in JavaScript",
   "main": "src/index.js",
