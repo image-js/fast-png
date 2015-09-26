@@ -90,7 +90,8 @@ class PNGDecoder extends InputBuffer {
 
     // http://www.w3.org/TR/PNG/#11IDAT
     decodeIDAT(length) {
-        this._inflator.push(this.readBytes(length));
+        this._inflator.push(new Uint8Array(this.buffer, this.offset, length));
+        this.skip(length);
     }
 
     // http://www.w3.org/TR/PNG/#11tEXt
