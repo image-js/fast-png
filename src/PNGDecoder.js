@@ -139,7 +139,7 @@ class PNGDecoder extends InputBuffer {
         const bytesPerLine = this._png.width * bytesPerPixel;
         const newData = new Uint8Array(this._png.height * bytesPerLine);
 
-        var prevLine = new Uint8Array(bytesPerLine);
+        var prevLine = empty;
         var offset = 0;
         var currentLine, newLine;
 
@@ -183,26 +183,65 @@ function unfilterNone(currentLine, newLine, bytesPerLine) {
 }
 
 function unfilterSub(currentLine, newLine, bytesPerLine, bytesPerPixel) {
-    for(var i = 0; i < bytesPerLine; i++) {
+    var i = 0;
+    for (; i < bytesPerPixel; i++) {
+        // just copy first bytes
+        newLine[i] = currentLine[i];
+    }
+    for(; i < bytesPerLine; i++) {
         newLine[i] = (currentLine[i] + currentLine[i - bytesPerPixel])&0xFF;
     }
 }
 
 function unfilterUp(currentLine, newLine, prevLine, bytesPerLine) {
-    for(var i = 0; i < bytesPerLine; i++) {
-        newLine[i] = (currentLine[i] + prevLine[i])&0xFF;
+    var i = 0;
+    if (prevLine.length === 0) {
+        // just copy bytes for first line
+        for (; i < bytesPerLine; i++) {
+            newLine[i] = currentLine[i];
+        }
+    } else {
+        for (; i < bytesPerLine; i++) {
+            newLine[i] = (currentLine[i] + prevLine[i]) & 0xFF;
+        }
     }
 }
 
 function unfilterAverage(currentLine, newLine, prevLine, bytesPerLine, bytesPerPixel) {
-    for(var i = 0; i < bytesPerLine; i++) {
-        newLine[i] = (currentLine[i] + Math.floor(currentLine[i - bytesPerPixel] + prevLine[i]))&0xFF;
+    var i = 0;
+    if (prevLine.length === 0) {
+        for (; i < bytesPerPixel; i++) {
+            newLine[i] = currentLine[i];
+        }
+        for (; i < bytesPerLine; i++) {
+            newLine[i] = (currentLine[i] + (currentLine[i - bytesPerPixel]>>1))&0xFF;
+        }
+    } else {
+        for (; i < bytesPerPixel; i++) {
+            newLine[i] = (currentLine[i] + (prevLine[i]>>1))&0xFF;
+        }
+        for (; i < bytesPerLine; i++) {
+            newLine[i] = (currentLine[i] + ((currentLine[i - bytesPerPixel] + prevLine[i])>>1))&0xFF;
+        }
     }
 }
 
 function unfilterPaeth(currentLine, newLine, prevLine, bytesPerLine, bytesPerPixel) {
-    for(var i = 0; i < bytesPerLine; i++) {
-        newLine[i] = (currentLine[i] + paethPredictor(currentLine[i - bytesPerPixel], prevLine[i], prevLine[i - bytesPerPixel]))&0xFF;
+    var i = 0;
+    if (prevLine.length === 0) {
+        for (; i < bytesPerPixel; i++) {
+            newLine[i] = currentLine[i];
+        }
+        for(; i < bytesPerLine; i++) {
+            newLine[i] = (currentLine[i] + currentLine[i - bytesPerPixel])&0xFF;
+        }
+    } else {
+        for (; i < bytesPerPixel; i++) {
+            newLine[i] = (currentLine[i] + prevLine[i])&0xFF;
+        }
+        for(; i < bytesPerLine; i++) {
+            newLine[i] = (currentLine[i] + paethPredictor(currentLine[i - bytesPerPixel], prevLine[i], prevLine[i - bytesPerPixel]))&0xFF;
+        }
     }
 }
 
