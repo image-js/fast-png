@@ -9,8 +9,7 @@ const pngSignature = [137, 80, 78, 71, 13, 10, 26, 10];
 
 class PNGDecoder extends InputBuffer {
     constructor(data) {
-        var b = data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
-        super(b);
+        super(data);
         this._decoded = false;
         this._inflator = new Inflator();
         this._png = null;
