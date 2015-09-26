@@ -46,7 +46,6 @@ class PNGDecoder extends InputBuffer {
         var length = this.readUint32();
         var type = this.readChars(4);
         var offset = this.offset;
-        console.log(type);
         switch (type) {
             case 'IHDR':
                 this.decodeIHDR();
