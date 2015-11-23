@@ -3,6 +3,7 @@
   "version": "0.0.4",
   "description": "PNG image decoder written entirely in JavaScript",
   "main": "src/index.js",
+  "files": "src",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -17,7 +18,7 @@
   },
   "homepage": "https://github.com/image-js/png-js#readme",
   "dependencies": {
-    "iobuffer": "^1.0.4",
+    "iobuffer": "^2.0.0",
     "pako": "^0.2.8"
   }
 }

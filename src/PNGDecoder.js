@@ -1,13 +1,13 @@
 'use strict';
 
-const InputBuffer = require('iobuffer').InputBuffer;
+const IOBuffer = require('iobuffer');
 const Inflator = require('pako').Inflate;
 
 const empty = new Uint8Array(0);
 const NULL = '\0';
 const pngSignature = [137, 80, 78, 71, 13, 10, 26, 10];
 
-class PNGDecoder extends InputBuffer {
+class PNGDecoder extends IOBuffer {
     constructor(data) {
         super(data);
         this._decoded = false;
