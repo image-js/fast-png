@@ -19,6 +19,6 @@
   "homepage": "https://github.com/image-js/png-js#readme",
   "dependencies": {
     "iobuffer": "^2.0.0",
-    "pako": "^0.2.8"
+    "pako": "^1.0.0"
   }
 }
