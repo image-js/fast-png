@@ -3,7 +3,9 @@
   "version": "1.1.0",
   "description": "PNG image decoder written entirely in JavaScript",
   "main": "src/index.js",
-  "files": "src",
+  "files": [
+    "src"
+  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 0"
   },
