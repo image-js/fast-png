@@ -3,13 +3,9 @@
 var fs = require('fs');
 var PNGDecoder = require('..').PNGDecoder;
 
-var image = fs.readFileSync(__dirname + '/img/ecoli.png');
+var image = fs.readFileSync(__dirname + '/img/lol.png');
 
-var t = process.hrtime();
-for (var i = 0; i < 10; i++) {
-    var decoder = new PNGDecoder(image);
-    var png = decoder.decode();
-}
-console.log(process.hrtime(t));
-//delete png.data;
-//console.log(png);
+var decoder = new PNGDecoder(image);
+var png = decoder.decode();
+
+console.log(png.palette);

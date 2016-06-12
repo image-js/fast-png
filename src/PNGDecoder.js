@@ -51,7 +51,8 @@ class PNGDecoder extends IOBuffer {
                 this.decodeIHDR();
                 break;
             case 'PLTE':
-                throw new Error('Palette image type not supported');
+                this.decodePLTE(length);
+                break;
             case 'IDAT':
                 this.decodeIDAT(length);
                 break;
@@ -87,6 +88,19 @@ class PNGDecoder extends IOBuffer {
             throw new Error('Unsupported compression method: ' + image.compressionMethod);
         }
     }
+    
+    // https://www.w3.org/TR/PNG/#11PLTE
+    decodePLTE(length) {
+        if (length % 3 !== 0) {
+            throw new RangeError('PLTE field length must be a multiple of 3. Got ' + length);
+        }
+        var l = length / 3;
+        this._hasPalette = true;
+        var palette = this._palette = new Array(l);
+        for (var i = 0; i < l; i++) {
+            palette[i] = [this.readUint8(), this.readUint8(), this.readUint8()];
+        }
+    }
 
     // http://www.w3.org/TR/PNG/#11IDAT
     decodeIDAT(length) {
@@ -113,7 +127,7 @@ class PNGDecoder extends IOBuffer {
         this._inflator = null;
 
         if (this._png.filterMethod !== 0) {
-            throw new Error('Filter method ' + this._png.interlaceMethod + ' not supported');
+            throw new Error('Filter method ' + this._png.filterMethod + ' not supported');
         }
 
         if (this._png.interlaceMethod === 0) {
@@ -129,7 +143,10 @@ class PNGDecoder extends IOBuffer {
         switch (this._png.colourType) {
             case 0: channels = 1; break;
             case 2: channels = 3; break;
-            case 3: throw new Error('Indexed-colour images are not supported');
+            case 3:
+                if (!this._hasPalette) throw new Error('Missing palette');
+                channels = 1;
+                break;
             case 4: channels = 2; break;
             case 6: channels = 4; break;
             default: throw new Error('Unknown colour type: ' + this._png.colourType);
@@ -169,6 +186,9 @@ class PNGDecoder extends IOBuffer {
             offset += bytesPerLine + 1;
         }
 
+        if (this._hasPalette) {
+            this._png.palette = this._palette;
+        }
         this._png.data = newData;
     }
 
