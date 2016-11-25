@@ -15,7 +15,7 @@ class PNGDecoder extends IOBuffer {
         this._png = null;
         this._end = false;
         // PNG is always big endian
-        // http://www.w3.org/TR/PNG/#7Integers-and-byte-order
+        // https://www.w3.org/TR/PNG/#7Integers-and-byte-order
         this.setBigEndian();
     }
 
@@ -32,7 +32,7 @@ class PNGDecoder extends IOBuffer {
         return this._png;
     }
 
-    // http://www.w3.org/TR/PNG/#5PNG-file-signature
+    // https://www.w3.org/TR/PNG/#5PNG-file-signature
     decodeSignature() {
         for (var i = 0; i < 8; i++) {
             if (this.readUint8() !== pngSignature[i]) {
@@ -41,26 +41,31 @@ class PNGDecoder extends IOBuffer {
         }
     }
 
-    // http://www.w3.org/TR/PNG/#5Chunk-layout
+    // https://www.w3.org/TR/PNG/#5Chunk-layout
     decodeChunk() {
         var length = this.readUint32();
         var type = this.readChars(4);
         var offset = this.offset;
         switch (type) {
-            case 'IHDR':
+            // 11.2 Critical chunks
+            case 'IHDR': // 11.2.2 IHDR Image header
                 this.decodeIHDR();
                 break;
-            case 'PLTE':
+            case 'PLTE': // 11.2.3 PLTE Palette
                 this.decodePLTE(length);
                 break;
-            case 'IDAT':
+            case 'IDAT': // 11.2.4 IDAT Image data
                 this.decodeIDAT(length);
                 break;
-            case 'tEXt':
+            case 'IEND': // 11.2.5 IEND Image trailer
+                this._end = true;
+                break;
+            // 11.3 Ancillary chunks
+            case 'tEXt': // 11.3.4.3 tEXt Textual data
                 this.decodetEXt(length);
                 break;
-            case 'IEND':
-                this._end = true;
+            case 'pHYs': // 11.3.5.3 pHYs Physical pixel dimensions
+                this.decodepHYs();
                 break;
             default:
                 this.skip(length);
@@ -70,11 +75,11 @@ class PNGDecoder extends IOBuffer {
             throw new Error('Length mismatch while decoding chunk ' + type);
         }
         // TODO compute and validate CRC ?
-        // http://www.w3.org/TR/PNG/#5CRC-algorithm
+        // https://www.w3.org/TR/PNG/#5CRC-algorithm
         var crc = this.readUint32();
     }
 
-    // http://www.w3.org/TR/PNG/#11IHDR
+    // https://www.w3.org/TR/PNG/#11IHDR
     decodeIHDR() {
         var image = this._png;
         image.width = this.readUint32();
@@ -102,13 +107,13 @@ class PNGDecoder extends IOBuffer {
         }
     }
 
-    // http://www.w3.org/TR/PNG/#11IDAT
+    // https://www.w3.org/TR/PNG/#11IDAT
     decodeIDAT(length) {
         this._inflator.push(new Uint8Array(this.buffer, this.offset, length));
         this.skip(length);
     }
 
-    // http://www.w3.org/TR/PNG/#11tEXt
+    // https://www.w3.org/TR/PNG/#11tEXt
     decodetEXt(length) {
         var keyword = '';
         var char;
@@ -116,6 +121,15 @@ class PNGDecoder extends IOBuffer {
             keyword += char;
         }
         this._png.tEXt[keyword] = this.readChars(length - keyword.length - 1);
+    }
+
+    // https://www.w3.org/TR/PNG/#11pHYs
+    decodepHYs() {
+        const ppuX = this.readUint32();
+        const ppuY = this.readUint32();
+        const unitSpecifier = this.readByte();
+        this._png.resolution = [ppuX, ppuY];
+        this._png.unitSpecifier = unitSpecifier;
     }
 
     decodeImage() {
