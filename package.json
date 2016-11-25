@@ -11,14 +11,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/image-js/png-js.git"
+    "url": "git+https://github.com/image-js/fast-png.git"
   },
   "author": "Michaël Zasso",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/image-js/png-js/issues"
+    "url": "https://github.com/image-js/fast-png/issues"
   },
-  "homepage": "https://github.com/image-js/png-js#readme",
+  "homepage": "https://github.com/image-js/fast-png#readme",
   "dependencies": {
     "iobuffer": "^2.0.0",
     "pako": "^1.0.0"

@@ -1,4 +1,4 @@
-# png-js
+# fast-png
 
   [![NPM version][npm-image]][npm-url]
   [![npm download][download-image]][download-url]
@@ -15,7 +15,7 @@ $ npm install fast-png
 
 ### Platform
 
-This package is written using ES2015 features. It is natively compatible with recent versions of Google Chrome
+This package is written using ES2015 features. It is natively compatible with recent browsers
 and Node.js. You can transpile it with a tool like [babel](https://babeljs.io/) if you need to support more
 JavaScript engines.
 
