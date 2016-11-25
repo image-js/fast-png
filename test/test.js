@@ -1,11 +1,10 @@
 'use strict';
 
-var fs = require('fs');
-var PNGDecoder = require('..').PNGDecoder;
+const fs = require('fs');
+const decode = require('..').decode;
 
-var image = fs.readFileSync(__dirname + '/img/lol.png');
+const image = fs.readFileSync(__dirname + '/img/NES_palette_sample_image.png');
 
-var decoder = new PNGDecoder(image);
-var png = decoder.decode();
+const png = decode(image);
 
 console.log(png.palette);
