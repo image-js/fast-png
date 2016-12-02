@@ -21,6 +21,6 @@
   "homepage": "https://github.com/image-js/fast-png#readme",
   "dependencies": {
     "iobuffer": "^2.0.0",
-    "pako": "^1.0.0"
+    "pako": "^1.0.1"
   }
 }
