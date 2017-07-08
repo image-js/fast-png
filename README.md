@@ -3,25 +3,23 @@
   [![NPM version][npm-image]][npm-url]
   [![npm download][download-image]][download-url]
 
-PNG image decoder written entirely in JavaScript
+PNG image decoder and encoder written entirely in JavaScript
 
 ## Installation
 
 ```
-$ npm install fast-png
+$ npm install --save fast-png
 ```
 
-## Compatibility
+## Usage
 
-### Platform
+### `decode(png)`
 
-This package is written using ES2015 features. It is natively compatible with recent browsers
-and Node.js. You can transpile it with a tool like [babel](https://babeljs.io/) if you need to support more
-JavaScript engines.
+### `encode(png, options)`
 
-### PNG standard
+## PNG standard
 
-Spec can be found at: http://www.w3.org/TR/PNG/
+Spec can be found at: https://www.w3.org/TR/PNG/
 
 ## License
 
