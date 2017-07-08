@@ -1,13 +1,11 @@
-'use strict';
-
-const IOBuffer = require('iobuffer');
-const Inflator = require('pako').Inflate;
+import IOBuffer from 'iobuffer';
+import {Inflate as Inflator} from 'pako';
+import {pngSignature} from './common';
 
 const empty = new Uint8Array(0);
 const NULL = '\0';
-const pngSignature = [137, 80, 78, 71, 13, 10, 26, 10];
 
-class PNGDecoder extends IOBuffer {
+export default class PNGDecoder extends IOBuffer {
     constructor(data) {
         super(data);
         this._decoded = false;
@@ -34,7 +32,7 @@ class PNGDecoder extends IOBuffer {
 
     // https://www.w3.org/TR/PNG/#5PNG-file-signature
     decodeSignature() {
-        for (var i = 0; i < 8; i++) {
+        for (var i = 0; i < pngSignature.length; i++) {
             if (this.readUint8() !== pngSignature[i]) {
                 throw new Error(`Wrong PNG signature. Byte at ${i} should be ${pngSignature[i]}.`);
             }
@@ -43,9 +41,9 @@ class PNGDecoder extends IOBuffer {
 
     // https://www.w3.org/TR/PNG/#5Chunk-layout
     decodeChunk() {
-        var length = this.readUint32();
-        var type = this.readChars(4);
-        var offset = this.offset;
+        const length = this.readUint32();
+        const type = this.readChars(4);
+        const offset = this.offset;
         switch (type) {
             // 11.2 Critical chunks
             case 'IHDR': // 11.2.2 IHDR Image header
@@ -76,7 +74,8 @@ class PNGDecoder extends IOBuffer {
         }
         // TODO compute and validate CRC ?
         // https://www.w3.org/TR/PNG/#5CRC-algorithm
-        var crc = this.readUint32();
+        // var crc = this.readUint32();
+        this.skip(4);
     }
 
     // https://www.w3.org/TR/PNG/#11IHDR
@@ -93,7 +92,7 @@ class PNGDecoder extends IOBuffer {
             throw new Error('Unsupported compression method: ' + image.compressionMethod);
         }
     }
-    
+
     // https://www.w3.org/TR/PNG/#11PLTE
     decodePLTE(length) {
         if (length % 3 !== 0) {
@@ -109,7 +108,7 @@ class PNGDecoder extends IOBuffer {
 
     // https://www.w3.org/TR/PNG/#11IDAT
     decodeIDAT(length) {
-        this._inflator.push(new Uint8Array(this.buffer, this.offset, length));
+        this._inflator.push(new Uint8Array(this.buffer, this.offset, length), false);
         this.skip(length);
     }
 
@@ -135,7 +134,7 @@ class PNGDecoder extends IOBuffer {
     decodeImage() {
         this._inflator.push(empty, true);
         if (this._inflator.err) {
-            throw new Error('Error while decompressing the data');
+            throw new Error('Error while decompressing the data: ' + this._inflator.err);
         }
         var data = this._inflator.result;
         this._inflator = null;
@@ -209,10 +208,8 @@ class PNGDecoder extends IOBuffer {
 
 }
 
-module.exports = PNGDecoder;
-
 function unfilterNone(currentLine, newLine, bytesPerLine) {
-    for(var i = 0; i < bytesPerLine; i++) {
+    for (var i = 0; i < bytesPerLine; i++) {
         newLine[i] = currentLine[i];
     }
 }
@@ -223,8 +220,8 @@ function unfilterSub(currentLine, newLine, bytesPerLine, bytesPerPixel) {
         // just copy first bytes
         newLine[i] = currentLine[i];
     }
-    for(; i < bytesPerLine; i++) {
-        newLine[i] = (currentLine[i] + newLine[i - bytesPerPixel])&0xFF;
+    for (; i < bytesPerLine; i++) {
+        newLine[i] = (currentLine[i] + newLine[i - bytesPerPixel]) & 0xFF;
     }
 }
 
@@ -249,14 +246,14 @@ function unfilterAverage(currentLine, newLine, prevLine, bytesPerLine, bytesPerP
             newLine[i] = currentLine[i];
         }
         for (; i < bytesPerLine; i++) {
-            newLine[i] = (currentLine[i] + (newLine[i - bytesPerPixel]>>1))&0xFF;
+            newLine[i] = (currentLine[i] + (newLine[i - bytesPerPixel] >> 1)) & 0xFF;
         }
     } else {
         for (; i < bytesPerPixel; i++) {
-            newLine[i] = (currentLine[i] + (prevLine[i]>>1))&0xFF;
+            newLine[i] = (currentLine[i] + (prevLine[i] >> 1)) & 0xFF;
         }
         for (; i < bytesPerLine; i++) {
-            newLine[i] = (currentLine[i] + ((newLine[i - bytesPerPixel] + prevLine[i])>>1))&0xFF;
+            newLine[i] = (currentLine[i] + ((newLine[i - bytesPerPixel] + prevLine[i]) >> 1)) & 0xFF;
         }
     }
 }
@@ -267,15 +264,15 @@ function unfilterPaeth(currentLine, newLine, prevLine, bytesPerLine, bytesPerPix
         for (; i < bytesPerPixel; i++) {
             newLine[i] = currentLine[i];
         }
-        for(; i < bytesPerLine; i++) {
-            newLine[i] = (currentLine[i] + newLine[i - bytesPerPixel])&0xFF;
+        for (; i < bytesPerLine; i++) {
+            newLine[i] = (currentLine[i] + newLine[i - bytesPerPixel]) & 0xFF;
         }
     } else {
         for (; i < bytesPerPixel; i++) {
-            newLine[i] = (currentLine[i] + prevLine[i])&0xFF;
+            newLine[i] = (currentLine[i] + prevLine[i]) & 0xFF;
         }
-        for(; i < bytesPerLine; i++) {
-            newLine[i] = (currentLine[i] + paethPredictor(newLine[i - bytesPerPixel], prevLine[i], prevLine[i - bytesPerPixel]))&0xFF;
+        for (; i < bytesPerLine; i++) {
+            newLine[i] = (currentLine[i] + paethPredictor(newLine[i - bytesPerPixel], prevLine[i], prevLine[i - bytesPerPixel])) & 0xFF;
         }
     }
 }

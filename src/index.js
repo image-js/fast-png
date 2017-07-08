@@ -1,8 +1,17 @@
-'use strict';
+import PNGDecoder from './PNGDecoder';
+import PNGEncoder from './PNGEncoder';
 
-const PNGDecoder = require('./PNGDecoder');
-
-exports.decode = function decodePNG(data) {
+function decodePNG(data) {
     const decoder = new PNGDecoder(data);
     return decoder.decode();
+}
+
+function encodePNG(png, options = {}) {
+    const encoder = new PNGEncoder(png, options);
+    return encoder.encode();
+}
+
+export {
+    decodePNG as decode,
+    encodePNG as encode
 };
