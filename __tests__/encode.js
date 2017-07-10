@@ -37,6 +37,26 @@ describe('encode', () => {
         });
         expect(decoded.data).toEqual(dataArray);
     });
+
+    it('RGB 16-bit', () => {
+        const dataArray = new Uint16Array([65535, 65535, 65535, 0, 0, 0, 32768, 32768, 32768, 500, 500, 500]);
+        const data = encode({
+            width: 2,
+            height: 2,
+            bitDepth: 16,
+            data: dataArray,
+            kind: 'RGB'
+        });
+        expect(data).toBeInstanceOf(Uint8Array);
+        const decoded = decode(data);
+        check(decoded, {
+            width: 2,
+            height: 2,
+            bitDepth: 16,
+            colourType: 2
+        });
+        expect(decoded.data).toEqual(dataArray);
+    });
 });
 
 function check(img, values) {

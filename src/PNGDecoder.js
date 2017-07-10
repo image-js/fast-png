@@ -202,7 +202,17 @@ export default class PNGDecoder extends IOBuffer {
         if (this._hasPalette) {
             this._png.palette = this._palette;
         }
-        this._png.data = newData;
+
+        if (this._png.bitDepth === 16) {
+            const uint16Data = new Uint16Array(newData.buffer);
+            for (var k = 0; k < uint16Data.length; k++) {
+                // PNG is in big endian. Return to little endian.
+                uint16Data[k] = swap16(uint16Data[k]);
+            }
+            this._png.data = uint16Data;
+        } else {
+            this._png.data = newData;
+        }
     }
 
 
@@ -285,4 +295,8 @@ function paethPredictor(a, b, c) {
     if (pa <= pb && pa <= pc) return a;
     else if (pb <= pc) return b;
     else return c;
+}
+
+function swap16(val) {
+    return ((val & 0xFF) << 8) | ((val >> 8) & 0xFF);
 }

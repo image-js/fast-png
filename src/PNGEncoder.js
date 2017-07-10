@@ -1,6 +1,6 @@
 import IOBuffer from 'iobuffer';
 import {deflate} from 'pako';
-import {pngSignature} from './common';
+import {pngSignature, crc} from './common';
 
 export default class PNGDecoder extends IOBuffer {
     constructor(data, options) {
@@ -37,7 +37,7 @@ export default class PNGDecoder extends IOBuffer {
         this.writeByte(0); // Filter method
         this.writeByte(0); // Interlace method
 
-        this.writeUint32(0);
+        this.writeInt32(this._getCrc(17));
     }
 
     // https://www.w3.org/TR/PNG/#11IEND
@@ -46,7 +46,7 @@ export default class PNGDecoder extends IOBuffer {
 
         this.writeChars('IEND');
 
-        this.writeUint32(0);
+        this.writeUint32(this._getCrc(4));
     }
 
     // https://www.w3.org/TR/PNG/#11IDAT
@@ -57,21 +57,26 @@ export default class PNGDecoder extends IOBuffer {
 
         this.writeBytes(data);
 
-        this.writeUint32(0);
+        this.writeUint32(this._getCrc(data.length + 4));
     }
 
     encodeData() {
-        const height = this._png.height;
-        const channels = this._png.channels;
-        const bytesPerPixel = channels * this._png.bitDepth / 8;
-        const bytesPerLine = this._png.width * bytesPerPixel;
-        const data = this._png.data;
-        const newData = new IOBuffer();
+        const {
+            width,
+            height,
+            channels,
+            bitDepth,
+            data
+        } = this._png;
+        const slotsPerLine = channels * width;
+        const newData = new IOBuffer().setBigEndian();
         var offset = 0;
         for (var i = 0; i < height; i++) {
             newData.writeByte(0); // no filter
-            for (var j = 0; j < bytesPerLine; j++) {
-                newData.writeByte(data[offset++]);
+            if (bitDepth === 8) {
+                offset = writeDataBytes(data, newData, slotsPerLine, offset);
+            } else if (bitDepth === 16) {
+                offset = writeDataUint16(data, newData, slotsPerLine, offset);
             }
         }
         const buffer = newData.getBuffer();
@@ -93,6 +98,10 @@ export default class PNGDecoder extends IOBuffer {
         if (this._png.data.length !== expectedSize) {
             throw new RangeError(`wrong data size. Found ${this._png.data.length}, expected ${expectedSize}`);
         }
+    }
+
+    _getCrc(length) {
+        return crc(new Uint8Array(this.buffer, this.byteOffset + this.offset - length, length), length);
     }
 }
 
@@ -116,4 +125,18 @@ function getColourType(kind = 'RGBA') {
         default:
             throw new Error(`unknown kind: ${kind}`);
     }
+}
+
+function writeDataBytes(data, newData, slotsPerLine, offset) {
+    for (var j = 0; j < slotsPerLine; j++) {
+        newData.writeByte(data[offset++]);
+    }
+    return offset;
+}
+
+function writeDataUint16(data, newData, slotsPerLine, offset) {
+    for (var j = 0; j < slotsPerLine; j++) {
+        newData.writeUint16(data[offset++]);
+    }
+    return offset;
 }
