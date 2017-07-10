@@ -1,3 +1,5 @@
+import {PNG} from 'pngjs';
+
 import {encode, decode} from '../src';
 
 describe('encode', () => {
@@ -10,12 +12,14 @@ describe('encode', () => {
         });
         expect(data).toBeInstanceOf(Uint8Array);
         const decoded = decode(data);
-        check(decoded, {
+        const expected = {
             width: 2,
             height: 2,
             bitDepth: 8,
             colourType: 6
-        });
+        };
+        check(decoded, expected);
+        checkPngJs(data, expected);
         expect(decoded.data).toEqual(dataArray);
     });
 
@@ -29,12 +33,14 @@ describe('encode', () => {
         });
         expect(data).toBeInstanceOf(Uint8Array);
         const decoded = decode(data);
-        check(decoded, {
+        const expected = {
             width: 2,
             height: 3,
             bitDepth: 8,
             colourType: 0
-        });
+        };
+        check(decoded, expected);
+        checkPngJs(data, expected);
         expect(decoded.data).toEqual(dataArray);
     });
 
@@ -49,12 +55,14 @@ describe('encode', () => {
         });
         expect(data).toBeInstanceOf(Uint8Array);
         const decoded = decode(data);
-        check(decoded, {
+        const expected = {
             width: 2,
             height: 2,
             bitDepth: 16,
             colourType: 2
-        });
+        };
+        check(decoded, expected);
+        checkPngJs(data, expected);
         expect(decoded.data).toEqual(dataArray);
     });
 });
@@ -63,4 +71,18 @@ function check(img, values) {
     for (const prop in values) {
         expect(img[prop]).toBe(values[prop]);
     }
+}
+
+function checkPngJs(data, values) {
+    const img = PNG.sync.read(Buffer.from(data, data.byteOffset, data.length));
+    var newValues = Object.assign({}, values);
+    if (newValues.bitDepth !== undefined) {
+        newValues.depth = newValues.bitDepth;
+        delete newValues.bitDepth;
+    }
+    if (newValues.colourType !== undefined) {
+        newValues.colorType = newValues.colourType;
+        delete newValues.colourType;
+    }
+    check(img, newValues);
 }
