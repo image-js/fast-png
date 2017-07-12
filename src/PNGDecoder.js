@@ -122,7 +122,7 @@ export default class PNGDecoder extends IOBuffer {
 
     // https://www.w3.org/TR/PNG/#11IDAT
     decodeIDAT(length) {
-        this._inflator.push(new Uint8Array(this.buffer, this.offset, length), false);
+        this._inflator.push(new Uint8Array(this.buffer, this.offset + this.byteOffset, length), false);
         this.skip(length);
     }
 
