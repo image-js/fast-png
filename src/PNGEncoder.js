@@ -3,10 +3,9 @@ import {deflate} from 'pako';
 import {pngSignature, crc} from './common';
 
 export default class PNGDecoder extends IOBuffer {
-    constructor(data, options) {
+    constructor(data) {
         super();
-        this._checkData(data, options);
-        this._options = options;
+        this._checkData(data);
         this.setBigEndian();
     }
 

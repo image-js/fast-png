@@ -6,8 +6,8 @@ function decodePNG(data, options = {}) {
     return decoder.decode();
 }
 
-function encodePNG(png, options = {}) {
-    const encoder = new PNGEncoder(png, options);
+function encodePNG(png) {
+    const encoder = new PNGEncoder(png);
     return encoder.encode();
 }
 
