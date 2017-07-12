@@ -1,5 +1,7 @@
 # fast-png
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/image-js/fast-png.svg)](https://greenkeeper.io/)
+
   [![NPM version][npm-image]][npm-url]
   [![build status][travis-image]][travis-url]
   [![npm download][download-image]][download-url]
