@@ -13,9 +13,27 @@ $ npm install --save fast-png
 
 ## Usage
 
-### `decode(png)`
+### `decode(png[, options])`
 
-### `encode(png, options)`
+__Arguments__
+
+* `png` - A TypedArray or Buffer that contains the PNG data.
+* `options` - An object of options
+
+__Options__
+
+* `checkCrc` - If set to `true`, the CRC will be checked for each chunk and an error will be throw in case it's wrong (default: false).
+
+### `encode(image)`
+
+__Arguments__
+
+* `png` - An object representing the image. You can pass an ImageData from the Canvas API or an object with the following properties:
+  * `width` - The width of the image
+  * `height` - The height of the image
+  * `data` - An array or TypedArray with the image data
+  * `bitDepth` - A number indicating the bit depth (only 8 and 16 are supported now). Defaults to 8.
+  * `kind` - One of `'RGBA'`, `'RGB'`, `'GREYA'`, `'GREY'`. This will determine the number of channels and the colour type of the image. Defaults to `'RGBA'`.
 
 ## PNG standard
 
