@@ -23,5 +23,5 @@ function updateCrc(crc, data, length) {
 }
 
 export function crc(data, length) {
-    return updateCrc(initialCrc, data, length) ^ initialCrc;
+    return (updateCrc(initialCrc, data, length) ^ initialCrc) >>> 0;
 }

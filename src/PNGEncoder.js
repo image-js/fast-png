@@ -37,7 +37,7 @@ export default class PNGDecoder extends IOBuffer {
         this.writeByte(0); // Filter method
         this.writeByte(0); // Interlace method
 
-        this.writeInt32(this._getCrc(17));
+        this.writeCrc(17);
     }
 
     // https://www.w3.org/TR/PNG/#11IEND
@@ -46,7 +46,7 @@ export default class PNGDecoder extends IOBuffer {
 
         this.writeChars('IEND');
 
-        this.writeUint32(this._getCrc(4));
+        this.writeCrc(4);
     }
 
     // https://www.w3.org/TR/PNG/#11IDAT
@@ -57,7 +57,7 @@ export default class PNGDecoder extends IOBuffer {
 
         this.writeBytes(data);
 
-        this.writeUint32(this._getCrc(data.length + 4));
+        this.writeCrc(data.length + 4);
     }
 
     encodeData() {
@@ -100,8 +100,8 @@ export default class PNGDecoder extends IOBuffer {
         }
     }
 
-    _getCrc(length) {
-        return crc(new Uint8Array(this.buffer, this.byteOffset + this.offset - length, length), length);
+    writeCrc(length) {
+        this.writeUint32(crc(new Uint8Array(this.buffer, this.byteOffset + this.offset - length, length), length));
     }
 }
 
