@@ -1,6 +1,7 @@
 # fast-png
 
   [![NPM version][npm-image]][npm-url]
+  [![build status][travis-image]][travis-url]
   [![npm download][download-image]][download-url]
 
 PNG image decoder and encoder written entirely in JavaScript
@@ -45,5 +46,7 @@ Spec can be found at: https://www.w3.org/TR/PNG/
 
 [npm-image]: https://img.shields.io/npm/v/fast-png.svg?style=flat-square
 [npm-url]: https://www.npmjs.com/package/fast-png
+[travis-image]: https://img.shields.io/travis/image-js/fast-png/master.svg?style=flat-square
+[travis-url]: https://travis-ci.org/image-js/fast-png
 [download-image]: https://img.shields.io/npm/dm/fast-png.svg?style=flat-square
 [download-url]: https://www.npmjs.com/package/fast-png
