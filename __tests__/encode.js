@@ -20,6 +20,7 @@ describe('encode', () => {
         };
         check(decoded, expected);
         checkPngJs(data, expected);
+        expect(decoded.data).toBeInstanceOf(Uint8Array);
         expect(decoded.data).toEqual(dataArray);
     });
 
@@ -41,6 +42,7 @@ describe('encode', () => {
         };
         check(decoded, expected);
         checkPngJs(data, expected);
+        expect(decoded.data).toBeInstanceOf(Uint8Array);
         expect(decoded.data).toEqual(dataArray);
     });
 
@@ -63,6 +65,7 @@ describe('encode', () => {
         };
         check(decoded, expected);
         checkPngJs(data, expected);
+        expect(decoded.data).toBeInstanceOf(Uint16Array);
         expect(decoded.data).toEqual(dataArray);
     });
 });
