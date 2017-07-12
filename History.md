@@ -1,3 +1,13 @@
+<a name="2.0.1"></a>
+## [2.0.1](https://github.com/image-js/fast-png/compare/v2.0.0...v2.0.1) (2017-07-12)
+
+
+### Bug Fixes
+
+* **decoder:** add missing byteOffset in IDAT decoding ([fd1d302](https://github.com/image-js/fast-png/commit/fd1d302))
+
+
+
 <a name="2.0.0"></a>
 # [2.0.0](https://github.com/image-js/fast-png/compare/v1.1.0...v2.0.0) (2017-07-12)
 
