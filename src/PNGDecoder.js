@@ -5,6 +5,10 @@ import {pngSignature, crc} from './common';
 const empty = new Uint8Array(0);
 const NULL = '\0';
 
+const uint16 = new Uint16Array([0x00ff]);
+const uint8 = new Uint8Array(uint16.buffer);
+const osIsLittleEndian = uint8[0] === 0xff;
+
 export default class PNGDecoder extends IOBuffer {
     constructor(data, options) {
         super(data);
@@ -215,9 +219,11 @@ export default class PNGDecoder extends IOBuffer {
 
         if (this._png.bitDepth === 16) {
             const uint16Data = new Uint16Array(newData.buffer);
-            for (var k = 0; k < uint16Data.length; k++) {
-                // PNG is in big endian. Return to little endian.
-                uint16Data[k] = swap16(uint16Data[k]);
+            if (osIsLittleEndian) {
+                for (var k = 0; k < uint16Data.length; k++) {
+                    // PNG is always big endian. Swap the bytes.
+                    uint16Data[k] = swap16(uint16Data[k]);
+                }
             }
             this._png.data = uint16Data;
         } else {
