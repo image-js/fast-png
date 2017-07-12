@@ -1,13 +1,17 @@
 import IOBuffer from 'iobuffer';
 import {Inflate as Inflator} from 'pako';
-import {pngSignature} from './common';
+import {pngSignature, crc} from './common';
 
 const empty = new Uint8Array(0);
 const NULL = '\0';
 
 export default class PNGDecoder extends IOBuffer {
-    constructor(data) {
+    constructor(data, options) {
         super(data);
+        const {
+            checkCrc = false
+        } = options;
+        this._checkCrc = checkCrc;
         this._decoded = false;
         this._inflator = new Inflator();
         this._png = null;
@@ -70,12 +74,18 @@ export default class PNGDecoder extends IOBuffer {
                 break;
         }
         if (this.offset - offset !== length) {
-            throw new Error('Length mismatch while decoding chunk ' + type);
+            throw new Error(`Length mismatch while decoding chunk ${type}`);
         }
-        // TODO compute and validate CRC ?
-        // https://www.w3.org/TR/PNG/#5CRC-algorithm
-        // var crc = this.readUint32();
-        this.skip(4);
+        if (this._checkCrc) {
+            const expectedCrc = this.readUint32();
+            const crcLength = length + 4; // includes type
+            const actualCrc = crc(new Uint8Array(this.buffer, this.byteOffset + this.offset - crcLength - 4, crcLength), crcLength); // "- 4" because we already advanced by reading the CRC
+            if (actualCrc !== expectedCrc) {
+                throw new Error(`CRC mismatch for chunk ${type}. Expected ${expectedCrc}, found ${actualCrc}`);
+            }
+        } else {
+            this.skip(4);
+        }
     }
 
     // https://www.w3.org/TR/PNG/#11IHDR

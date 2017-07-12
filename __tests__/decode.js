@@ -16,10 +16,14 @@ describe('decode', () => {
         expect(img.palette.length).toBe(256);
         expect(img.palette[0]).toEqual([124, 124, 124]);
     });
+
+    it('should not throw when CRC is correct', () => {
+        loadAndDecode('palette.png', {checkCrc: true});
+    });
 });
 
-function loadAndDecode(img) {
-    return decode(readFileSync(join(__dirname, 'img', img)));
+function loadAndDecode(img, options) {
+    return decode(readFileSync(join(__dirname, 'img', img)), options);
 }
 
 function check(img, values) {

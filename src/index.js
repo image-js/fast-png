@@ -1,8 +1,8 @@
 import PNGDecoder from './PNGDecoder';
 import PNGEncoder from './PNGEncoder';
 
-function decodePNG(data) {
-    const decoder = new PNGDecoder(data);
+function decodePNG(data, options = {}) {
+    const decoder = new PNGDecoder(data, options);
     return decoder.decode();
 }
 
