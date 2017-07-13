@@ -89,7 +89,7 @@ export default class PNGDecoder extends IOBuffer {
             height: checkInteger(data.height, 'height'),
             data: data.data
         };
-        const {colourType, channels} = getColourType(data.kind);
+        const {colourType, channels} = getColourType(data);
         this._png.colourType = colourType;
         this._png.channels = channels;
         this._png.bitDepth = data.bitDepth || 8;
@@ -111,18 +111,26 @@ function checkInteger(value, name) {
     throw new TypeError(`${name} must be a positive integer`);
 }
 
-function getColourType(kind = 'RGBA') {
-    switch (kind) {
-        case 'RGBA':
+function getColourType(data) {
+    const {
+        components = 3,
+        alpha = true
+    } = data;
+    if (components !== 3 && components !== 1) {
+        throw new RangeError(`unsupported number of components: ${components}`);
+    }
+    const channels = components + Number(alpha);
+    switch (channels) {
+        case 4:
             return {colourType: 6, channels: 4};
-        case 'RGB':
+        case 3:
             return {colourType: 2, channels: 3};
-        case 'GREY':
+        case 1:
             return {colourType: 0, channels: 1};
-        case 'GREYA':
+        case 2:
             return {colourType: 4, channels: 2};
         default:
-            throw new Error(`unknown kind: ${kind}`);
+            throw new Error(`unsupported number of channels: ${channels}`);
     }
 }
 

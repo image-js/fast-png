@@ -34,7 +34,8 @@ __Arguments__
   * `height` - The height of the image
   * `data` - An array or TypedArray with the image data
   * `bitDepth` - A number indicating the bit depth (only 8 and 16 are supported now). Defaults to 8.
-  * `kind` - One of `'RGBA'`, `'RGB'`, `'GREYA'`, `'GREY'`. This will determine the number of channels and the colour type of the image. Defaults to `'RGBA'`.
+  * `components` - Number of non-alpha channels (1 or 3 are supported). Defaults to 3.
+  * `alpha` - Boolean indicating if an alpha channel is present. Defaults to true.
 
 ## PNG standard
 
