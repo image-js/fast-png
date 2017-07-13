@@ -72,10 +72,13 @@ export default class PNGDecoder extends IOBuffer {
         var offset = 0;
         for (var i = 0; i < height; i++) {
             newData.writeByte(0); // no filter
+            /* istanbul ignore else */
             if (bitDepth === 8) {
                 offset = writeDataBytes(data, newData, slotsPerLine, offset);
             } else if (bitDepth === 16) {
                 offset = writeDataUint16(data, newData, slotsPerLine, offset);
+            } else {
+                throw new Error('unreachable');
             }
         }
         const buffer = newData.getBuffer();
@@ -89,10 +92,10 @@ export default class PNGDecoder extends IOBuffer {
             height: checkInteger(data.height, 'height'),
             data: data.data
         };
-        const {colourType, channels} = getColourType(data);
+        const {colourType, channels, bitDepth} = getColourType(data);
         this._png.colourType = colourType;
         this._png.channels = channels;
-        this._png.bitDepth = data.bitDepth || 8;
+        this._png.bitDepth = bitDepth;
         const expectedSize = this._png.width * this._png.height * channels;
         if (this._png.data.length !== expectedSize) {
             throw new RangeError(`wrong data size. Found ${this._png.data.length}, expected ${expectedSize}`);
@@ -114,24 +117,34 @@ function checkInteger(value, name) {
 function getColourType(data) {
     const {
         components = 3,
-        alpha = true
+        alpha = true,
+        bitDepth = 8
     } = data;
     if (components !== 3 && components !== 1) {
         throw new RangeError(`unsupported number of components: ${components}`);
     }
+    if (bitDepth !== 8 && bitDepth !== 16) {
+        throw new RangeError(`unsupported bit depth: ${bitDepth}`);
+    }
     const channels = components + Number(alpha);
+    const returnValue = {channels, bitDepth};
     switch (channels) {
         case 4:
-            return {colourType: 6, channels: 4};
+            returnValue.colourType = 6;
+            break;
         case 3:
-            return {colourType: 2, channels: 3};
+            returnValue.colourType = 2;
+            break;
         case 1:
-            return {colourType: 0, channels: 1};
+            returnValue.colourType = 0;
+            break;
         case 2:
-            return {colourType: 4, channels: 2};
+            returnValue.colourType = 4;
+            break;
         default:
             throw new Error(`unsupported number of channels: ${channels}`);
     }
+    return returnValue;
 }
 
 function writeDataBytes(data, newData, slotsPerLine, offset) {

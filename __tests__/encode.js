@@ -71,6 +71,29 @@ describe('encode', () => {
         expect(decoded.data).toEqual(dataArray);
     });
 
+    it('GREYA 16-bit', () => {
+        const dataArray = new Uint8Array([0, 0, 32, 127, 64, 255, 96, 0, 127, 127, 255, 255]);
+        const data = encode({
+            width: 2,
+            height: 3,
+            data: dataArray,
+            components: 1,
+            alpha: true
+        });
+        expect(data).toBeInstanceOf(Uint8Array);
+        const decoded = decode(data);
+        const expected = {
+            width: 2,
+            height: 3,
+            bitDepth: 8,
+            colourType: 4
+        };
+        check(decoded, expected);
+        checkPngJs(data, expected);
+        expect(decoded.data).toBeInstanceOf(Uint8Array);
+        expect(decoded.data).toEqual(dataArray);
+    });
+
     it('errors', () => {
         expect(() => encode({width: 1, height: 1, bitDepth: 8, data: [], components: 2, alpha: true}))
             .toThrow('unsupported number of components: 2');
@@ -80,6 +103,10 @@ describe('encode', () => {
             .toThrow('width must be a positive integer');
         expect(() => encode({width: 1, height: undefined, bitDepth: 8, data: [], components: 3, alpha: false}))
             .toThrow('height must be a positive integer');
+        expect(() => encode({width: 1, height: 1, bitDepth: 8, data: new Array(10), components: 3, alpha: false}))
+            .toThrow('wrong data size. Found 10, expected 3');
+        expect(() => encode({width: 1, height: 1, bitDepth: 1, data: new Array(10), components: 3, alpha: false}))
+            .toThrow('unsupported bit depth: 1');
     });
 });
 
