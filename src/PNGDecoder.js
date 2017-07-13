@@ -40,7 +40,7 @@ export default class PNGDecoder extends IOBuffer {
     decodeSignature() {
         for (var i = 0; i < pngSignature.length; i++) {
             if (this.readUint8() !== pngSignature[i]) {
-                throw new Error(`Wrong PNG signature. Byte at ${i} should be ${pngSignature[i]}.`);
+                throw new Error(`wrong PNG signature. Byte at ${i} should be ${pngSignature[i]}.`);
             }
         }
     }

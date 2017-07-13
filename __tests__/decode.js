@@ -44,6 +44,10 @@ describe('decode', () => {
     it('should not throw when CRC is correct', () => {
         loadAndDecode('palette.png', {checkCrc: true});
     });
+
+    it('should throw with a non-png', () => {
+        expect(() => decode(new Uint8Array(20))).toThrow('wrong PNG signature. Byte at 0 should be 137.');
+    });
 });
 
 function loadAndDecode(img, options) {
