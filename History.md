@@ -1,3 +1,23 @@
+<a name="3.0.0"></a>
+# [3.0.0](https://github.com/image-js/fast-png/compare/v2.0.1...v3.0.0) (2017-07-13)
+
+
+### Bug Fixes
+
+* remove misleading kind option ([9749e1c](https://github.com/image-js/fast-png/commit/9749e1c))
+
+
+* rename "tEXt" field to "text" in decoded PNG ([0bdc855](https://github.com/image-js/fast-png/commit/0bdc855))
+
+
+### BREAKING CHANGES
+
+* The "tEXt" field returned by the decoder has been renamed to "text".
+* The "kind" option was misleading and has been replaced by separate
+"components" and "alpha" options.
+
+
+
 <a name="2.0.1"></a>
 ## [2.0.1](https://github.com/image-js/fast-png/compare/v2.0.0...v2.0.1) (2017-07-12)
 
