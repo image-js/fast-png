@@ -16,7 +16,6 @@ export default class PNGDecoder extends IOBuffer {
             checkCrc = false
         } = options;
         this._checkCrc = checkCrc;
-        this._decoded = false;
         this._inflator = new Inflator();
         this._png = null;
         this._end = false;
@@ -26,9 +25,8 @@ export default class PNGDecoder extends IOBuffer {
     }
 
     decode() {
-        if (this._decoded) return this._png;
         this._png = {
-            tEXt: {}
+            text: {}
         };
         this.decodeSignature();
         while (!this._end) {
@@ -133,7 +131,7 @@ export default class PNGDecoder extends IOBuffer {
         while ((char = this.readChar()) !== NULL) {
             keyword += char;
         }
-        this._png.tEXt[keyword] = this.readChars(length - keyword.length - 1);
+        this._png.text[keyword] = this.readChars(length - keyword.length - 1);
     }
 
     // https://www.w3.org/TR/PNG/#11pHYs
