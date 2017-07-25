@@ -1,3 +1,13 @@
+<a name="3.1.0"></a>
+# [3.1.0](https://github.com/image-js/fast-png/compare/v3.0.0...v3.1.0) (2017-07-25)
+
+
+### Features
+
+* allow to specify zlib options - default level to 3 ([70ec732](https://github.com/image-js/fast-png/commit/70ec732))
+
+
+
 <a name="3.0.0"></a>
 # [3.0.0](https://github.com/image-js/fast-png/compare/v2.0.1...v3.0.0) (2017-07-13)
 
