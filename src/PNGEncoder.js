@@ -2,10 +2,15 @@ import IOBuffer from 'iobuffer';
 import {deflate} from 'pako';
 import {pngSignature, crc} from './common';
 
-export default class PNGDecoder extends IOBuffer {
-    constructor(data) {
+const defaultZlibOptions = {
+    level: 3
+};
+
+export default class PNGEncoder extends IOBuffer {
+    constructor(data, options) {
         super();
         this._checkData(data);
+        this._zlibOptions = Object.assign({}, defaultZlibOptions, options.zlib);
         this.setBigEndian();
     }
 
@@ -82,7 +87,7 @@ export default class PNGDecoder extends IOBuffer {
             }
         }
         const buffer = newData.getBuffer();
-        const compressed = deflate(buffer);
+        const compressed = deflate(buffer, this._zlibOptions);
         this.encodeIDAT(compressed);
     }
 
