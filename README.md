@@ -23,7 +23,7 @@ __Arguments__
 
 __Options__
 
-* `checkCrc` - If set to `true`, the CRC will be checked for each chunk and an error will be throw in case it's wrong (default: false).
+* `checkCrc` - If set to `true`, the CRC will be checked for each chunk and an error will be thrown in case it's wrong (default: false).
 
 ### `encode(image)`
 
