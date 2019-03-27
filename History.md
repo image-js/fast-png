@@ -1,3 +1,7 @@
+## [3.1.1](https://github.com/image-js/fast-png/compare/v3.1.0...v3.1.1) (2019-03-27)
+
+
+
 <a name="3.1.0"></a>
 # [3.1.0](https://github.com/image-js/fast-png/compare/v3.0.0...v3.1.0) (2017-07-25)
 
