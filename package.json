@@ -1,42 +1,65 @@
 {
   "name": "fast-png",
   "version": "3.1.0",
-  "description": "PNG image decoder written entirely in JavaScript",
-  "main": "lib/index.js",
-  "module": "src/index.js",
+  "description": "PNG image decoder and encoder written entirely in JavaScript",
+  "main": "./lib/index.js",
+  "module": "./lib-esm/index.js",
+  "types": "./lib/index.d.ts",
+  "keywords": [
+    "png",
+    "image",
+    "image-js",
+    "encoder",
+    "decoder"
+  ],
+  "author": "Michaël Zasso",
+  "license": "MIT",
   "files": [
     "lib",
-    "src"
+    "lib-esm"
   ],
   "scripts": {
-    "eslint": "eslint src",
+    "clean": "rimraf lib lib-esm",
+    "eslint": "eslint src --ext ts --cache",
     "eslint-fix": "npm run eslint -- --fix",
-    "prepublish": "rollup -c",
-    "test": "run-s testonly eslint",
-    "testonly": "jest"
+    "prepublishOnly": "npm run tsc",
+    "test": "npm run test-coverage && npm run eslint",
+    "test-coverage": "npm run test-only -- --coverage",
+    "test-only": "jest",
+    "tsc": "npm run clean && npm run tsc-cjs && npm run tsc-esm",
+    "tsc-cjs": "tsc",
+    "tsc-esm": "tsc --project tsconfig.esm.json"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/image-js/fast-png.git"
   },
-  "author": "Michaël Zasso",
-  "license": "MIT",
   "bugs": {
     "url": "https://github.com/image-js/fast-png/issues"
   },
   "homepage": "https://github.com/image-js/fast-png#readme",
-  "dependencies": {
-    "iobuffer": "^3.2.0",
-    "pako": "^1.0.0"
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node"
   },
   "devDependencies": {
-    "babel-plugin-transform-es2015-modules-commonjs": "^6.24.1",
-    "eslint": "^4.3.0",
-    "eslint-config-cheminfo": "^1.8.0",
-    "eslint-plugin-no-only-tests": "^2.0.0",
-    "jest": "^20.0.4",
-    "npm-run-all": "^4.0.2",
-    "pngjs": "^3.2.0",
-    "rollup": "^0.45.2"
+    "@types/jest": "^24.0.11",
+    "@typescript-eslint/eslint-plugin": "^1.5.0",
+    "@typescript-eslint/parser": "^1.5.0",
+    "eslint": "^5.15.3",
+    "eslint-config-cheminfo": "^1.20.1",
+    "eslint-config-cheminfo-typescript": "^3.0.0",
+    "eslint-plugin-import": "^2.16.0",
+    "eslint-plugin-jest": "^22.4.1",
+    "jest": "^24.5.0",
+    "pngjs": "^3.4.0",
+    "rimraf": "^2.6.3",
+    "ts-jest": "^24.0.0",
+    "typescript": "^3.3.4000"
+  },
+  "dependencies": {
+    "@types/pako": "^1.0.1",
+    "iobuffer": "^4.0.1",
+    "pako": "^1.0.10"
   }
 }
