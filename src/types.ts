@@ -32,7 +32,7 @@ export interface IImageData {
   height: number;
   data: PNGDataArray;
   channels?: number;
-  alpha?: boolean;
+  alpha?: boolean | 0 | 1;
   bitDepth?: number;
 }
 
