@@ -1,3 +1,12 @@
+## [3.1.2](https://github.com/image-js/fast-png/compare/v3.1.1...v3.1.2) (2019-03-29)
+
+
+### Bug Fixes
+
+* undo breaking change: alpha can be 0 or 1 again ([e82c80c](https://github.com/image-js/fast-png/commit/e82c80c))
+
+
+
 ## [3.1.1](https://github.com/image-js/fast-png/compare/v3.1.0...v3.1.1) (2019-03-27)
 
 
