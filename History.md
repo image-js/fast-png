@@ -1,3 +1,13 @@
+## [3.1.3](https://github.com/image-js/fast-png/compare/v3.1.2...v3.1.3) (2019-04-01)
+
+
+### Bug Fixes
+
+* include src in package ([e7cf353](https://github.com/image-js/fast-png/commit/e7cf353))
+* revert breaking change in PNGDecoder ([df9aa5e](https://github.com/image-js/fast-png/commit/df9aa5e))
+
+
+
 ## [3.1.2](https://github.com/image-js/fast-png/compare/v3.1.1...v3.1.2) (2019-03-29)
 
 
