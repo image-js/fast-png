@@ -163,13 +163,13 @@ function getColorType(
       returnValue.colorType = ColorType.TRUECOLOUR_ALPHA;
       break;
     case 3:
-      returnValue.colorType = ColorType.GREYSCALE_ALPHA;
+      returnValue.colorType = ColorType.TRUECOLOUR;
       break;
     case 1:
       returnValue.colorType = ColorType.GREYSCALE;
       break;
     case 2:
-      returnValue.colorType = ColorType.TRUECOLOUR;
+      returnValue.colorType = ColorType.GREYSCALE_ALPHA;
       break;
     default:
       throw new Error(`unsupported number of channels: ${channels}`);
