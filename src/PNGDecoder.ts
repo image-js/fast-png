@@ -114,7 +114,7 @@ export default class PNGDecoder extends IOBuffer {
     const image = this._png;
     image.width = this.readUint32();
     image.height = this.readUint32();
-    image.bitDepth = this.readUint8();
+    image.depth = this.readUint8();
     image.colourType = this.readUint8();
     image.compressionMethod = this.readUint8();
     image.filterMethod = this.readUint8();
@@ -216,7 +216,7 @@ export default class PNGDecoder extends IOBuffer {
     }
 
     const height = this._png.height;
-    const bytesPerPixel = (channels * this._png.bitDepth) / 8;
+    const bytesPerPixel = (channels * this._png.depth) / 8;
     const bytesPerLine = this._png.width * bytesPerPixel;
     const newData = new Uint8Array(this._png.height * bytesPerLine);
 
@@ -267,7 +267,7 @@ export default class PNGDecoder extends IOBuffer {
       this._png.palette = this._palette;
     }
 
-    if (this._png.bitDepth === 16) {
+    if (this._png.depth === 16) {
       const uint16Data = new Uint16Array(newData.buffer);
       if (osIsLittleEndian) {
         for (let k = 0; k < uint16Data.length; k++) {

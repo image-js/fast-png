@@ -33,7 +33,7 @@ describe('encode', () => {
     const expected = {
       width: 2,
       height: 2,
-      bitDepth: 8,
+      depth: 8,
       colourType: 6
     };
     check(decoded, expected);
@@ -56,7 +56,7 @@ describe('encode', () => {
     const expected = {
       width: 2,
       height: 3,
-      bitDepth: 8,
+      depth: 8,
       colourType: 0
     };
     check(decoded, expected);
@@ -83,7 +83,7 @@ describe('encode', () => {
     const data = encode({
       width: 2,
       height: 2,
-      bitDepth: 16,
+      depth: 16,
       data: dataArray,
       components: 3,
       alpha: false
@@ -93,7 +93,7 @@ describe('encode', () => {
     const expected = {
       width: 2,
       height: 2,
-      bitDepth: 16,
+      depth: 16,
       colourType: 2
     };
     check(decoded, expected);
@@ -129,7 +129,7 @@ describe('encode', () => {
     const expected = {
       width: 2,
       height: 3,
-      bitDepth: 8,
+      depth: 8,
       colourType: 4
     };
     check(decoded, expected);
@@ -143,7 +143,7 @@ describe('encode', () => {
       encode({
         width: 1,
         height: 1,
-        bitDepth: 8,
+        depth: 8,
         data: new Uint8Array(),
         components: 5,
         alpha: true
@@ -153,7 +153,7 @@ describe('encode', () => {
       encode({
         width: 1,
         height: 1,
-        bitDepth: 8,
+        depth: 8,
         data: new Uint8Array(),
         components: 3,
         // @ts-ignore
@@ -164,7 +164,7 @@ describe('encode', () => {
       encode({
         width: 1.1,
         height: 1,
-        bitDepth: 8,
+        depth: 8,
         data: new Uint8Array(),
         components: 3,
         alpha: false
@@ -175,7 +175,7 @@ describe('encode', () => {
         width: 1,
         // @ts-ignore
         height: undefined,
-        bitDepth: 8,
+        depth: 8,
         data: new Uint8Array(),
         components: 3,
         alpha: false
@@ -185,7 +185,7 @@ describe('encode', () => {
       encode({
         width: 1,
         height: 1,
-        bitDepth: 8,
+        depth: 8,
         data: new Uint8Array(10),
         components: 3,
         alpha: false
@@ -195,7 +195,7 @@ describe('encode', () => {
       encode({
         width: 1,
         height: 1,
-        bitDepth: 1,
+        depth: 1,
         data: new Uint8Array(10),
         components: 3,
         alpha: false
@@ -215,10 +215,6 @@ function check(img: any, values: any): void {
 function checkPngJs(data: any, values: any): void {
   const img = PNG.sync.read(Buffer.from(data, data.byteOffset, data.length));
   var newValues = Object.assign({}, values);
-  if (newValues.bitDepth !== undefined) {
-    newValues.depth = newValues.bitDepth;
-    delete newValues.bitDepth;
-  }
   if (newValues.colourType !== undefined) {
     newValues.colorType = newValues.colourType;
     delete newValues.colourType;

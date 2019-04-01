@@ -11,7 +11,7 @@ describe('decode', () => {
     check(img, {
       width: 2,
       height: 2,
-      bitDepth: 8,
+      depth: 8,
       colourType: 4
     });
     expect(img.data).toBeInstanceOf(Uint8Array);
@@ -25,7 +25,7 @@ describe('decode', () => {
     check(img, {
       width: 10,
       height: 10,
-      bitDepth: 8,
+      depth: 8,
       colourType: 6
     });
     expect(img.data).toBeInstanceOf(Uint8Array);
@@ -37,7 +37,7 @@ describe('decode', () => {
     check(img, {
       width: 150,
       height: 200,
-      bitDepth: 8,
+      depth: 8,
       colourType: 3
     });
     expect(img.palette).toBeInstanceOf(Array);

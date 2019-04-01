@@ -8,10 +8,10 @@ export type PNGDataArray = Uint8Array | Uint16Array;
 export type DecoderInputType = IOBuffer | ArrayBufferLike | ArrayBufferView;
 
 export interface IDecodedPNG {
-  height: number;
   width: number;
+  height: number;
   data: PNGDataArray;
-  bitDepth: number;
+  depth: number;
   colourType: number;
   channels: number;
   compressionMethod: number;
@@ -31,9 +31,9 @@ export interface IImageData {
   width: number;
   height: number;
   data: PNGDataArray;
+  depth?: number;
   components?: number;
   alpha?: boolean | 0 | 1;
-  bitDepth?: number;
 }
 
 export interface IPNGEncoderOptions {

@@ -48,7 +48,7 @@ export default class PNGEncoder extends IOBuffer {
 
     this.writeUint32(this._png.width);
     this.writeUint32(this._png.height);
-    this.writeByte(this._png.bitDepth);
+    this.writeByte(this._png.depth);
     this.writeByte(this._png.colourType);
     this.writeByte(0); // Compression method
     this.writeByte(0); // Filter method
@@ -78,16 +78,16 @@ export default class PNGEncoder extends IOBuffer {
   }
 
   private encodeData(): void {
-    const { width, height, channels, bitDepth, data } = this._png;
+    const { width, height, channels, depth, data } = this._png;
     const slotsPerLine = channels * width;
     const newData = new IOBuffer().setBigEndian();
     let offset = 0;
     for (let i = 0; i < height; i++) {
       newData.writeByte(0); // no filter
       /* istanbul ignore else */
-      if (bitDepth === 8) {
+      if (depth === 8) {
         offset = writeDataBytes(data, newData, slotsPerLine, offset);
-      } else if (bitDepth === 16) {
+      } else if (depth === 16) {
         offset = writeDataUint16(data, newData, slotsPerLine, offset);
       } else {
         throw new Error('unreachable');
@@ -102,10 +102,10 @@ export default class PNGEncoder extends IOBuffer {
     this._png.width = checkInteger(data.width, 'width');
     this._png.height = checkInteger(data.height, 'height');
     this._png.data = data.data;
-    const { colourType, channels, bitDepth } = getColourType(data);
+    const { colourType, channels, depth } = getColourType(data);
     this._png.colourType = colourType;
     this._png.channels = channels;
-    this._png.bitDepth = bitDepth;
+    this._png.depth = depth;
     const expectedSize = this._png.width * this._png.height * channels;
     if (this._png.data.length !== expectedSize) {
       throw new RangeError(
@@ -139,13 +139,13 @@ function checkInteger(value: number, name: string): number {
 
 function getColourType(
   data: IImageData
-): { channels: number; bitDepth: number; colourType: number } {
-  let { components = 3, bitDepth = 8 } = data;
+): { channels: number; depth: number; colourType: number } {
+  let { components = 3, depth = 8 } = data;
   if (components !== 3 && components !== 1) {
     throw new RangeError(`unsupported number of components: ${components}`);
   }
-  if (bitDepth !== 8 && bitDepth !== 16) {
-    throw new RangeError(`unsupported bit depth: ${bitDepth}`);
+  if (depth !== 8 && depth !== 16) {
+    throw new RangeError(`unsupported bit depth: ${depth}`);
   }
 
   let { alpha = true } = data;
@@ -157,7 +157,7 @@ function getColourType(
   }
 
   const channels = components + Number(alpha);
-  const returnValue = { channels, bitDepth, colourType: -1 };
+  const returnValue = { channels, depth, colourType: -1 };
   switch (channels) {
     case 4:
       returnValue.colourType = 6;
