@@ -1,3 +1,22 @@
+# [4.0.0](https://github.com/image-js/fast-png/compare/v3.1.3...v4.0.0) (2019-04-01)
+
+
+### Code Refactoring
+
+* rename bitDepth to depth ([306b32b](https://github.com/image-js/fast-png/commit/306b32b))
+* replace components with channels and remove alpha ([35393fa](https://github.com/image-js/fast-png/commit/35393fa))
+
+
+### BREAKING CHANGES
+
+* * The components property has been replaced with channels, that includes
+  alpha.
+* The alpha property has been removed. It was unused after the previous
+  change.
+* The `bitDepth` field was renamed to `depth`.
+
+
+
 ## [3.1.3](https://github.com/image-js/fast-png/compare/v3.1.2...v3.1.3) (2019-04-01)
 
 
