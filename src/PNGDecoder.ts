@@ -19,7 +19,6 @@ export default class PNGDecoder extends IOBuffer {
   private _end: boolean;
   private _hasPalette: boolean;
   private _palette: IndexedColors;
-  private _colorType: ColorType;
   private _compressionMethod: CompressionMethod;
   private _filterMethod: FilterMethod;
   private _interlaceMethod: InterlaceMethod;
@@ -36,7 +35,6 @@ export default class PNGDecoder extends IOBuffer {
     this._end = false;
     this._hasPalette = false;
     this._palette = [];
-    this._colorType = ColorType.UNKNOWN;
     this._compressionMethod = CompressionMethod.UNKNOWN;
     this._filterMethod = FilterMethod.UNKNOWN;
     this._interlaceMethod = InterlaceMethod.UNKNOWN;
@@ -126,15 +124,39 @@ export default class PNGDecoder extends IOBuffer {
     image.height = this.readUint32();
     // @ts-ignore
     image.depth = this.readUint8();
-    this._colorType = this.readUint8();
+
+    const colorType: ColorType = this.readUint8();
+    let channels: number;
+    switch (colorType) {
+      case ColorType.GREYSCALE:
+        channels = 1;
+        break;
+      case ColorType.TRUECOLOUR:
+        channels = 3;
+        break;
+      case ColorType.INDEXED_COLOUR:
+        channels = 1;
+        break;
+      case ColorType.GREYSCALE_ALPHA:
+        channels = 2;
+        break;
+      case ColorType.TRUECOLOUR_ALPHA:
+        channels = 4;
+        break;
+      default:
+        throw new Error(`Unknown color type: ${colorType}`);
+    }
+    this._png.channels = channels;
+
     this._compressionMethod = this.readUint8();
-    this._filterMethod = this.readUint8();
-    this._interlaceMethod = this.readUint8();
     if (this._compressionMethod !== CompressionMethod.DEFLATE) {
       throw new Error(
         `Unsupported compression method: ${this._compressionMethod}`
       );
     }
+
+    this._filterMethod = this.readUint8();
+    this._interlaceMethod = this.readUint8();
   }
 
   // https://www.w3.org/TR/PNG/#11PLTE
@@ -203,30 +225,8 @@ export default class PNGDecoder extends IOBuffer {
   }
 
   private decodeInterlaceNull(data: PNGDataArray): void {
-    let channels: number;
-    switch (this._colorType) {
-      case ColorType.GREYSCALE:
-        channels = 1;
-        break;
-      case ColorType.TRUECOLOUR:
-        channels = 3;
-        break;
-      case ColorType.INDEXED_COLOUR:
-        if (!this._hasPalette) throw new Error('Missing palette');
-        channels = 1;
-        break;
-      case ColorType.GREYSCALE_ALPHA:
-        channels = 2;
-        break;
-      case ColorType.TRUECOLOUR_ALPHA:
-        channels = 4;
-        break;
-      default:
-        throw new Error(`Unknown color type: ${this._colorType}`);
-    }
-
     const height = this._png.height;
-    const bytesPerPixel = (channels * this._png.depth) / 8;
+    const bytesPerPixel = (this._png.channels * this._png.depth) / 8;
     const bytesPerLine = this._png.width * bytesPerPixel;
     const newData = new Uint8Array(this._png.height * bytesPerLine);
 

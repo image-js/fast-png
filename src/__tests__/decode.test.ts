@@ -11,7 +11,8 @@ describe('decode', () => {
     check(img, {
       width: 2,
       height: 2,
-      depth: 8
+      depth: 8,
+      channels: 2
     });
     expect(img.data).toBeInstanceOf(Uint8Array);
     expect(img.data).toStrictEqual(
@@ -24,7 +25,8 @@ describe('decode', () => {
     check(img, {
       width: 10,
       height: 10,
-      depth: 8
+      depth: 8,
+      channels: 4
     });
     expect(img.data).toBeInstanceOf(Uint8Array);
     expect(img.data).toHaveLength(10 * 10 * 4);
@@ -35,7 +37,8 @@ describe('decode', () => {
     check(img, {
       width: 150,
       height: 200,
-      depth: 8
+      depth: 8,
+      channels: 1
     });
     expect(img.palette).toBeInstanceOf(Array);
     expect(img.palette).toHaveLength(256);
