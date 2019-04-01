@@ -33,8 +33,7 @@ describe('encode', () => {
     const expected = {
       width: 2,
       height: 2,
-      depth: 8,
-      colourType: 6
+      depth: 8
     };
     check(decoded, expected);
     checkPngJs(data, expected);
@@ -55,8 +54,7 @@ describe('encode', () => {
     const expected = {
       width: 2,
       height: 3,
-      depth: 8,
-      colourType: 0
+      depth: 8
     };
     check(decoded, expected);
     checkPngJs(data, expected);
@@ -91,8 +89,7 @@ describe('encode', () => {
     const expected = {
       width: 2,
       height: 2,
-      depth: 16,
-      colourType: 2
+      depth: 16
     };
     check(decoded, expected);
     checkPngJs(data, expected);
@@ -126,8 +123,7 @@ describe('encode', () => {
     const expected = {
       width: 2,
       height: 3,
-      depth: 8,
-      colourType: 4
+      depth: 8
     };
     check(decoded, expected);
     checkPngJs(data, expected);
@@ -195,10 +191,5 @@ function check(img: any, values: any): void {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function checkPngJs(data: any, values: any): void {
   const img = PNG.sync.read(Buffer.from(data, data.byteOffset, data.length));
-  var newValues = Object.assign({}, values);
-  if (newValues.colourType !== undefined) {
-    newValues.colorType = newValues.colourType;
-    delete newValues.colourType;
-  }
-  check(img, newValues);
+  check(img, values);
 }

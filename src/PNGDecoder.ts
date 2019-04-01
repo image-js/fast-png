@@ -2,7 +2,8 @@ import { IOBuffer } from 'iobuffer';
 import { Inflate as Inflator } from 'pako';
 
 import { pngSignature, crc } from './common';
-import { IDecodedPNG, DecoderInputType, IPNGDecoderOptions, PNGDataArray } from './types';
+import { IDecodedPNG, DecoderInputType, IPNGDecoderOptions, PNGDataArray, IndexedColors } from './types';
+import { ColorType, CompressionMethod, FilterMethod, InterlaceMethod } from './internalTypes';
 
 const empty = new Uint8Array(0);
 const NULL = '\0';
@@ -17,7 +18,11 @@ export default class PNGDecoder extends IOBuffer {
   private _png: IDecodedPNG;
   private _end: boolean;
   private _hasPalette: boolean;
-  private _palette?: [number, number, number][];
+  private _palette: IndexedColors;
+  private _colorType: ColorType;
+  private _compressionMethod: CompressionMethod;
+  private _filterMethod: FilterMethod;
+  private _interlaceMethod: InterlaceMethod;
 
   public constructor(data: DecoderInputType, options: IPNGDecoderOptions = {}) {
     super(data);
@@ -30,6 +35,11 @@ export default class PNGDecoder extends IOBuffer {
     };
     this._end = false;
     this._hasPalette = false;
+    this._palette = [];
+    this._colorType = ColorType.UNKNOWN;
+    this._compressionMethod = CompressionMethod.UNKNOWN;
+    this._filterMethod = FilterMethod.UNKNOWN;
+    this._interlaceMethod = InterlaceMethod.UNKNOWN;
     // PNG is always big endian
     // https://www.w3.org/TR/PNG/#7Integers-and-byte-order
     this.setBigEndian();
@@ -114,14 +124,15 @@ export default class PNGDecoder extends IOBuffer {
     const image = this._png;
     image.width = this.readUint32();
     image.height = this.readUint32();
+    // @ts-ignore
     image.depth = this.readUint8();
-    image.colourType = this.readUint8();
-    image.compressionMethod = this.readUint8();
-    image.filterMethod = this.readUint8();
-    image.interlaceMethod = this.readUint8();
-    if (this._png.compressionMethod !== 0) {
+    this._colorType = this.readUint8();
+    this._compressionMethod = this.readUint8();
+    this._filterMethod = this.readUint8();
+    this._interlaceMethod = this.readUint8();
+    if (this._compressionMethod !== CompressionMethod.DEFLATE) {
       throw new Error(
-        `Unsupported compression method: ${image.compressionMethod}`
+        `Unsupported compression method: ${this._compressionMethod}`
       );
     }
   }
@@ -135,7 +146,7 @@ export default class PNGDecoder extends IOBuffer {
     }
     const l = length / 3;
     this._hasPalette = true;
-    const palette: [number, number, number][] = [];
+    const palette: IndexedColors = [];
     this._palette = palette;
     for (let i = 0; i < l; i++) {
       palette.push([this.readUint8(), this.readUint8(), this.readUint8()]);
@@ -166,8 +177,7 @@ export default class PNGDecoder extends IOBuffer {
     const ppuX = this.readUint32();
     const ppuY = this.readUint32();
     const unitSpecifier = this.readByte();
-    this._png.resolution = [ppuX, ppuY];
-    this._png.unitSpecifier = unitSpecifier;
+    this._png.resolution = { x: ppuX, y: ppuY, unit: unitSpecifier };
   }
 
   private decodeImage(): void {
@@ -179,40 +189,40 @@ export default class PNGDecoder extends IOBuffer {
     }
     var data = this._inflator.result;
 
-    if (this._png.filterMethod !== 0) {
-      throw new Error(`Filter method ${this._png.filterMethod} not supported`);
+    if (this._filterMethod !== FilterMethod.ADAPTIVE) {
+      throw new Error(`Filter method ${this._filterMethod} not supported`);
     }
 
-    if (this._png.interlaceMethod === 0) {
+    if (this._interlaceMethod === InterlaceMethod.NO_INTERLACE) {
       this.decodeInterlaceNull(data as Uint8Array);
     } else {
       throw new Error(
-        `Interlace method ${this._png.interlaceMethod} not supported`
+        `Interlace method ${this._interlaceMethod} not supported`
       );
     }
   }
 
   private decodeInterlaceNull(data: PNGDataArray): void {
     let channels: number;
-    switch (this._png.colourType) {
-      case 0:
+    switch (this._colorType) {
+      case ColorType.GREYSCALE:
         channels = 1;
         break;
-      case 2:
+      case ColorType.TRUECOLOUR:
         channels = 3;
         break;
-      case 3:
+      case ColorType.INDEXED_COLOUR:
         if (!this._hasPalette) throw new Error('Missing palette');
         channels = 1;
         break;
-      case 4:
+      case ColorType.GREYSCALE_ALPHA:
         channels = 2;
         break;
-      case 6:
+      case ColorType.TRUECOLOUR_ALPHA:
         channels = 4;
         break;
       default:
-        throw new Error(`Unknown colour type: ${this._png.colourType}`);
+        throw new Error(`Unknown color type: ${this._colorType}`);
     }
 
     const height = this._png.height;
