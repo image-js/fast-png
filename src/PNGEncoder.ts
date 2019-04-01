@@ -140,9 +140,9 @@ function checkInteger(value: number, name: string): number {
 function getColourType(
   data: IImageData
 ): { channels: number; bitDepth: number; colourType: number } {
-  const { channels = 4, bitDepth = 8 } = data;
-  if (channels !== 4 && channels !== 3 && channels !== 2 && channels !== 1) {
-    throw new RangeError(`unsupported number of channels: ${channels}`);
+  let { components = 3, bitDepth = 8 } = data;
+  if (components !== 3 && components !== 1) {
+    throw new RangeError(`unsupported number of components: ${components}`);
   }
   if (bitDepth !== 8 && bitDepth !== 16) {
     throw new RangeError(`unsupported bit depth: ${bitDepth}`);
@@ -156,6 +156,7 @@ function getColourType(
     throw new TypeError(`unsupported alpha: ${alpha}`);
   }
 
+  const channels = components + Number(alpha);
   const returnValue = { channels, bitDepth, colourType: -1 };
   switch (channels) {
     case 4:

@@ -48,7 +48,7 @@ describe('encode', () => {
       width: 2,
       height: 3,
       data: dataArray,
-      channels: 1,
+      components: 1,
       alpha: false
     });
     expect(data).toBeInstanceOf(Uint8Array);
@@ -85,7 +85,7 @@ describe('encode', () => {
       height: 2,
       bitDepth: 16,
       data: dataArray,
-      channels: 3,
+      components: 3,
       alpha: false
     });
     expect(data).toBeInstanceOf(Uint8Array);
@@ -121,7 +121,7 @@ describe('encode', () => {
       width: 2,
       height: 3,
       data: dataArray,
-      channels: 2,
+      components: 1,
       alpha: true
     });
     expect(data).toBeInstanceOf(Uint8Array);
@@ -145,17 +145,17 @@ describe('encode', () => {
         height: 1,
         bitDepth: 8,
         data: new Uint8Array(),
-        channels: 5,
+        components: 5,
         alpha: true
       })
-    ).toThrow('unsupported number of channels: 5');
+    ).toThrow('unsupported number of components: 5');
     expect(() =>
       encode({
         width: 1,
         height: 1,
         bitDepth: 8,
         data: new Uint8Array(),
-        channels: 3,
+        components: 3,
         // @ts-ignore
         alpha: 2
       })
@@ -166,7 +166,7 @@ describe('encode', () => {
         height: 1,
         bitDepth: 8,
         data: new Uint8Array(),
-        channels: 3,
+        components: 3,
         alpha: false
       })
     ).toThrow('width must be a positive integer');
@@ -177,7 +177,7 @@ describe('encode', () => {
         height: undefined,
         bitDepth: 8,
         data: new Uint8Array(),
-        channels: 3,
+        components: 3,
         alpha: false
       })
     ).toThrow('height must be a positive integer');
@@ -187,7 +187,7 @@ describe('encode', () => {
         height: 1,
         bitDepth: 8,
         data: new Uint8Array(10),
-        channels: 3,
+        components: 3,
         alpha: false
       })
     ).toThrow('wrong data size. Found 10, expected 3');
@@ -197,7 +197,7 @@ describe('encode', () => {
         height: 1,
         bitDepth: 1,
         data: new Uint8Array(10),
-        channels: 3,
+        components: 3,
         alpha: false
       })
     ).toThrow('unsupported bit depth: 1');
