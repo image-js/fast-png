@@ -1,3 +1,12 @@
+## [4.0.1](https://github.com/image-js/fast-png/compare/v4.0.0...v4.0.1) (2019-04-01)
+
+
+### Bug Fixes
+
+* **decode:** set channels property of result ([683d61a](https://github.com/image-js/fast-png/commit/683d61a))
+
+
+
 # [4.0.0](https://github.com/image-js/fast-png/compare/v3.1.3...v4.0.0) (2019-04-01)
 
 
