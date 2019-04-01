@@ -7,8 +7,15 @@ import {
   IPNGEncoderOptions,
   IImageData,
   IDecodedPNG,
-  PNGDataArray
+  PNGDataArray,
+  BitDepth
 } from './types';
+import {
+  ColorType,
+  CompressionMethod,
+  FilterMethod,
+  InterlaceMethod
+} from './internalTypes';
 
 const defaultZlibOptions: DeflateFunctionOptions = {
   level: 3
@@ -17,13 +24,15 @@ const defaultZlibOptions: DeflateFunctionOptions = {
 export default class PNGEncoder extends IOBuffer {
   private _png: IDecodedPNG;
   private _zlibOptions: DeflateFunctionOptions;
+  private _colorType: ColorType;
 
   public constructor(data: IImageData, options: IPNGEncoderOptions = {}) {
     super();
     // @ts-ignore
     this._png = {};
-    this._checkData(data);
+    this._colorType = ColorType.UNKNOWN;
     this._zlibOptions = Object.assign({}, defaultZlibOptions, options.zlib);
+    this._checkData(data);
     this.setBigEndian();
   }
 
@@ -49,10 +58,10 @@ export default class PNGEncoder extends IOBuffer {
     this.writeUint32(this._png.width);
     this.writeUint32(this._png.height);
     this.writeByte(this._png.depth);
-    this.writeByte(this._png.colourType);
-    this.writeByte(0); // Compression method
-    this.writeByte(0); // Filter method
-    this.writeByte(0); // Interlace method
+    this.writeByte(this._colorType);
+    this.writeByte(CompressionMethod.DEFLATE);
+    this.writeByte(FilterMethod.ADAPTIVE);
+    this.writeByte(InterlaceMethod.NO_INTERLACE);
 
     this.writeCrc(17);
   }
@@ -102,8 +111,8 @@ export default class PNGEncoder extends IOBuffer {
     this._png.width = checkInteger(data.width, 'width');
     this._png.height = checkInteger(data.height, 'height');
     this._png.data = data.data;
-    const { colourType, channels, depth } = getColourType(data);
-    this._png.colourType = colourType;
+    const { colorType, channels, depth } = getColorType(data);
+    this._colorType = colorType;
     this._png.channels = channels;
     this._png.depth = depth;
     const expectedSize = this._png.width * this._png.height * channels;
@@ -137,9 +146,9 @@ function checkInteger(value: number, name: string): number {
   throw new TypeError(`${name} must be a positive integer`);
 }
 
-function getColourType(
+function getColorType(
   data: IImageData
-): { channels: number; depth: number; colourType: number } {
+): { channels: number; depth: BitDepth; colorType: ColorType } {
   const { channels = 4, depth = 8 } = data;
   if (channels !== 4 && channels !== 3 && channels !== 2 && channels !== 1) {
     throw new RangeError(`unsupported number of channels: ${channels}`);
@@ -148,19 +157,19 @@ function getColourType(
     throw new RangeError(`unsupported bit depth: ${depth}`);
   }
 
-  const returnValue = { channels, depth, colourType: -1 };
+  const returnValue = { channels, depth, colorType: ColorType.UNKNOWN };
   switch (channels) {
     case 4:
-      returnValue.colourType = 6;
+      returnValue.colorType = ColorType.TRUECOLOUR_ALPHA;
       break;
     case 3:
-      returnValue.colourType = 2;
+      returnValue.colorType = ColorType.TRUECOLOUR;
       break;
     case 1:
-      returnValue.colourType = 0;
+      returnValue.colorType = ColorType.GREYSCALE;
       break;
     case 2:
-      returnValue.colourType = 4;
+      returnValue.colorType = ColorType.GREYSCALE_ALPHA;
       break;
     default:
       throw new Error(`unsupported number of channels: ${channels}`);
