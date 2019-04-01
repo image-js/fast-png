@@ -48,8 +48,7 @@ describe('encode', () => {
       width: 2,
       height: 3,
       data: dataArray,
-      components: 1,
-      alpha: false
+      channels: 1
     });
     expect(data).toBeInstanceOf(Uint8Array);
     const decoded = decode(data);
@@ -85,8 +84,7 @@ describe('encode', () => {
       height: 2,
       depth: 16,
       data: dataArray,
-      components: 3,
-      alpha: false
+      channels: 3
     });
     expect(data).toBeInstanceOf(Uint8Array);
     const decoded = decode(data);
@@ -121,8 +119,7 @@ describe('encode', () => {
       width: 2,
       height: 3,
       data: dataArray,
-      components: 1,
-      alpha: true
+      channels: 2
     });
     expect(data).toBeInstanceOf(Uint8Array);
     const decoded = decode(data);
@@ -145,29 +142,16 @@ describe('encode', () => {
         height: 1,
         depth: 8,
         data: new Uint8Array(),
-        components: 5,
-        alpha: true
+        channels: 5
       })
-    ).toThrow('unsupported number of components: 5');
-    expect(() =>
-      encode({
-        width: 1,
-        height: 1,
-        depth: 8,
-        data: new Uint8Array(),
-        components: 3,
-        // @ts-ignore
-        alpha: 2
-      })
-    ).toThrow('unsupported alpha: 2');
+    ).toThrow('unsupported number of channels: 5');
     expect(() =>
       encode({
         width: 1.1,
         height: 1,
         depth: 8,
         data: new Uint8Array(),
-        components: 3,
-        alpha: false
+        channels: 3
       })
     ).toThrow('width must be a positive integer');
     expect(() =>
@@ -177,8 +161,7 @@ describe('encode', () => {
         height: undefined,
         depth: 8,
         data: new Uint8Array(),
-        components: 3,
-        alpha: false
+        channels: 3
       })
     ).toThrow('height must be a positive integer');
     expect(() =>
@@ -187,8 +170,7 @@ describe('encode', () => {
         height: 1,
         depth: 8,
         data: new Uint8Array(10),
-        components: 3,
-        alpha: false
+        channels: 3
       })
     ).toThrow('wrong data size. Found 10, expected 3');
     expect(() =>
@@ -197,8 +179,7 @@ describe('encode', () => {
         height: 1,
         depth: 1,
         data: new Uint8Array(10),
-        components: 3,
-        alpha: false
+        channels: 3
       })
     ).toThrow('unsupported bit depth: 1');
   });

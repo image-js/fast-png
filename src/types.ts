@@ -32,8 +32,7 @@ export interface IImageData {
   height: number;
   data: PNGDataArray;
   depth?: number;
-  components?: number;
-  alpha?: boolean | 0 | 1;
+  channels?: number;
 }
 
 export interface IPNGEncoderOptions {

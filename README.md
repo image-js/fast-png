@@ -33,8 +33,7 @@ PNG image decoder and encoder written entirely in JavaScript.
   - `height` - The height of the image
   - `data` - An array or TypedArray with the image data
   - `depth` - A number indicating the color depth (only 8 and 16 are supported now). Defaults to 8.
-  - `components` - Number of non-alpha channels (1 or 3 are supported). Defaults to 3.
-  - `alpha` - Boolean indicating if an alpha channel is present. Defaults to true.
+  - `channels` - Number of channels, including alpha (1, 2, 3 and 4 are supported). Defaults to 4.
 
 ## PNG standard
 
