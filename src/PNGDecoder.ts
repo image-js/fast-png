@@ -2,8 +2,20 @@ import { IOBuffer } from 'iobuffer';
 import { Inflate as Inflator } from 'pako';
 
 import { pngSignature, crc } from './common';
-import { IDecodedPNG, DecoderInputType, IPNGDecoderOptions, PNGDataArray, IndexedColors } from './types';
-import { ColorType, CompressionMethod, FilterMethod, InterlaceMethod } from './internalTypes';
+import {
+  IDecodedPNG,
+  DecoderInputType,
+  IPNGDecoderOptions,
+  PNGDataArray,
+  IndexedColors,
+  BitDepth,
+} from './types';
+import {
+  ColorType,
+  CompressionMethod,
+  FilterMethod,
+  InterlaceMethod,
+} from './internalTypes';
 
 const empty = new Uint8Array(0);
 const NULL = '\0';
@@ -28,9 +40,13 @@ export default class PNGDecoder extends IOBuffer {
     const { checkCrc = false } = options;
     this._checkCrc = checkCrc;
     this._inflator = new Inflator();
-    // @ts-ignore
     this._png = {
-      text: {}
+      width: -1,
+      height: -1,
+      channels: -1,
+      data: new Uint8Array(0),
+      depth: 1,
+      text: {},
     };
     this._end = false;
     this._hasPalette = false;
@@ -57,7 +73,7 @@ export default class PNGDecoder extends IOBuffer {
     for (let i = 0; i < pngSignature.length; i++) {
       if (this.readUint8() !== pngSignature[i]) {
         throw new Error(
-          `wrong PNG signature. Byte at ${i} should be ${pngSignature[i]}.`
+          `wrong PNG signature. Byte at ${i} should be ${pngSignature[i]}.`,
         );
       }
     }
@@ -103,13 +119,13 @@ export default class PNGDecoder extends IOBuffer {
         new Uint8Array(
           this.buffer,
           this.byteOffset + this.offset - crcLength - 4,
-          crcLength
+          crcLength,
         ),
-        crcLength
+        crcLength,
       ); // "- 4" because we already advanced by reading the CRC
       if (actualCrc !== expectedCrc) {
         throw new Error(
-          `CRC mismatch for chunk ${type}. Expected ${expectedCrc}, found ${actualCrc}`
+          `CRC mismatch for chunk ${type}. Expected ${expectedCrc}, found ${actualCrc}`,
         );
       }
     } else {
@@ -122,8 +138,7 @@ export default class PNGDecoder extends IOBuffer {
     const image = this._png;
     image.width = this.readUint32();
     image.height = this.readUint32();
-    // @ts-ignore
-    image.depth = this.readUint8();
+    image.depth = checkBitDepth(this.readUint8());
 
     const colorType: ColorType = this.readUint8();
     let channels: number;
@@ -151,7 +166,7 @@ export default class PNGDecoder extends IOBuffer {
     this._compressionMethod = this.readUint8();
     if (this._compressionMethod !== CompressionMethod.DEFLATE) {
       throw new Error(
-        `Unsupported compression method: ${this._compressionMethod}`
+        `Unsupported compression method: ${this._compressionMethod}`,
       );
     }
 
@@ -163,7 +178,7 @@ export default class PNGDecoder extends IOBuffer {
   private decodePLTE(length: number): void {
     if (length % 3 !== 0) {
       throw new RangeError(
-        `PLTE field length must be a multiple of 3. Got ${length}`
+        `PLTE field length must be a multiple of 3. Got ${length}`,
       );
     }
     const l = length / 3;
@@ -179,7 +194,7 @@ export default class PNGDecoder extends IOBuffer {
   private decodeIDAT(length: number): void {
     this._inflator.push(
       new Uint8Array(this.buffer, this.offset + this.byteOffset, length),
-      false
+      false,
     );
     this.skip(length);
   }
@@ -206,10 +221,10 @@ export default class PNGDecoder extends IOBuffer {
     this._inflator.push(empty, true);
     if (this._inflator.err) {
       throw new Error(
-        `Error while decompressing the data: ${this._inflator.err}`
+        `Error while decompressing the data: ${this._inflator.err}`,
       );
     }
-    var data = this._inflator.result;
+    const data = this._inflator.result;
 
     if (this._filterMethod !== FilterMethod.ADAPTIVE) {
       throw new Error(`Filter method ${this._filterMethod} not supported`);
@@ -219,7 +234,7 @@ export default class PNGDecoder extends IOBuffer {
       this.decodeInterlaceNull(data as Uint8Array);
     } else {
       throw new Error(
-        `Interlace method ${this._interlaceMethod} not supported`
+        `Interlace method ${this._interlaceMethod} not supported`,
       );
     }
   }
@@ -254,7 +269,7 @@ export default class PNGDecoder extends IOBuffer {
             newLine,
             prevLine,
             bytesPerLine,
-            bytesPerPixel
+            bytesPerPixel,
           );
           break;
         case 4:
@@ -263,7 +278,7 @@ export default class PNGDecoder extends IOBuffer {
             newLine,
             prevLine,
             bytesPerLine,
-            bytesPerPixel
+            bytesPerPixel,
           );
           break;
         default:
@@ -295,7 +310,7 @@ export default class PNGDecoder extends IOBuffer {
 function unfilterNone(
   currentLine: PNGDataArray,
   newLine: PNGDataArray,
-  bytesPerLine: number
+  bytesPerLine: number,
 ): void {
   for (let i = 0; i < bytesPerLine; i++) {
     newLine[i] = currentLine[i];
@@ -306,7 +321,7 @@ function unfilterSub(
   currentLine: PNGDataArray,
   newLine: PNGDataArray,
   bytesPerLine: number,
-  bytesPerPixel: number
+  bytesPerPixel: number,
 ): void {
   let i = 0;
   for (; i < bytesPerPixel; i++) {
@@ -322,7 +337,7 @@ function unfilterUp(
   currentLine: PNGDataArray,
   newLine: PNGDataArray,
   prevLine: PNGDataArray,
-  bytesPerLine: number
+  bytesPerLine: number,
 ): void {
   let i = 0;
   if (prevLine.length === 0) {
@@ -342,7 +357,7 @@ function unfilterAverage(
   newLine: PNGDataArray,
   prevLine: PNGDataArray,
   bytesPerLine: number,
-  bytesPerPixel: number
+  bytesPerPixel: number,
 ): void {
   let i = 0;
   if (prevLine.length === 0) {
@@ -369,7 +384,7 @@ function unfilterPaeth(
   newLine: PNGDataArray,
   prevLine: PNGDataArray,
   bytesPerLine: number,
-  bytesPerPixel: number
+  bytesPerPixel: number,
 ): void {
   let i = 0;
   if (prevLine.length === 0) {
@@ -389,7 +404,7 @@ function unfilterPaeth(
           paethPredictor(
             newLine[i - bytesPerPixel],
             prevLine[i],
-            prevLine[i - bytesPerPixel]
+            prevLine[i - bytesPerPixel],
           )) &
         0xff;
     }
@@ -408,4 +423,17 @@ function paethPredictor(a: number, b: number, c: number): number {
 
 function swap16(val: number): number {
   return ((val & 0xff) << 8) | ((val >> 8) & 0xff);
+}
+
+function checkBitDepth(value: number): BitDepth {
+  if (
+    value !== 1 &&
+    value !== 2 &&
+    value !== 4 &&
+    value !== 8 &&
+    value !== 16
+  ) {
+    throw new Error(`invalid bit depth: ${value}`);
+  }
+  return value;
 }

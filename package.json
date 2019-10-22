@@ -21,14 +21,14 @@
   ],
   "scripts": {
     "clean": "rimraf lib lib-esm",
-    "eslint": "eslint src --ext ts --cache",
+    "eslint": "eslint src --ext ts",
     "eslint-fix": "npm run eslint -- --fix",
     "prepublishOnly": "npm run tsc",
     "test": "npm run test-coverage && npm run eslint",
     "test-coverage": "npm run test-only -- --coverage",
     "test-only": "jest",
     "tsc": "npm run clean && npm run tsc-cjs && npm run tsc-esm",
-    "tsc-cjs": "tsc",
+    "tsc-cjs": "tsc --project tsconfig.cjs.json",
     "tsc-esm": "tsc --project tsconfig.esm.json"
   },
   "repository": {
@@ -44,23 +44,33 @@
     "testEnvironment": "node"
   },
   "devDependencies": {
-    "@types/jest": "^24.0.11",
-    "@typescript-eslint/eslint-plugin": "^1.5.0",
-    "@typescript-eslint/parser": "^1.5.0",
-    "eslint": "^5.15.3",
-    "eslint-config-cheminfo": "^1.20.1",
-    "eslint-config-cheminfo-typescript": "^3.0.0",
-    "eslint-plugin-import": "^2.16.0",
-    "eslint-plugin-jest": "^22.4.1",
-    "jest": "^24.5.0",
+    "@types/jest": "^24.0.19",
+    "@types/node": "^12.11.2",
+    "@typescript-eslint/eslint-plugin": "^2.5.0",
+    "@typescript-eslint/parser": "^2.5.0",
+    "eslint": "^6.5.1",
+    "eslint-config-cheminfo": "^2.0.3",
+    "eslint-config-cheminfo-typescript": "^4.1.1",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-jest": "^22.20.0",
+    "eslint-plugin-prettier": "^3.1.1",
+    "jest": "^24.9.0",
     "pngjs": "^3.4.0",
-    "rimraf": "^2.6.3",
-    "ts-jest": "^24.0.0",
-    "typescript": "^3.3.4000"
+    "prettier": "^1.18.2",
+    "rimraf": "^3.0.0",
+    "ts-jest": "^24.1.0",
+    "typescript": "^3.6.4"
   },
   "dependencies": {
     "@types/pako": "^1.0.1",
     "iobuffer": "^4.0.1",
     "pako": "^1.0.10"
+  },
+  "prettier": {
+    "arrowParens": "always",
+    "semi": true,
+    "singleQuote": true,
+    "tabWidth": 2,
+    "trailingComma": "all"
   }
 }

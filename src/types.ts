@@ -32,7 +32,7 @@ export enum ResolutionUnitSpecifier {
   /**
    * Unit is the metre
    */
-  METRE = 1
+  METRE = 1,
 }
 
 export interface IImageData {

@@ -8,17 +8,17 @@ import {
   IImageData,
   IDecodedPNG,
   PNGDataArray,
-  BitDepth
+  BitDepth,
 } from './types';
 import {
   ColorType,
   CompressionMethod,
   FilterMethod,
-  InterlaceMethod
+  InterlaceMethod,
 } from './internalTypes';
 
 const defaultZlibOptions: DeflateFunctionOptions = {
-  level: 3
+  level: 3,
 };
 
 export default class PNGEncoder extends IOBuffer {
@@ -28,11 +28,9 @@ export default class PNGEncoder extends IOBuffer {
 
   public constructor(data: IImageData, options: IPNGEncoderOptions = {}) {
     super();
-    // @ts-ignore
-    this._png = {};
     this._colorType = ColorType.UNKNOWN;
     this._zlibOptions = Object.assign({}, defaultZlibOptions, options.zlib);
-    this._checkData(data);
+    this._png = this._checkData(data);
     this.setBigEndian();
   }
 
@@ -107,22 +105,24 @@ export default class PNGEncoder extends IOBuffer {
     this.encodeIDAT(compressed);
   }
 
-  private _checkData(data: IImageData): void {
-    this._png.width = checkInteger(data.width, 'width');
-    this._png.height = checkInteger(data.height, 'height');
-    this._png.data = data.data;
+  private _checkData(data: IImageData): IDecodedPNG {
     const { colorType, channels, depth } = getColorType(data);
+    const png: IDecodedPNG = {
+      width: checkInteger(data.width, 'width'),
+      height: checkInteger(data.height, 'height'),
+      channels: channels,
+      data: data.data,
+      depth: depth,
+      text: {},
+    };
     this._colorType = colorType;
-    this._png.channels = channels;
-    this._png.depth = depth;
-    const expectedSize = this._png.width * this._png.height * channels;
-    if (this._png.data.length !== expectedSize) {
+    const expectedSize = png.width * png.height * channels;
+    if (png.data.length !== expectedSize) {
       throw new RangeError(
-        `wrong data size. Found ${
-          this._png.data.length
-        }, expected ${expectedSize}`
+        `wrong data size. Found ${png.data.length}, expected ${expectedSize}`,
       );
     }
+    return png;
   }
 
   private writeCrc(length: number): void {
@@ -131,10 +131,10 @@ export default class PNGEncoder extends IOBuffer {
         new Uint8Array(
           this.buffer,
           this.byteOffset + this.offset - length,
-          length
+          length,
         ),
-        length
-      )
+        length,
+      ),
     );
   }
 }
@@ -147,7 +147,7 @@ function checkInteger(value: number, name: string): number {
 }
 
 function getColorType(
-  data: IImageData
+  data: IImageData,
 ): { channels: number; depth: BitDepth; colorType: ColorType } {
   const { channels = 4, depth = 8 } = data;
   if (channels !== 4 && channels !== 3 && channels !== 2 && channels !== 1) {
@@ -181,7 +181,7 @@ function writeDataBytes(
   data: PNGDataArray,
   newData: IOBuffer,
   slotsPerLine: number,
-  offset: number
+  offset: number,
 ): number {
   for (let j = 0; j < slotsPerLine; j++) {
     newData.writeByte(data[offset++]);
@@ -193,7 +193,7 @@ function writeDataUint16(
   data: PNGDataArray,
   newData: IOBuffer,
   slotsPerLine: number,
-  offset: number
+  offset: number,
 ): number {
   for (let j = 0; j < slotsPerLine; j++) {
     newData.writeUint16(data[offset++]);

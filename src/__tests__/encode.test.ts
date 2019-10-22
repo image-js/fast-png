@@ -21,19 +21,19 @@ describe('encode', () => {
       255,
       255,
       255,
-      255
+      255,
     ]);
     const data = encode({
       width: 2,
       height: 2,
-      data: dataArray
+      data: dataArray,
     });
     expect(data).toBeInstanceOf(Uint8Array);
     const decoded = decode(data);
     const expected = {
       width: 2,
       height: 2,
-      depth: 8
+      depth: 8,
     };
     check(decoded, expected);
     checkPngJs(data, expected);
@@ -47,14 +47,14 @@ describe('encode', () => {
       width: 2,
       height: 3,
       data: dataArray,
-      channels: 1
+      channels: 1,
     });
     expect(data).toBeInstanceOf(Uint8Array);
     const decoded = decode(data);
     const expected = {
       width: 2,
       height: 3,
-      depth: 8
+      depth: 8,
     };
     check(decoded, expected);
     checkPngJs(data, expected);
@@ -75,21 +75,21 @@ describe('encode', () => {
       32768,
       500,
       500,
-      500
+      500,
     ]);
     const data = encode({
       width: 2,
       height: 2,
       depth: 16,
       data: dataArray,
-      channels: 3
+      channels: 3,
     });
     expect(data).toBeInstanceOf(Uint8Array);
     const decoded = decode(data);
     const expected = {
       width: 2,
       height: 2,
-      depth: 16
+      depth: 16,
     };
     check(decoded, expected);
     checkPngJs(data, expected);
@@ -110,20 +110,20 @@ describe('encode', () => {
       127,
       127,
       255,
-      255
+      255,
     ]);
     const data = encode({
       width: 2,
       height: 3,
       data: dataArray,
-      channels: 2
+      channels: 2,
     });
     expect(data).toBeInstanceOf(Uint8Array);
     const decoded = decode(data);
     const expected = {
       width: 2,
       height: 3,
-      depth: 8
+      depth: 8,
     };
     check(decoded, expected);
     checkPngJs(data, expected);
@@ -138,8 +138,8 @@ describe('encode', () => {
         height: 1,
         depth: 8,
         data: new Uint8Array(),
-        channels: 5
-      })
+        channels: 5,
+      }),
     ).toThrow('unsupported number of channels: 5');
     expect(() =>
       encode({
@@ -147,8 +147,8 @@ describe('encode', () => {
         height: 1,
         depth: 8,
         data: new Uint8Array(),
-        channels: 3
-      })
+        channels: 3,
+      }),
     ).toThrow('width must be a positive integer');
     expect(() =>
       encode({
@@ -157,8 +157,8 @@ describe('encode', () => {
         height: undefined,
         depth: 8,
         data: new Uint8Array(),
-        channels: 3
-      })
+        channels: 3,
+      }),
     ).toThrow('height must be a positive integer');
     expect(() =>
       encode({
@@ -166,8 +166,8 @@ describe('encode', () => {
         height: 1,
         depth: 8,
         data: new Uint8Array(10),
-        channels: 3
-      })
+        channels: 3,
+      }),
     ).toThrow('wrong data size. Found 10, expected 3');
     expect(() =>
       encode({
@@ -175,8 +175,8 @@ describe('encode', () => {
         height: 1,
         depth: 1,
         data: new Uint8Array(10),
-        channels: 3
-      })
+        channels: 3,
+      }),
     ).toThrow('unsupported bit depth: 1');
   });
 });

@@ -14,8 +14,12 @@ for (let n = 0; n < 256; n++) {
 }
 
 const initialCrc = 0xffffffff;
-function updateCrc(crc: number, data: Uint8Array, length: number): number {
-  let c = crc;
+function updateCrc(
+  currentCrc: number,
+  data: Uint8Array,
+  length: number,
+): number {
+  let c = currentCrc;
   for (let n = 0; n < length; n++) {
     c = crcTable[(c ^ data[n]) & 0xff] ^ (c >>> 8);
   }

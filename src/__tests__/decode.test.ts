@@ -12,11 +12,11 @@ describe('decode', () => {
       width: 2,
       height: 2,
       depth: 8,
-      channels: 2
+      channels: 2,
     });
     expect(img.data).toBeInstanceOf(Uint8Array);
     expect(img.data).toStrictEqual(
-      new Uint8Array([0, 255, 255, 255, 255, 255, 0, 255])
+      new Uint8Array([0, 255, 255, 255, 255, 255, 0, 255]),
     );
   });
 
@@ -26,7 +26,7 @@ describe('decode', () => {
       width: 10,
       height: 10,
       depth: 8,
-      channels: 4
+      channels: 4,
     });
     expect(img.data).toBeInstanceOf(Uint8Array);
     expect(img.data).toHaveLength(10 * 10 * 4);
@@ -38,7 +38,7 @@ describe('decode', () => {
       width: 150,
       height: 200,
       depth: 8,
-      channels: 1
+      channels: 1,
     });
     expect(img.palette).toBeInstanceOf(Array);
     expect(img.palette).toHaveLength(256);
@@ -52,7 +52,7 @@ describe('decode', () => {
 
   it('should throw with a non-png', () => {
     expect(() => decode(new Uint8Array(20))).toThrow(
-      'wrong PNG signature. Byte at 0 should be 137.'
+      'wrong PNG signature. Byte at 0 should be 137.',
     );
   });
 });

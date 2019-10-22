@@ -5,15 +5,14 @@ import {
   IPNGDecoderOptions,
   IDecodedPNG,
   IImageData,
-  IPNGEncoderOptions
+  IPNGEncoderOptions,
 } from './types';
 
-// eslint-disable-next-line no-duplicate-imports
 export * from './types';
 
 function decodePNG(
   data: DecoderInputType,
-  options?: IPNGDecoderOptions
+  options?: IPNGDecoderOptions,
 ): IDecodedPNG {
   const decoder = new PNGDecoder(data, options);
   return decoder.decode();
