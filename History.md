@@ -1,3 +1,17 @@
+# [5.0.0](https://github.com/image-js/fast-png/compare/v4.0.1...v5.0.0) (2019-11-12)
+
+
+### chore
+
+* update dependencies ([39cf43e](https://github.com/image-js/fast-png/commit/39cf43e59a571faf7f1bddd45dde5394a0eaf1dd))
+
+
+### BREAKING CHANGES
+
+* Node.js 6 and 8 are no longer supported.
+
+
+
 ## [4.0.1](https://github.com/image-js/fast-png/compare/v4.0.0...v4.0.1) (2019-04-01)
 
 

@@ -1,6 +1,6 @@
 {
   "name": "fast-png",
-  "version": "4.0.1",
+  "version": "5.0.0",
   "description": "PNG image decoder and encoder written entirely in JavaScript",
   "main": "./lib/index.js",
   "module": "./lib-esm/index.js",
