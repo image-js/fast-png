@@ -63,7 +63,7 @@
   },
   "dependencies": {
     "@types/pako": "^1.0.1",
-    "iobuffer": "^5.0.1",
+    "iobuffer": "^5.0.2",
     "pako": "^1.0.10"
   },
   "prettier": {
