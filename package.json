@@ -44,26 +44,26 @@
     "testEnvironment": "node"
   },
   "devDependencies": {
-    "@types/jest": "^24.0.19",
-    "@types/node": "^12.11.2",
-    "@typescript-eslint/eslint-plugin": "^2.5.0",
-    "@typescript-eslint/parser": "^2.5.0",
-    "eslint": "^6.5.1",
-    "eslint-config-cheminfo": "^2.0.3",
-    "eslint-config-cheminfo-typescript": "^4.1.1",
+    "@types/jest": "^24.0.22",
+    "@types/node": "^12.12.7",
+    "@typescript-eslint/eslint-plugin": "^2.7.0",
+    "@typescript-eslint/parser": "^2.7.0",
+    "eslint": "^6.6.0",
+    "eslint-config-cheminfo": "^2.0.4",
+    "eslint-config-cheminfo-typescript": "^4.1.2",
     "eslint-plugin-import": "^2.18.2",
-    "eslint-plugin-jest": "^22.20.0",
+    "eslint-plugin-jest": "^23.0.3",
     "eslint-plugin-prettier": "^3.1.1",
     "jest": "^24.9.0",
     "pngjs": "^3.4.0",
-    "prettier": "^1.18.2",
+    "prettier": "^1.19.1",
     "rimraf": "^3.0.0",
     "ts-jest": "^24.1.0",
-    "typescript": "^3.6.4"
+    "typescript": "^3.7.2"
   },
   "dependencies": {
     "@types/pako": "^1.0.1",
-    "iobuffer": "^4.0.1",
+    "iobuffer": "^5.0.1",
     "pako": "^1.0.10"
   },
   "prettier": {
