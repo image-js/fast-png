@@ -1,3 +1,12 @@
+## [5.0.1](https://github.com/image-js/fast-png/compare/v5.0.0...v5.0.1) (2019-11-12)
+
+
+### Bug Fixes
+
+* update iobuffer to fix browser build ([75d3e63](https://github.com/image-js/fast-png/commit/75d3e6318ec30c27611ed18ff5bd32adf6e92d6c))
+
+
+
 # [5.0.0](https://github.com/image-js/fast-png/compare/v4.0.1...v5.0.0) (2019-11-12)
 
 
