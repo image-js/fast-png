@@ -46,6 +46,22 @@ describe('decode', () => {
     expect(img.palette[0]).toStrictEqual([124, 124, 124]);
   });
 
+  it('palette with tRNS', () => {
+    const img = loadAndDecode('palette_trns.png');
+    check(img, {
+      width: 1300,
+      height: 1300,
+      depth: 8,
+      channels: 1,
+    });
+    expect(img.palette).toBeInstanceOf(Array);
+    expect(img.palette).toHaveLength(256);
+    // @ts-ignore
+    expect(img.palette[0]).toStrictEqual([71, 112, 76, 0]);
+    // @ts-ignore
+    expect(img.palette[255]).toStrictEqual([98, 185, 201, 255]);
+  });
+
   it('should not throw when CRC is correct', () => {
     loadAndDecode('palette.png', { checkCrc: true });
   });

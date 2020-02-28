@@ -62,4 +62,4 @@ export interface IPNGEncoderOptions {
   zlib?: DeflateFunctionOptions;
 }
 
-export type IndexedColors = [number, number, number][];
+export type IndexedColors = number[][];
