@@ -1,3 +1,12 @@
+## [5.0.2](https://github.com/image-js/fast-png/compare/v5.0.1...v5.0.2) (2020-02-28)
+
+
+### Bug Fixes
+
+* support tRNS chunk for palette images ([6d9e3ec](https://github.com/image-js/fast-png/commit/6d9e3ecf91d08db52772d011f87a6a765676e9cd))
+
+
+
 ## [5.0.1](https://github.com/image-js/fast-png/compare/v5.0.0...v5.0.1) (2019-11-12)
 
 
