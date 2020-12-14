@@ -1,3 +1,5 @@
+# Changelog
+
 ## [5.0.2](https://github.com/image-js/fast-png/compare/v5.0.1...v5.0.2) (2020-02-28)
 
 
