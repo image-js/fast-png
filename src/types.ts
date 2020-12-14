@@ -1,5 +1,5 @@
-import { DeflateFunctionOptions } from 'pako';
 import { IOBuffer } from 'iobuffer';
+import { DeflateFunctionOptions } from 'pako';
 
 export { DeflateFunctionOptions };
 

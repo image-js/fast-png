@@ -3,6 +3,12 @@ import { deflate } from 'pako';
 
 import { pngSignature, crc } from './common';
 import {
+  ColorType,
+  CompressionMethod,
+  FilterMethod,
+  InterlaceMethod,
+} from './internalTypes';
+import {
   DeflateFunctionOptions,
   IPNGEncoderOptions,
   IImageData,
@@ -10,12 +16,6 @@ import {
   PNGDataArray,
   BitDepth,
 } from './types';
-import {
-  ColorType,
-  CompressionMethod,
-  FilterMethod,
-  InterlaceMethod,
-} from './internalTypes';
 
 const defaultZlibOptions: DeflateFunctionOptions = {
   level: 3,
@@ -172,7 +172,7 @@ function getColorType(
       returnValue.colorType = ColorType.GREYSCALE_ALPHA;
       break;
     default:
-      throw new Error(`unsupported number of channels: ${channels}`);
+      throw new Error('unsupported number of channels');
   }
   return returnValue;
 }

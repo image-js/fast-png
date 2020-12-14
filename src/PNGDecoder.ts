@@ -3,6 +3,12 @@ import { Inflate as Inflator } from 'pako';
 
 import { pngSignature, crc } from './common';
 import {
+  ColorType,
+  CompressionMethod,
+  FilterMethod,
+  InterlaceMethod,
+} from './internalTypes';
+import {
   IDecodedPNG,
   DecoderInputType,
   IPNGDecoderOptions,
@@ -10,12 +16,6 @@ import {
   IndexedColors,
   BitDepth,
 } from './types';
-import {
-  ColorType,
-  CompressionMethod,
-  FilterMethod,
-  InterlaceMethod,
-} from './internalTypes';
 
 const empty = new Uint8Array(0);
 const NULL = '\0';
@@ -200,7 +200,6 @@ export default class PNGDecoder extends IOBuffer {
   private decodeIDAT(length: number): void {
     this._inflator.push(
       new Uint8Array(this.buffer, this.offset + this.byteOffset, length),
-      false,
     );
     this.skip(length);
   }
@@ -244,7 +243,6 @@ export default class PNGDecoder extends IOBuffer {
   }
 
   private decodeImage(): void {
-    this._inflator.push(empty, true);
     if (this._inflator.err) {
       throw new Error(
         `Error while decompressing the data: ${this._inflator.err}`,

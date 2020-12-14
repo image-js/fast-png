@@ -1,7 +1,5 @@
-/* eslint jest/expect-expect: ["error", { "assertFunctionNames": ["expect", "loadAndDecode"] }] */
-
-import { join } from 'path';
 import { readFileSync } from 'fs';
+import { join } from 'path';
 
 import { decode, IPNGDecoderOptions, IDecodedPNG } from '../index';
 

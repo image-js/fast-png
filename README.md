@@ -1,8 +1,7 @@
 # fast-png
 
 [![NPM version][npm-image]][npm-url]
-[![build status][travis-image]][travis-url]
-[![Test coverage][codecov-image]][codecov-url]
+[![build status][ci-image]][ci-url]
 [![npm download][download-image]][download-url]
 
 PNG image decoder and encoder written entirely in JavaScript.
@@ -15,18 +14,18 @@ PNG image decoder and encoder written entirely in JavaScript.
 
 ### `decode(png[, options])`
 
-**Arguments**
+#### Arguments
 
 - `png` - A TypedArray or Buffer that contains the PNG data.
 - `options` - An object of options
 
-**Options**
+#### Options
 
 - `checkCrc` - If set to `true`, the CRC will be checked for each chunk and an error will be thrown in case it's wrong (default: false).
 
 ### `encode(image)`
 
-**Arguments**
+#### Arguments
 
 - `png` - An object representing the image. You can pass an ImageData from the Canvas API or an object with the following properties:
   - `width` - The width of the image
@@ -45,9 +44,7 @@ Spec can be found at: https://www.w3.org/TR/PNG/
 
 [npm-image]: https://img.shields.io/npm/v/fast-png.svg?style=flat-square
 [npm-url]: https://www.npmjs.com/package/fast-png
-[travis-image]: https://img.shields.io/travis/image-js/fast-png/master.svg?style=flat-square
-[travis-url]: https://travis-ci.org/image-js/fast-png
-[codecov-image]: https://img.shields.io/codecov/c/github/image-js/fast-png.svg?style=flat-square
-[codecov-url]: https://codecov.io/gh/image-js/fast-png
+[ci-image]: https://github.com/image-js/fast-png/workflows/Node.js%20CI/badge.svg?branch=master
+[ci-url]: https://github.com/image-js/fast-png/actions?query=workflow%3A%22Node.js+CI%22
 [download-image]: https://img.shields.io/npm/dm/fast-png.svg?style=flat-square
 [download-url]: https://www.npmjs.com/package/fast-png
