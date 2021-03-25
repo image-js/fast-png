@@ -3,7 +3,7 @@ import { DeflateFunctionOptions } from 'pako';
 
 export { DeflateFunctionOptions };
 
-export type PNGDataArray = Uint8Array | Uint16Array;
+export type PNGDataArray = Uint8Array | Uint8ClampedArray | Uint16Array;
 
 export type DecoderInputType = IOBuffer | ArrayBufferLike | ArrayBufferView;
 
