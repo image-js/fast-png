@@ -1,5 +1,12 @@
 # Changelog
 
+### [5.0.4](https://www.github.com/image-js/fast-png/compare/v5.0.3...v5.0.4) (2021-03-26)
+
+
+### Bug Fixes
+
+* add Uint8ClampedArray to PNGDataArray union type ([#13](https://www.github.com/image-js/fast-png/issues/13)) ([ae1cc70](https://www.github.com/image-js/fast-png/commit/ae1cc70ccd0a4c644ad80b9b13fc7d27fcec513d))
+
 ### [5.0.3](https://www.github.com/image-js/fast-png/compare/v5.0.2...v5.0.3) (2020-12-14)
 
 
