@@ -183,10 +183,8 @@ function writeDataBytes(
   slotsPerLine: number,
   offset: number,
 ): number {
-  for (let j = 0; j < slotsPerLine; j++) {
-    newData.writeByte(data[offset++]);
-  }
-  return offset;
+  newData.writeBytes(new Uint8Array(data.buffer, offset, slotsPerLine));
+  return offset + slotsPerLine;
 }
 
 function writeDataUint16(
