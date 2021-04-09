@@ -1,4 +1,5 @@
 # fast-png
+
 PNG image decoder and encoder written entirely in JavaScript.
 
 <h3 align="center">
