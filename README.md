@@ -1,10 +1,22 @@
 # fast-png
 
-[![NPM version][npm-image]][npm-url]
-[![build status][ci-image]][ci-url]
-[![npm download][download-image]][download-url]
-
 PNG image decoder and encoder written entirely in JavaScript.
+
+<h3 align="center">
+
+  <a href="https://www.zakodium.com">
+    <img src="https://www.zakodium.com/brand/zakodium-logo-white.svg" width="50" alt="Zakodium logo" />
+  </a>
+
+  <p>
+    Maintained by <a href="https://www.zakodium.com">Zakodium</a>
+  </p>
+
+  [![NPM version][npm-image]][npm-url]
+  [![build status][ci-image]][ci-url]
+  [![npm download][download-image]][download-url]
+
+</h3>
 
 ## Installation
 
