@@ -1,26 +1,26 @@
-import PNGDecoder from './PNGDecoder';
-import PNGEncoder from './PNGEncoder';
+import PngDecoder from './PngDecoder';
+import PngEncoder from './PngEncoder';
 import {
   DecoderInputType,
-  IPNGDecoderOptions,
-  IDecodedPNG,
-  IImageData,
-  IPNGEncoderOptions,
+  PngDecoderOptions,
+  DecodedPng,
+  ImageData,
+  PngEncoderOptions,
 } from './types';
 
 export * from './types';
 
-function decodePNG(
+function decodePng(
   data: DecoderInputType,
-  options?: IPNGDecoderOptions,
-): IDecodedPNG {
-  const decoder = new PNGDecoder(data, options);
+  options?: PngDecoderOptions,
+): DecodedPng {
+  const decoder = new PngDecoder(data, options);
   return decoder.decode();
 }
 
-function encodePNG(png: IImageData, options?: IPNGEncoderOptions): Uint8Array {
-  const encoder = new PNGEncoder(png, options);
+function encodePng(png: ImageData, options?: PngEncoderOptions): Uint8Array {
+  const encoder = new PngEncoder(png, options);
   return encoder.encode();
 }
 
-export { decodePNG as decode, encodePNG as encode };
+export { decodePng as decode, encodePng as encode };

@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
-import { decode, IPNGDecoderOptions, IDecodedPNG } from '../index';
+import { decode, PngDecoderOptions, DecodedPng } from '../index';
 
 describe('decode', () => {
   it('BW2x2', () => {
@@ -71,7 +71,7 @@ describe('decode', () => {
   });
 });
 
-function loadAndDecode(img: string, options?: IPNGDecoderOptions): IDecodedPNG {
+function loadAndDecode(img: string, options?: PngDecoderOptions): DecodedPng {
   return decode(readFileSync(join(__dirname, '../../img', img)), options);
 }
 

@@ -3,13 +3,13 @@ import { DeflateFunctionOptions } from 'pako';
 
 export { DeflateFunctionOptions };
 
-export type PNGDataArray = Uint8Array | Uint8ClampedArray | Uint16Array;
+export type PngDataArray = Uint8Array | Uint8ClampedArray | Uint16Array;
 
 export type DecoderInputType = IOBuffer | ArrayBufferLike | ArrayBufferView;
 
 export type BitDepth = 1 | 2 | 4 | 8 | 16;
 
-export interface IPNGResolution {
+export interface PngResolution {
   /**
    * Pixels per unit, X axis
    */
@@ -35,30 +35,30 @@ export enum ResolutionUnitSpecifier {
   METRE = 1,
 }
 
-export interface IImageData {
+export interface ImageData {
   width: number;
   height: number;
-  data: PNGDataArray;
+  data: PngDataArray;
   depth?: BitDepth;
   channels?: number;
 }
 
-export interface IDecodedPNG {
+export interface DecodedPng {
   width: number;
   height: number;
-  data: PNGDataArray;
+  data: PngDataArray;
   depth: BitDepth;
   channels: number;
   text: { [key: string]: string };
-  resolution?: IPNGResolution;
+  resolution?: PngResolution;
   palette?: IndexedColors;
 }
 
-export interface IPNGDecoderOptions {
+export interface PngDecoderOptions {
   checkCrc?: boolean;
 }
 
-export interface IPNGEncoderOptions {
+export interface PngEncoderOptions {
   zlib?: DeflateFunctionOptions;
 }
 
