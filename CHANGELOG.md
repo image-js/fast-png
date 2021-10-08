@@ -1,5 +1,22 @@
 # Changelog
 
+## [6.0.0](https://www.github.com/image-js/fast-png/compare/v5.0.4...v6.0.0) (2021-10-08)
+
+
+### ⚠ BREAKING CHANGES
+
+* remove support for node 10 and 15
+* use camelcase for acronyms
+
+### Code Refactoring
+
+* use camelcase for acronyms ([3f485b3](https://www.github.com/image-js/fast-png/commit/3f485b314c01d18f27cf25ec543514885782d04d)), closes [#17](https://www.github.com/image-js/fast-png/issues/17)
+
+
+### Miscellaneous Chores
+
+* remove support for node 10 and 15 ([ad0bc8b](https://www.github.com/image-js/fast-png/commit/ad0bc8bf9f55b0207b03c23715f7e5c2bc10f412))
+
 ### [5.0.4](https://www.github.com/image-js/fast-png/compare/v5.0.3...v5.0.4) (2021-03-26)
 
 
