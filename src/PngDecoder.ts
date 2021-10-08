@@ -9,10 +9,10 @@ import {
   InterlaceMethod,
 } from './internalTypes';
 import {
-  IDecodedPNG,
+  DecodedPng,
   DecoderInputType,
-  IPNGDecoderOptions,
-  PNGDataArray,
+  PngDecoderOptions,
+  PngDataArray,
   IndexedColors,
   BitDepth,
 } from './types';
@@ -24,10 +24,10 @@ const uint16 = new Uint16Array([0x00ff]);
 const uint8 = new Uint8Array(uint16.buffer);
 const osIsLittleEndian = uint8[0] === 0xff;
 
-export default class PNGDecoder extends IOBuffer {
+export default class PngDecoder extends IOBuffer {
   private _checkCrc: boolean;
   private _inflator: Inflator;
-  private _png: IDecodedPNG;
+  private _png: DecodedPng;
   private _end: boolean;
   private _hasPalette: boolean;
   private _palette: IndexedColors;
@@ -36,7 +36,7 @@ export default class PNGDecoder extends IOBuffer {
   private _interlaceMethod: InterlaceMethod;
   private _colorType: number;
 
-  public constructor(data: DecoderInputType, options: IPNGDecoderOptions = {}) {
+  public constructor(data: DecoderInputType, options: PngDecoderOptions = {}) {
     super(data);
     const { checkCrc = false } = options;
     this._checkCrc = checkCrc;
@@ -61,7 +61,7 @@ export default class PNGDecoder extends IOBuffer {
     this.setBigEndian();
   }
 
-  public decode(): IDecodedPNG {
+  public decode(): DecodedPng {
     this.decodeSignature();
     while (!this._end) {
       this.decodeChunk();
@@ -263,7 +263,7 @@ export default class PNGDecoder extends IOBuffer {
     }
   }
 
-  private decodeInterlaceNull(data: PNGDataArray): void {
+  private decodeInterlaceNull(data: PngDataArray): void {
     const height = this._png.height;
     const bytesPerPixel = (this._png.channels * this._png.depth) / 8;
     const bytesPerLine = this._png.width * bytesPerPixel;
@@ -332,8 +332,8 @@ export default class PNGDecoder extends IOBuffer {
 }
 
 function unfilterNone(
-  currentLine: PNGDataArray,
-  newLine: PNGDataArray,
+  currentLine: PngDataArray,
+  newLine: PngDataArray,
   bytesPerLine: number,
 ): void {
   for (let i = 0; i < bytesPerLine; i++) {
@@ -342,8 +342,8 @@ function unfilterNone(
 }
 
 function unfilterSub(
-  currentLine: PNGDataArray,
-  newLine: PNGDataArray,
+  currentLine: PngDataArray,
+  newLine: PngDataArray,
   bytesPerLine: number,
   bytesPerPixel: number,
 ): void {
@@ -358,9 +358,9 @@ function unfilterSub(
 }
 
 function unfilterUp(
-  currentLine: PNGDataArray,
-  newLine: PNGDataArray,
-  prevLine: PNGDataArray,
+  currentLine: PngDataArray,
+  newLine: PngDataArray,
+  prevLine: PngDataArray,
   bytesPerLine: number,
 ): void {
   let i = 0;
@@ -377,9 +377,9 @@ function unfilterUp(
 }
 
 function unfilterAverage(
-  currentLine: PNGDataArray,
-  newLine: PNGDataArray,
-  prevLine: PNGDataArray,
+  currentLine: PngDataArray,
+  newLine: PngDataArray,
+  prevLine: PngDataArray,
   bytesPerLine: number,
   bytesPerPixel: number,
 ): void {
@@ -404,9 +404,9 @@ function unfilterAverage(
 }
 
 function unfilterPaeth(
-  currentLine: PNGDataArray,
-  newLine: PNGDataArray,
-  prevLine: PNGDataArray,
+  currentLine: PngDataArray,
+  newLine: PngDataArray,
+  prevLine: PngDataArray,
   bytesPerLine: number,
   bytesPerPixel: number,
 ): void {

@@ -10,10 +10,10 @@ import {
 } from './internalTypes';
 import {
   DeflateFunctionOptions,
-  IPNGEncoderOptions,
-  IImageData,
-  IDecodedPNG,
-  PNGDataArray,
+  PngEncoderOptions,
+  ImageData,
+  DecodedPng,
+  PngDataArray,
   BitDepth,
 } from './types';
 
@@ -21,12 +21,12 @@ const defaultZlibOptions: DeflateFunctionOptions = {
   level: 3,
 };
 
-export default class PNGEncoder extends IOBuffer {
-  private _png: IDecodedPNG;
+export default class PngEncoder extends IOBuffer {
+  private _png: DecodedPng;
   private _zlibOptions: DeflateFunctionOptions;
   private _colorType: ColorType;
 
-  public constructor(data: IImageData, options: IPNGEncoderOptions = {}) {
+  public constructor(data: ImageData, options: PngEncoderOptions = {}) {
     super();
     this._colorType = ColorType.UNKNOWN;
     this._zlibOptions = Object.assign({}, defaultZlibOptions, options.zlib);
@@ -74,7 +74,7 @@ export default class PNGEncoder extends IOBuffer {
   }
 
   // https://www.w3.org/TR/PNG/#11IDAT
-  private encodeIDAT(data: PNGDataArray): void {
+  private encodeIDAT(data: PngDataArray): void {
     this.writeUint32(data.length);
 
     this.writeChars('IDAT');
@@ -105,9 +105,9 @@ export default class PNGEncoder extends IOBuffer {
     this.encodeIDAT(compressed);
   }
 
-  private _checkData(data: IImageData): IDecodedPNG {
+  private _checkData(data: ImageData): DecodedPng {
     const { colorType, channels, depth } = getColorType(data);
-    const png: IDecodedPNG = {
+    const png: DecodedPng = {
       width: checkInteger(data.width, 'width'),
       height: checkInteger(data.height, 'height'),
       channels: channels,
@@ -146,9 +146,11 @@ function checkInteger(value: number, name: string): number {
   throw new TypeError(`${name} must be a positive integer`);
 }
 
-function getColorType(
-  data: IImageData,
-): { channels: number; depth: BitDepth; colorType: ColorType } {
+function getColorType(data: ImageData): {
+  channels: number;
+  depth: BitDepth;
+  colorType: ColorType;
+} {
   const { channels = 4, depth = 8 } = data;
   if (channels !== 4 && channels !== 3 && channels !== 2 && channels !== 1) {
     throw new RangeError(`unsupported number of channels: ${channels}`);
@@ -178,7 +180,7 @@ function getColorType(
 }
 
 function writeDataBytes(
-  data: PNGDataArray,
+  data: PngDataArray,
   newData: IOBuffer,
   slotsPerLine: number,
   offset: number,
@@ -190,7 +192,7 @@ function writeDataBytes(
 }
 
 function writeDataUint16(
-  data: PNGDataArray,
+  data: PngDataArray,
   newData: IOBuffer,
   slotsPerLine: number,
   offset: number,
