@@ -1,5 +1,12 @@
 # Changelog
 
+### [6.0.1](https://www.github.com/image-js/fast-png/compare/v6.0.0...v6.0.1) (2021-10-12)
+
+
+### Bug Fixes
+
+* set TypeScript target to ES2020 ([255bc9e](https://www.github.com/image-js/fast-png/commit/255bc9eb7fe9e2550edfeb00e002c982141cabd7))
+
 ## [6.0.0](https://www.github.com/image-js/fast-png/compare/v5.0.4...v6.0.0) (2021-10-08)
 
 
