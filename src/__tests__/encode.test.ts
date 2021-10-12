@@ -6,22 +6,7 @@ import { encode, decode } from '../index';
 describe('encode', () => {
   it('simple RGBA', () => {
     const dataArray = new Uint8Array([
-      255,
-      255,
-      255,
-      255,
-      0,
-      0,
-      0,
-      255,
-      0,
-      0,
-      0,
-      255,
-      255,
-      255,
-      255,
-      255,
+      255, 255, 255, 255, 0, 0, 0, 255, 0, 0, 0, 255, 255, 255, 255, 255,
     ]);
     const data = encode({
       width: 2,
@@ -64,18 +49,7 @@ describe('encode', () => {
 
   it('RGB 16-bit', () => {
     const dataArray = new Uint16Array([
-      65535,
-      65535,
-      65535,
-      0,
-      0,
-      0,
-      32768,
-      32768,
-      32768,
-      500,
-      500,
-      500,
+      65535, 65535, 65535, 0, 0, 0, 32768, 32768, 32768, 500, 500, 500,
     ]);
     const data = encode({
       width: 2,
@@ -99,18 +73,7 @@ describe('encode', () => {
 
   it('GREYA 16-bit', () => {
     const dataArray = new Uint8Array([
-      0,
-      0,
-      32,
-      127,
-      64,
-      255,
-      96,
-      0,
-      127,
-      127,
-      255,
-      255,
+      0, 0, 32, 127, 64, 255, 96, 0, 127, 127, 255, 255,
     ]);
     const data = encode({
       width: 2,

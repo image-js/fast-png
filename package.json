@@ -22,12 +22,13 @@
   "scripts": {
     "check-types": "tsc --noEmit",
     "clean": "rimraf lib lib-esm",
-    "eslint": "eslint src --ext ts",
+    "eslint": "eslint src",
     "eslint-fix": "npm run eslint -- --fix",
-    "prepublishOnly": "npm run tsc",
-    "test": "npm run test-coverage && npm run eslint && npm run check-types",
-    "test-coverage": "npm run test-only -- --coverage",
-    "test-only": "jest",
+    "prepack": "npm run tsc",
+    "prettier": "prettier --check src",
+    "prettier-write": "prettier --write src",
+    "test": "npm run test-only && npm run eslint && npm run prettier && npm run check-types",
+    "test-only": "jest --coverage",
     "tsc": "npm run clean && npm run tsc-cjs && npm run tsc-esm",
     "tsc-cjs": "tsc --project tsconfig.cjs.json",
     "tsc-esm": "tsc --project tsconfig.esm.json"
@@ -40,32 +41,21 @@
     "url": "https://github.com/image-js/fast-png/issues"
   },
   "homepage": "https://github.com/image-js/fast-png#readme",
-  "jest": {
-    "preset": "ts-jest",
-    "testEnvironment": "node"
-  },
   "devDependencies": {
-    "@types/jest": "^26.0.19",
-    "@types/node": "^14.14.13",
+    "@types/jest": "^27.0.2",
+    "@types/node": "^16.10.3",
     "eslint": "^7.15.0",
-    "eslint-config-cheminfo-typescript": "^8.0.5",
-    "jest": "^26.6.3",
+    "eslint-config-cheminfo-typescript": "^9.0.0",
+    "jest": "^27.2.5",
     "pngjs": "^6.0.0",
-    "prettier": "^2.2.1",
+    "prettier": "^2.4.1",
     "rimraf": "^3.0.2",
-    "ts-jest": "^26.4.4",
-    "typescript": "^4.1.3"
+    "ts-jest": "^27.0.5",
+    "typescript": "^4.4.3"
   },
   "dependencies": {
-    "@types/pako": "^1.0.1",
-    "iobuffer": "^5.0.2",
-    "pako": "^2.0.2"
-  },
-  "prettier": {
-    "arrowParens": "always",
-    "semi": true,
-    "singleQuote": true,
-    "tabWidth": 2,
-    "trailingComma": "all"
+    "@types/pako": "^1.0.2",
+    "iobuffer": "^5.0.3",
+    "pako": "^2.0.4"
   }
 }
