@@ -1,5 +1,5 @@
 import { IOBuffer } from 'iobuffer';
-import { Inflate as Inflator } from 'pako';
+import { inflate, Inflate as Inflator } from 'pako';
 
 import { pngSignature, crc } from './common';
 import {
@@ -15,6 +15,7 @@ import {
   PngDataArray,
   IndexedColors,
   BitDepth,
+  IccEmbeddedProfile,
 } from './types';
 
 const empty = new Uint8Array(0);
@@ -103,6 +104,9 @@ export default class PngDecoder extends IOBuffer {
       // 11.3 Ancillary chunks
       case 'tRNS': // 11.3.2.1 tRNS Transparency
         this.decodetRNS(length);
+        break;
+      case 'iCCP': // 11.3.3.3 iCCP Embedded ICC profile
+        this.decodeiCCP(length);
         break;
       case 'tEXt': // 11.3.4.3 tEXt Textual data
         this.decodetEXt(length);
@@ -222,6 +226,26 @@ export default class PngDecoder extends IOBuffer {
         this._palette[i].push(255);
       }
     }
+  }
+
+  // https://www.w3.org/TR/PNG/#11iCCP
+  private decodeiCCP(length: number): void {
+    let name = '';
+    let char;
+    while ((char = this.readChar()) !== NULL) {
+      name += char;
+    }
+    const compressionMethod = this.readUint8();
+    if (compressionMethod !== CompressionMethod.DEFLATE) {
+      throw new Error(
+        `Unsupported iCCP compression method: ${compressionMethod}`,
+      );
+    }
+    const compressedProfile = this.readBytes(length - name.length - 2);
+    this._png.iccEmbeddedProfile = { 
+      name: name, 
+      profile: inflate(compressedProfile),
+    };
   }
 
   // https://www.w3.org/TR/PNG/#11tEXt
