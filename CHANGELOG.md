@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.1.0](https://www.github.com/image-js/fast-png/compare/v6.0.1...v6.1.0) (2021-10-18)
+
+
+### Features
+
+* add support for decoding ICC embedded profiles ([#21](https://www.github.com/image-js/fast-png/issues/21)) ([9b7cc36](https://www.github.com/image-js/fast-png/commit/9b7cc361a322ec2417d8a69ec258b6326c9b94b1))
+
 ### [6.0.1](https://www.github.com/image-js/fast-png/compare/v6.0.0...v6.0.1) (2021-10-12)
 
 
