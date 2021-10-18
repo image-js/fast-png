@@ -15,7 +15,6 @@ import {
   PngDataArray,
   IndexedColors,
   BitDepth,
-  IccEmbeddedProfile,
 } from './types';
 
 const empty = new Uint8Array(0);
@@ -242,8 +241,8 @@ export default class PngDecoder extends IOBuffer {
       );
     }
     const compressedProfile = this.readBytes(length - name.length - 2);
-    this._png.iccEmbeddedProfile = { 
-      name: name, 
+    this._png.iccEmbeddedProfile = {
+      name: name,
       profile: inflate(compressedProfile),
     };
   }

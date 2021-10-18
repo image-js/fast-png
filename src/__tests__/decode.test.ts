@@ -1,3 +1,4 @@
+import assert from 'assert';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
@@ -78,12 +79,10 @@ describe('decode', () => {
       depth: 8,
       channels: 3,
     });
-    expect(img.iccEmbeddedProfile).not.toBeNull()
-    expect(img.iccEmbeddedProfile?.name).toBe("ICC profile")
-    expect(img.iccEmbeddedProfile?.profile).toHaveLength(672)
+    assert(img.iccEmbeddedProfile);
+    expect(img.iccEmbeddedProfile.name).toBe('ICC profile');
+    expect(img.iccEmbeddedProfile.profile).toHaveLength(672);
   });
-
-
 });
 
 function loadAndDecode(img: string, options?: PngDecoderOptions): DecodedPng {

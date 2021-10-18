@@ -69,4 +69,3 @@ export interface IccEmbeddedProfile {
   name: string;
   profile: Uint8Array;
 }
-
