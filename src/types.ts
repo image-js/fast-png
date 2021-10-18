@@ -52,6 +52,7 @@ export interface DecodedPng {
   text: { [key: string]: string };
   resolution?: PngResolution;
   palette?: IndexedColors;
+  iccEmbeddedProfile?: IccEmbeddedProfile;
 }
 
 export interface PngDecoderOptions {
@@ -63,3 +64,9 @@ export interface PngEncoderOptions {
 }
 
 export type IndexedColors = number[][];
+
+export interface IccEmbeddedProfile {
+  name: string;
+  profile: Uint8Array;
+}
+

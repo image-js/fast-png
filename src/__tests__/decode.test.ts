@@ -69,6 +69,21 @@ describe('decode', () => {
       'wrong PNG signature. Byte at 0 should be 137.',
     );
   });
+
+  it('ICC Embeded Profile', () => {
+    const img = loadAndDecode('icc_profile.png');
+    check(img, {
+      width: 512,
+      height: 512,
+      depth: 8,
+      channels: 3,
+    });
+    expect(img.iccEmbeddedProfile).not.toBeNull()
+    expect(img.iccEmbeddedProfile?.name).toBe("ICC profile")
+    expect(img.iccEmbeddedProfile?.profile).toHaveLength(672)
+  });
+
+
 });
 
 function loadAndDecode(img: string, options?: PngDecoderOptions): DecodedPng {
