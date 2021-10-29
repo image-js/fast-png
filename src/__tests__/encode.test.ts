@@ -1,10 +1,12 @@
+import expect from 'expect';
 // @ts-ignore
 import { PNG } from 'pngjs';
+import t from 'tap';
 
 import { encode, decode } from '../index';
 
-describe('encode', () => {
-  it('simple RGBA', () => {
+t.test('encode', async () => {
+  t.test('simple RGBA', async () => {
     const dataArray = new Uint8Array([
       255, 255, 255, 255, 0, 0, 0, 255, 0, 0, 0, 255, 255, 255, 255, 255,
     ]);
@@ -26,7 +28,7 @@ describe('encode', () => {
     expect(decoded.data).toStrictEqual(dataArray);
   });
 
-  it('simple GREY', () => {
+  t.test('simple GREY', async () => {
     const dataArray = new Uint8Array([0, 32, 64, 96, 127, 255]);
     const data = encode({
       width: 2,
@@ -47,7 +49,7 @@ describe('encode', () => {
     expect(decoded.data).toStrictEqual(dataArray);
   });
 
-  it('RGB 16-bit', () => {
+  t.test('RGB 16-bit', async () => {
     const dataArray = new Uint16Array([
       65535, 65535, 65535, 0, 0, 0, 32768, 32768, 32768, 500, 500, 500,
     ]);
@@ -71,7 +73,7 @@ describe('encode', () => {
     expect(decoded.data).toStrictEqual(dataArray);
   });
 
-  it('GREYA 16-bit', () => {
+  t.test('GREYA 16-bit', async () => {
     const dataArray = new Uint8Array([
       0, 0, 32, 127, 64, 255, 96, 0, 127, 127, 255, 255,
     ]);
@@ -94,7 +96,7 @@ describe('encode', () => {
     expect(decoded.data).toStrictEqual(dataArray);
   });
 
-  it('errors', () => {
+  t.test('errors', async () => {
     expect(() =>
       encode({
         width: 1,

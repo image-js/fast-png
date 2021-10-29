@@ -1,0 +1,5 @@
+{
+  "ts": true,
+  "check-coverage": false,
+  "coverage-report": "lcov"
+}

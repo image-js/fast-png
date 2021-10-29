@@ -1,1 +1,4 @@
 extends: cheminfo-typescript
+rules:
+  '@typescript-eslint/no-floating-promises': off
+  'jest/no-standalone-expect': off

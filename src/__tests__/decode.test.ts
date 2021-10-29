@@ -2,10 +2,13 @@ import assert from 'assert';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
+import expect from 'expect';
+import t from 'tap';
+
 import { decode, PngDecoderOptions, DecodedPng } from '../index';
 
-describe('decode', () => {
-  it('BW2x2', () => {
+t.test('decode', async () => {
+  t.test('BW2x2', async () => {
     const img = loadAndDecode('BW2x2.png');
     check(img, {
       width: 2,
@@ -19,7 +22,7 @@ describe('decode', () => {
     );
   });
 
-  it('ColorGrid5x5', () => {
+  t.test('ColorGrid5x5', async () => {
     const img = loadAndDecode('ColorGrid5x5.png');
     check(img, {
       width: 10,
@@ -31,7 +34,7 @@ describe('decode', () => {
     expect(img.data).toHaveLength(10 * 10 * 4);
   });
 
-  it('palette', () => {
+  t.test('palette', async () => {
     const img = loadAndDecode('palette.png');
     check(img, {
       width: 150,
@@ -45,7 +48,7 @@ describe('decode', () => {
     expect(img.palette[0]).toStrictEqual([124, 124, 124]);
   });
 
-  it('palette with tRNS', () => {
+  t.test('palette with tRNS', async () => {
     const img = loadAndDecode('palette_trns.png');
     check(img, {
       width: 1300,
@@ -61,17 +64,17 @@ describe('decode', () => {
     expect(img.palette[255]).toStrictEqual([98, 185, 201, 255]);
   });
 
-  it('should not throw when CRC is correct', () => {
+  t.test('should not throw when CRC is correct', async () => {
     loadAndDecode('palette.png', { checkCrc: true });
   });
 
-  it('should throw with a non-png', () => {
+  t.test('should throw with a non-png', async () => {
     expect(() => decode(new Uint8Array(20))).toThrow(
       'wrong PNG signature. Byte at 0 should be 137.',
     );
   });
 
-  it('ICC Embeded Profile', () => {
+  t.test('ICC Embeded Profile', async () => {
     const img = loadAndDecode('icc_profile.png');
     check(img, {
       width: 512,
