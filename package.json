@@ -43,10 +43,10 @@
   "homepage": "https://github.com/image-js/fast-png#readme",
   "devDependencies": {
     "@types/jest": "^27.0.2",
-    "@types/node": "^16.11.1",
-    "eslint": "^8.0.1",
+    "@types/node": "^16.11.6",
+    "eslint": "^8.1.0",
     "eslint-config-cheminfo-typescript": "^10.1.1",
-    "jest": "^27.3.0",
+    "jest": "^27.3.1",
     "pngjs": "^6.0.0",
     "prettier": "^2.4.1",
     "rimraf": "^3.0.2",
