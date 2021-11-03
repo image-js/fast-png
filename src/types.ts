@@ -9,6 +9,8 @@ export type DecoderInputType = IOBuffer | ArrayBufferLike | ArrayBufferView;
 
 export type BitDepth = 1 | 2 | 4 | 8 | 16;
 
+export type IndexedColorBitDepth = 1 | 2 | 4 | 8;
+
 export interface PngResolution {
   /**
    * Pixels per unit, X axis
