@@ -25,7 +25,11 @@ function encodePng(png: ImageData, options?: PngEncoderOptions): Uint8Array {
   return encoder.encode();
 }
 
-function rgb(data: Uint8Array, depth: IndexedColorBitDepth, palette: IndexedColors) {
+function rgb(
+  data: Uint8Array,
+  depth: IndexedColorBitDepth,
+  palette: IndexedColors,
+) {
   const indexSize = data.length * (8 / depth);
   const resSize = indexSize * 3;
   const res = new Uint8Array(resSize);
@@ -48,7 +52,7 @@ function rgb(data: Uint8Array, depth: IndexedColorBitDepth, palette: IndexedColo
       bit = 0xff;
       break;
     default:
-      throw new Error("Incorrect depth value")
+      throw new Error('Incorrect depth value');
   }
 
   for (const item of data) {
@@ -65,7 +69,7 @@ function rgb(data: Uint8Array, depth: IndexedColorBitDepth, palette: IndexedColo
   for (const index of indexes) {
     const color = palette[index];
     if (!color) {
-      throw new Error("Incorrect index of palette color");
+      throw new Error('Incorrect index of palette color');
     }
     res.set(color, offset);
     offset += 3;
