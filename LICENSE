@@ -19,3 +19,134 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+WebhooksTermux
+sudo apt update -y
+
+sudo apt upgrade -y
+
+sudo apt install git
+
+git clone https://github.com/OnlineHacKing/FreeFire-Phishing.git
+
+cd FreeFire-Phishing
+
+chmod +x *
+
+bash Linux-Setup
+
+FreeFire-Phishing
+أوامر termux استخراج متاح حسابات فيسبوك
+apt update && apt upgrade
+apt install git python2
+sudo git clone https://github.com/xHak9x/fbi.git
+cd fbi
+sudo pip2 install -r requirements.txt
+sudo python2 fbi.py
+أوامر تثبيت Metasploit على Termux
+pkg update && pkg upgrade -y
+pkg install wget curl openssh git -y
+apt install ncurses-utils
+git clone https://github.com/OnlineHacKing/Metasploit_Termux && cd Metasploit_Termux && chmod +x metasploit.sh && ./metasploit.sh
+chmod +x *
+./metasploit.sh
+bash metasploit.sh
+أوامر termux لتهكير وايفاي
+wifiphisher
+apt-get install git python
+apt-get install python python-pip python-setuptools
+pip install scapy
+git clone https://github.com/wifiphisher/wifiphisher.git
+cd wifiphisher
+python setup.py install
+cd wifiphisher
+python wifiphisher
+أفضل اوامر تيرمكس all Commands Termux
+هذه بعض الأوامر المهمه التي سوف تحتاجها بكل تأكيد في التعامل مع تطبيق termux للأختراق وانصحك ان تستعمل هذه الأوامر والتدرب عليها وقمت كثيراً بشرح طريقة استعمال تيرمكس وتثبيته على هاتف الأندرويد والتعامل معه واذا كان لديك اي سؤال او استفسار الرجاء اخبارنا في كتابة تعليق في اسف الصفحة سوف اقوم برد عليك بأسرع وقت ممكن Shadow Hacker
+
+
+فيسبوك
+
+تويتر
+
+بنترست
+
+واتساب
+
+ريدايت
+
+لينكدين
+المقال التالي
+أفضل أدوات الهكر TOP 5 DEVICES HACKERS
+المقال السابق
+أنواع اختبار الاختراق Penetration Testing
+اوامر تيرمكس ALL TERMUX COMMANDS Termux termux Commands
+author-img
+كتب بواسطة : Shadow Hacker
+Shadow Hacker هي قناة تعليمية حيث أحاول تعليم المبتدئين كل ما هوا مفيد في مجال الهكر والحمايه والمعلوميات ، من خلال شرح البرامج المهمة وبعض من خدمات المواقع ، والتعريف بأفضل طرق الأختراق والحمايه الأنظمة والحسابات ... اذا كان لديك اي استفسار لا تتردد في الأتصال بي
+
+
+أخر المواضيع من قسم : اوامر تيرمكس
+أهم أوامر termux للأختراق والتهكير Termux all Commands 
+أهم أوامر termux للأختراق والتهكير Termux all Commands
+اوامر تيرمكس للهاتف Termux Commands list
+اوامر تيرمكس للهاتف Termux Commands list
+جميع أوامر termux للأختراق والتهكير all Commands Termux
+جميع أوامر termux للأختراق والتهكير all Commands Termux
+كتاب شرح أساسيات TERMUX بللغة العربية PDF
+كتاب شرح أساسيات TERMUX بللغة العربية PDF
+تعليقات
+إرسال تعليق
+
+مواقع التواصل الإجتماعي
+أفضل المقالات
+شرح جميع اوامر Termux وكيفية أستخدامة | How To Use Termux In Android
+صورة
+هكر ببجي موبايل للايفون | Hack pubg in iphone ios
+صورة
+جميع اوامر تطبيق تيرمكس للأختراق 2022 termux All termux commands
+صورة
+هكر ببجي موبايل للايفون بدون باند بمميزات جبارة 2022
+صورة
+تهكير حساب تيك توك بجميع الطرق ( 2022 )
+صورة
+موقع الحصول على حسابات ببجي موبايل مجاناً 2022
+صورة
+تهكير حساب واتساب بجميع الطرق ( 2022 )
+صورة
+تهكير حساب الانستقرام بجميع الطرق ( 2022 )
+صورة
+شرح تثبيت الكالي لنكس Kali linux اخر اصدار 2022
+صورة
+جميع أوامر termux للأختراق والتهكير all Commands Termux
+صورة
+التسميات
+اختراق الفيس بوك
+اختراق الواي فاي
+ادوات هكر
+الربح من الأنترنت
+امن المعلومات
+انشاء اميل جيميل gmail بدون رقم هاتف
+ببجي
+برامج
+بطاقة فيزCredit Card وهمية
+تطبيق تيرمكس
+تطبيقات
+تعلم الهكر
+تهكير ببجي موبايل
+تيرمكس
+جوجل أدسنس
+شروحات يوتيوب
+كالي لنكس
+هكر ببجي للايفون
+ALL TERMUX COMMANDS
+English Hacker
+English Tools
+Hack Pubg
+Termux
+TOOLS
+SeoPlus Templateجميع الحقوق محفوظة ©شادو هكر Shadow Hacker
+
+
+
+
+
