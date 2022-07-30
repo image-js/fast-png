@@ -12,9 +12,9 @@ PNG image decoder and encoder written entirely in JavaScript.
     Maintained by <a href="https://www.zakodium.com">Zakodium</a>
   </p>
 
-  [![NPM version][npm-image]][npm-url]
-  [![build status][ci-image]][ci-url]
-  [![npm download][download-image]][download-url]
+[![NPM version][npm-image]][npm-url]
+[![build status][ci-image]][ci-url]
+[![npm download][download-image]][download-url]
 
 </h3>
 
@@ -56,7 +56,7 @@ Spec can be found at: https://www.w3.org/TR/PNG/
 
 [npm-image]: https://img.shields.io/npm/v/fast-png.svg?style=flat-square
 [npm-url]: https://www.npmjs.com/package/fast-png
-[ci-image]: https://github.com/image-js/fast-png/workflows/Node.js%20CI/badge.svg?branch=master
+[ci-image]: https://github.com/image-js/fast-png/workflows/Node.js%20CI/badge.svg?branch=main
 [ci-url]: https://github.com/image-js/fast-png/actions?query=workflow%3A%22Node.js+CI%22
 [download-image]: https://img.shields.io/npm/dm/fast-png.svg?style=flat-square
 [download-url]: https://www.npmjs.com/package/fast-png
