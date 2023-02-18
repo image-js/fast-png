@@ -23,6 +23,9 @@ describe('decode', () => {
     expect(() => loadAndDecode('interlaced.png')).toThrow(
       'Interlace method 1 not supported',
     );
+    expect(() => loadAndDecode('ColorGrid5x5-interlaced.png')).toThrow(
+      'Interlace method 1 not supported',
+    );
   });
 
   it('ColorGrid5x5', () => {
