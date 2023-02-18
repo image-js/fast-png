@@ -1,4 +1,4 @@
-// @ts-ignore
+// @ts-expect-error TS not defined but this is a test
 import { PNG } from 'pngjs';
 
 import { encode, decode } from '../index';
@@ -116,7 +116,7 @@ describe('encode', () => {
     expect(() =>
       encode({
         width: 1,
-        // @ts-ignore
+        // @ts-expect-error we want to test the error
         height: undefined,
         depth: 8,
         data: new Uint8Array(),

@@ -41,7 +41,7 @@ describe('decode', () => {
     });
     expect(img.palette).toBeInstanceOf(Array);
     expect(img.palette).toHaveLength(256);
-    // @ts-ignore
+    // @ts-expect-error Palette should not be undefined
     expect(img.palette[0]).toStrictEqual([124, 124, 124]);
   });
 
@@ -55,9 +55,9 @@ describe('decode', () => {
     });
     expect(img.palette).toBeInstanceOf(Array);
     expect(img.palette).toHaveLength(256);
-    // @ts-ignore
+    // @ts-expect-error Palette should not be undefined
     expect(img.palette[0]).toStrictEqual([71, 112, 76, 0]);
-    // @ts-ignore
+    // @ts-expect-error Palette should not be undefined
     expect(img.palette[255]).toStrictEqual([98, 185, 201, 255]);
   });
 

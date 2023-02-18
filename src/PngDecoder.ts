@@ -242,7 +242,7 @@ export default class PngDecoder extends IOBuffer {
     }
     const compressedProfile = this.readBytes(length - name.length - 2);
     this._png.iccEmbeddedProfile = {
-      name: name,
+      name,
       profile: inflate(compressedProfile),
     };
   }
