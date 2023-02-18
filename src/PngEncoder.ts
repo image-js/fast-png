@@ -29,7 +29,7 @@ export default class PngEncoder extends IOBuffer {
   public constructor(data: ImageData, options: PngEncoderOptions = {}) {
     super();
     this._colorType = ColorType.UNKNOWN;
-    this._zlibOptions = { ...defaultZlibOptions, ...options.zlib};
+    this._zlibOptions = { ...defaultZlibOptions, ...options.zlib };
     this._png = this._checkData(data);
     this.setBigEndian();
   }
