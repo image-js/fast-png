@@ -19,6 +19,12 @@ describe('decode', () => {
     );
   });
 
+  it('interlaced', () => {
+    expect(() => loadAndDecode('interlaced.png')).toThrow(
+      'Interlace method 1 not supported',
+    );
+  });
+
   it('ColorGrid5x5', () => {
     const img = loadAndDecode('ColorGrid5x5.png');
     check(img, {
