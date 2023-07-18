@@ -31,6 +31,8 @@ export default class PngDecoder extends IOBuffer {
   private _end: boolean;
   private _hasPalette: boolean;
   private _palette: IndexedColors;
+  private _hasTransparency: boolean;
+  private _transparency: Uint16Array;
   private _compressionMethod: CompressionMethod;
   private _filterMethod: FilterMethod;
   private _interlaceMethod: InterlaceMethod;
@@ -52,6 +54,8 @@ export default class PngDecoder extends IOBuffer {
     this._end = false;
     this._hasPalette = false;
     this._palette = [];
+    this._hasTransparency = false;
+    this._transparency = new Uint16Array(0);
     this._compressionMethod = CompressionMethod.UNKNOWN;
     this._filterMethod = FilterMethod.UNKNOWN;
     this._interlaceMethod = InterlaceMethod.UNKNOWN;
@@ -210,7 +214,27 @@ export default class PngDecoder extends IOBuffer {
   // https://www.w3.org/TR/PNG/#11tRNS
   private decodetRNS(length: number): void {
     switch (this._colorType) {
-      // TODO: support other color types.
+      case ColorType.GREYSCALE:
+      case ColorType.TRUECOLOUR: {
+        if (length % 2 !== 0) {
+          throw new RangeError(
+            `tRNS chunk length must be a multiple of 2. Got ${length}`,
+          );
+        }
+        if (length / 2 > this._png.width * this._png.height) {
+          throw new Error(
+            `tRNS chunk contains more alpha values than there are pixels (${
+              length / 2
+            } vs ${this._png.width * this._png.height})`,
+          );
+        }
+        this._hasTransparency = true;
+        this._transparency = new Uint16Array(length / 2);
+        for (let i = 0; i < length / 2; i++) {
+          this._transparency[i] = this.readUint16();
+        }
+        break;
+      }
       case ColorType.INDEXED_COLOUR: {
         if (length > this._palette.length) {
           throw new Error(
@@ -345,6 +369,9 @@ export default class PngDecoder extends IOBuffer {
 
     if (this._hasPalette) {
       this._png.palette = this._palette;
+    }
+    if (this._hasTransparency) {
+      this._png.transparency = this._transparency;
     }
 
     if (this._png.depth === 16) {

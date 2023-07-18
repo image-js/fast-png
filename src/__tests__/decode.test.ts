@@ -70,6 +70,20 @@ describe('decode', () => {
     expect(img.palette[255]).toStrictEqual([98, 185, 201, 255]);
   });
 
+  it('16-bit grey image with tRNS', () => {
+    const img = loadAndDecode('trns_grey_16bit.png');
+    check(img, {
+      width: 256,
+      height: 256,
+      depth: 16,
+      channels: 1,
+    });
+    expect(img.transparency).toBeInstanceOf(Uint16Array);
+    expect(img.transparency).toHaveLength(1);
+    // @ts-expect-error Transparency should not be undefined
+    expect(img.transparency[0]).toBe(0);
+  });
+
   it('should not throw when CRC is correct', () => {
     loadAndDecode('palette.png', { checkCrc: true });
   });
