@@ -52,6 +52,7 @@ export interface DecodedPng {
   text: { [key: string]: string };
   resolution?: PngResolution;
   palette?: IndexedColors;
+  transparency?: Uint16Array;
   iccEmbeddedProfile?: IccEmbeddedProfile;
 }
 
