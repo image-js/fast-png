@@ -34,7 +34,7 @@ export default class PngDecoder extends IOBuffer {
   private _compressionMethod: CompressionMethod;
   private _filterMethod: FilterMethod;
   private _interlaceMethod: InterlaceMethod;
-  private _colorType: number;
+  private _colorType: ColorType;
 
   public constructor(data: DecoderInputType, options: PngDecoderOptions = {}) {
     super(data);
@@ -55,7 +55,7 @@ export default class PngDecoder extends IOBuffer {
     this._compressionMethod = CompressionMethod.UNKNOWN;
     this._filterMethod = FilterMethod.UNKNOWN;
     this._interlaceMethod = InterlaceMethod.UNKNOWN;
-    this._colorType = -1;
+    this._colorType = ColorType.UNKNOWN;
     // PNG is always big endian
     // https://www.w3.org/TR/PNG/#7Integers-and-byte-order
     this.setBigEndian();
@@ -209,20 +209,28 @@ export default class PngDecoder extends IOBuffer {
 
   // https://www.w3.org/TR/PNG/#11tRNS
   private decodetRNS(length: number): void {
-    // TODO: support other color types.
-    if (this._colorType === 3) {
-      if (length > this._palette.length) {
+    switch (this._colorType) {
+      // TODO: support other color types.
+      case ColorType.INDEXED_COLOUR: {
+        if (length > this._palette.length) {
+          throw new Error(
+            `tRNS chunk contains more alpha values than there are palette colors (${length} vs ${this._palette.length})`,
+          );
+        }
+        let i = 0;
+        for (; i < length; i++) {
+          const alpha = this.readByte();
+          this._palette[i].push(alpha);
+        }
+        for (; i < this._palette.length; i++) {
+          this._palette[i].push(255);
+        }
+        break;
+      }
+      default: {
         throw new Error(
-          `tRNS chunk contains more alpha values than there are palette colors (${length} vs ${this._palette.length})`,
+          `tRNS chunk is not supported for color type ${this._colorType}`,
         );
-      }
-      let i = 0;
-      for (; i < length; i++) {
-        const alpha = this.readByte();
-        this._palette[i].push(alpha);
-      }
-      for (; i < this._palette.length; i++) {
-        this._palette[i].push(255);
       }
     }
   }
