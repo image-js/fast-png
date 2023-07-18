@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.2.0](https://github.com/image-js/fast-png/compare/v6.1.0...v6.2.0) (2023-07-18)
+
+
+### Features
+
+* add support for tRNS field on colour types 0 and 2 ([ee5f451](https://github.com/image-js/fast-png/commit/ee5f45142f8399ec3002fb87b7a8c5b5ec5061c3))
+
 ## [6.1.0](https://www.github.com/image-js/fast-png/compare/v6.0.1...v6.1.0) (2021-10-18)
 
 
