@@ -152,7 +152,7 @@ export default class PngDecoder extends IOBuffer {
     image.height = this.readUint32();
     image.depth = checkBitDepth(this.readUint8());
 
-    const colorType: ColorType = this.readUint8();
+    const colorType = this.readUint8() as ColorType;
     this._colorType = colorType;
     let channels: number;
     switch (colorType) {
@@ -176,15 +176,15 @@ export default class PngDecoder extends IOBuffer {
     }
     this._png.channels = channels;
 
-    this._compressionMethod = this.readUint8();
+    this._compressionMethod = this.readUint8() as CompressionMethod;
     if (this._compressionMethod !== CompressionMethod.DEFLATE) {
       throw new Error(
         `Unsupported compression method: ${this._compressionMethod}`,
       );
     }
 
-    this._filterMethod = this.readUint8();
-    this._interlaceMethod = this.readUint8();
+    this._filterMethod = this.readUint8() as FilterMethod;
+    this._interlaceMethod = this.readUint8() as InterlaceMethod;
   }
 
   // https://www.w3.org/TR/PNG/#11PLTE
