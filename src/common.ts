@@ -1,5 +1,3 @@
-export const pngSignature = [137, 80, 78, 71, 13, 10, 26, 10];
-
 const crcTable: number[] = [];
 for (let n = 0; n < 256; n++) {
   let c = n;

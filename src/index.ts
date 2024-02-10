@@ -8,6 +8,7 @@ import {
   PngEncoderOptions,
 } from './types';
 
+export { hasPngSignature } from './helpers/signature';
 export * from './types';
 
 function decodePng(

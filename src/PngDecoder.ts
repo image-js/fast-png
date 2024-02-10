@@ -1,7 +1,8 @@
 import { IOBuffer } from 'iobuffer';
 import { inflate, Inflate as Inflator } from 'pako';
 
-import { pngSignature, crc } from './common';
+import { crc } from './common';
+import { checkSignature } from './helpers/signature';
 import {
   ColorType,
   CompressionMethod,
@@ -25,9 +26,9 @@ const uint8 = new Uint8Array(uint16.buffer);
 const osIsLittleEndian = uint8[0] === 0xff;
 
 export default class PngDecoder extends IOBuffer {
-  private _checkCrc: boolean;
-  private _inflator: Inflator;
-  private _png: DecodedPng;
+  private readonly _checkCrc: boolean;
+  private readonly _inflator: Inflator;
+  private readonly _png: DecodedPng;
   private _end: boolean;
   private _hasPalette: boolean;
   private _palette: IndexedColors;
@@ -66,23 +67,12 @@ export default class PngDecoder extends IOBuffer {
   }
 
   public decode(): DecodedPng {
-    this.decodeSignature();
+    checkSignature(this);
     while (!this._end) {
       this.decodeChunk();
     }
     this.decodeImage();
     return this._png;
-  }
-
-  // https://www.w3.org/TR/PNG/#5PNG-file-signature
-  private decodeSignature(): void {
-    for (let i = 0; i < pngSignature.length; i++) {
-      if (this.readUint8() !== pngSignature[i]) {
-        throw new Error(
-          `wrong PNG signature. Byte at ${i} should be ${pngSignature[i]}.`,
-        );
-      }
-    }
   }
 
   // https://www.w3.org/TR/PNG/#5Chunk-layout

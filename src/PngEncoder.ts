@@ -1,7 +1,8 @@
 import { IOBuffer } from 'iobuffer';
 import { deflate } from 'pako';
 
-import { pngSignature, crc } from './common';
+import { crc } from './common';
+import { writeSignature } from './helpers/signature';
 import {
   ColorType,
   CompressionMethod,
@@ -22,8 +23,8 @@ const defaultZlibOptions: DeflateFunctionOptions = {
 };
 
 export default class PngEncoder extends IOBuffer {
-  private _png: DecodedPng;
-  private _zlibOptions: DeflateFunctionOptions;
+  private readonly _png: DecodedPng;
+  private readonly _zlibOptions: DeflateFunctionOptions;
   private _colorType: ColorType;
 
   public constructor(data: ImageData, options: PngEncoderOptions = {}) {
@@ -35,16 +36,11 @@ export default class PngEncoder extends IOBuffer {
   }
 
   public encode(): Uint8Array {
-    this.encodeSignature();
+    writeSignature(this);
     this.encodeIHDR();
     this.encodeData();
     this.encodeIEND();
     return this.toArray();
-  }
-
-  // https://www.w3.org/TR/PNG/#5PNG-file-signature
-  private encodeSignature(): void {
-    this.writeBytes(pngSignature);
   }
 
   // https://www.w3.org/TR/PNG/#11IHDR

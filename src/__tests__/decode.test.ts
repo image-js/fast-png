@@ -88,10 +88,13 @@ describe('decode', () => {
     loadAndDecode('palette.png', { checkCrc: true });
   });
 
-  it('should throw with a non-png', () => {
-    expect(() => decode(new Uint8Array(20))).toThrow(
-      'wrong PNG signature. Byte at 0 should be 137.',
-    );
+  it.each([
+    // Enough values, last one is wrong.
+    Uint8Array.of(137, 80, 78, 71, 13, 10, 26, 9, 0, 0, 0),
+    // Not enough values.
+    Uint8Array.of(137, 80),
+  ])('should throw with a non-png', (value) => {
+    expect(() => decode(value)).toThrow('wrong PNG signature');
   });
 
   it('ICC Embeded Profile', () => {
