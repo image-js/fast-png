@@ -146,11 +146,13 @@ function checkInteger(value: number, name: string): number {
   throw new TypeError(`${name} must be a positive integer`);
 }
 
-function getColorType(data: ImageData): {
+interface GetColorTypeReturn {
   channels: number;
   depth: BitDepth;
   colorType: ColorType;
-} {
+}
+
+function getColorType(data: ImageData): GetColorTypeReturn {
   const { channels = 4, depth = 8 } = data;
   if (channels !== 4 && channels !== 3 && channels !== 2 && channels !== 1) {
     throw new RangeError(`unsupported number of channels: ${channels}`);
@@ -159,7 +161,11 @@ function getColorType(data: ImageData): {
     throw new RangeError(`unsupported bit depth: ${depth}`);
   }
 
-  const returnValue = { channels, depth, colorType: ColorType.UNKNOWN };
+  const returnValue: GetColorTypeReturn = {
+    channels,
+    depth,
+    colorType: ColorType.UNKNOWN,
+  };
   switch (channels) {
     case 4:
       returnValue.colorType = ColorType.TRUECOLOUR_ALPHA;

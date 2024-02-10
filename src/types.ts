@@ -49,7 +49,7 @@ export interface DecodedPng {
   data: PngDataArray;
   depth: BitDepth;
   channels: number;
-  text: { [key: string]: string };
+  text: Record<string, string>;
   resolution?: PngResolution;
   palette?: IndexedColors;
   transparency?: Uint16Array;
