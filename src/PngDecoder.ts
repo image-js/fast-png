@@ -2,6 +2,7 @@ import { IOBuffer } from 'iobuffer';
 import { inflate, Inflate as Inflator } from 'pako';
 
 import { crc } from './common';
+import { decodeInterlaceNull } from './helpers/decodeInterlaceNull';
 import { checkSignature } from './helpers/signature';
 import {
   ColorType,
@@ -10,20 +11,14 @@ import {
   InterlaceMethod,
 } from './internalTypes';
 import {
+  BitDepth,
   DecodedPng,
   DecoderInputType,
-  PngDecoderOptions,
-  PngDataArray,
   IndexedColors,
-  BitDepth,
+  PngDecoderOptions,
 } from './types';
 
-const empty = new Uint8Array(0);
 const NULL = '\0';
-
-const uint16 = new Uint16Array([0x00ff]);
-const uint8 = new Uint8Array(uint16.buffer);
-const osIsLittleEndian = uint8[0] === 0xff;
 
 export default class PngDecoder extends IOBuffer {
   private readonly _checkCrc: boolean;
@@ -300,61 +295,17 @@ export default class PngDecoder extends IOBuffer {
     }
 
     if (this._interlaceMethod === InterlaceMethod.NO_INTERLACE) {
-      this.decodeInterlaceNull(data as Uint8Array);
+      this._png.data = decodeInterlaceNull({
+        data: data as Uint8Array,
+        width: this._png.width,
+        height: this._png.height,
+        channels: this._png.channels,
+        depth: this._png.depth,
+      });
     } else {
       throw new Error(
         `Interlace method ${this._interlaceMethod} not supported`,
       );
-    }
-  }
-
-  private decodeInterlaceNull(data: PngDataArray): void {
-    const height = this._png.height;
-    const bytesPerPixel = (this._png.channels * this._png.depth) / 8;
-    const bytesPerLine = this._png.width * bytesPerPixel;
-    const newData = new Uint8Array(this._png.height * bytesPerLine);
-
-    let prevLine = empty;
-    let offset = 0;
-    let currentLine;
-    let newLine;
-
-    for (let i = 0; i < height; i++) {
-      currentLine = data.subarray(offset + 1, offset + 1 + bytesPerLine);
-      newLine = newData.subarray(i * bytesPerLine, (i + 1) * bytesPerLine);
-      switch (data[offset]) {
-        case 0:
-          unfilterNone(currentLine, newLine, bytesPerLine);
-          break;
-        case 1:
-          unfilterSub(currentLine, newLine, bytesPerLine, bytesPerPixel);
-          break;
-        case 2:
-          unfilterUp(currentLine, newLine, prevLine, bytesPerLine);
-          break;
-        case 3:
-          unfilterAverage(
-            currentLine,
-            newLine,
-            prevLine,
-            bytesPerLine,
-            bytesPerPixel,
-          );
-          break;
-        case 4:
-          unfilterPaeth(
-            currentLine,
-            newLine,
-            prevLine,
-            bytesPerLine,
-            bytesPerPixel,
-          );
-          break;
-        default:
-          throw new Error(`Unsupported filter: ${data[offset]}`);
-      }
-      prevLine = newLine;
-      offset += bytesPerLine + 1;
     }
 
     if (this._hasPalette) {
@@ -363,138 +314,7 @@ export default class PngDecoder extends IOBuffer {
     if (this._hasTransparency) {
       this._png.transparency = this._transparency;
     }
-
-    if (this._png.depth === 16) {
-      const uint16Data = new Uint16Array(newData.buffer);
-      if (osIsLittleEndian) {
-        for (let k = 0; k < uint16Data.length; k++) {
-          // PNG is always big endian. Swap the bytes.
-          uint16Data[k] = swap16(uint16Data[k]);
-        }
-      }
-      this._png.data = uint16Data;
-    } else {
-      this._png.data = newData;
-    }
   }
-}
-
-function unfilterNone(
-  currentLine: PngDataArray,
-  newLine: PngDataArray,
-  bytesPerLine: number,
-): void {
-  for (let i = 0; i < bytesPerLine; i++) {
-    newLine[i] = currentLine[i];
-  }
-}
-
-function unfilterSub(
-  currentLine: PngDataArray,
-  newLine: PngDataArray,
-  bytesPerLine: number,
-  bytesPerPixel: number,
-): void {
-  let i = 0;
-  for (; i < bytesPerPixel; i++) {
-    // just copy first bytes
-    newLine[i] = currentLine[i];
-  }
-  for (; i < bytesPerLine; i++) {
-    newLine[i] = (currentLine[i] + newLine[i - bytesPerPixel]) & 0xff;
-  }
-}
-
-function unfilterUp(
-  currentLine: PngDataArray,
-  newLine: PngDataArray,
-  prevLine: PngDataArray,
-  bytesPerLine: number,
-): void {
-  let i = 0;
-  if (prevLine.length === 0) {
-    // just copy bytes for first line
-    for (; i < bytesPerLine; i++) {
-      newLine[i] = currentLine[i];
-    }
-  } else {
-    for (; i < bytesPerLine; i++) {
-      newLine[i] = (currentLine[i] + prevLine[i]) & 0xff;
-    }
-  }
-}
-
-function unfilterAverage(
-  currentLine: PngDataArray,
-  newLine: PngDataArray,
-  prevLine: PngDataArray,
-  bytesPerLine: number,
-  bytesPerPixel: number,
-): void {
-  let i = 0;
-  if (prevLine.length === 0) {
-    for (; i < bytesPerPixel; i++) {
-      newLine[i] = currentLine[i];
-    }
-    for (; i < bytesPerLine; i++) {
-      newLine[i] = (currentLine[i] + (newLine[i - bytesPerPixel] >> 1)) & 0xff;
-    }
-  } else {
-    for (; i < bytesPerPixel; i++) {
-      newLine[i] = (currentLine[i] + (prevLine[i] >> 1)) & 0xff;
-    }
-    for (; i < bytesPerLine; i++) {
-      newLine[i] =
-        (currentLine[i] + ((newLine[i - bytesPerPixel] + prevLine[i]) >> 1)) &
-        0xff;
-    }
-  }
-}
-
-function unfilterPaeth(
-  currentLine: PngDataArray,
-  newLine: PngDataArray,
-  prevLine: PngDataArray,
-  bytesPerLine: number,
-  bytesPerPixel: number,
-): void {
-  let i = 0;
-  if (prevLine.length === 0) {
-    for (; i < bytesPerPixel; i++) {
-      newLine[i] = currentLine[i];
-    }
-    for (; i < bytesPerLine; i++) {
-      newLine[i] = (currentLine[i] + newLine[i - bytesPerPixel]) & 0xff;
-    }
-  } else {
-    for (; i < bytesPerPixel; i++) {
-      newLine[i] = (currentLine[i] + prevLine[i]) & 0xff;
-    }
-    for (; i < bytesPerLine; i++) {
-      newLine[i] =
-        (currentLine[i] +
-          paethPredictor(
-            newLine[i - bytesPerPixel],
-            prevLine[i],
-            prevLine[i - bytesPerPixel],
-          )) &
-        0xff;
-    }
-  }
-}
-
-function paethPredictor(a: number, b: number, c: number): number {
-  const p = a + b - c;
-  const pa = Math.abs(p - a);
-  const pb = Math.abs(p - b);
-  const pc = Math.abs(p - c);
-  if (pa <= pb && pa <= pc) return a;
-  else if (pb <= pc) return b;
-  else return c;
-}
-
-function swap16(val: number): number {
-  return ((val & 0xff) << 8) | ((val >> 8) & 0xff);
 }
 
 function checkBitDepth(value: number): BitDepth {
