@@ -1,18 +1,20 @@
 // @ts-expect-error TS not defined but this is a test
 import { PNG } from 'pngjs';
 
-import { encode, decode } from '../index';
+import { encode, decode, ImageData } from '../index';
+
+const simpleRGBAData = new Uint8Array([
+  255, 255, 255, 255, 0, 0, 0, 255, 0, 0, 0, 255, 255, 255, 255, 255,
+]);
+const simpleRGBAImageData: ImageData = {
+  width: 2,
+  height: 2,
+  data: simpleRGBAData,
+};
 
 describe('encode', () => {
   it('simple RGBA', () => {
-    const dataArray = new Uint8Array([
-      255, 255, 255, 255, 0, 0, 0, 255, 0, 0, 0, 255, 255, 255, 255, 255,
-    ]);
-    const data = encode({
-      width: 2,
-      height: 2,
-      data: dataArray,
-    });
+    const data = encode(simpleRGBAImageData);
     expect(data).toBeInstanceOf(Uint8Array);
     const decoded = decode(data);
     const expected = {
@@ -23,7 +25,7 @@ describe('encode', () => {
     check(decoded, expected);
     checkPngJs(data, expected);
     expect(decoded.data).toBeInstanceOf(Uint8Array);
-    expect(decoded.data).toStrictEqual(dataArray);
+    expect(decoded.data).toStrictEqual(simpleRGBAData);
   });
 
   it('simple GREY', () => {
@@ -92,6 +94,32 @@ describe('encode', () => {
     checkPngJs(data, expected);
     expect(decoded.data).toBeInstanceOf(Uint8Array);
     expect(decoded.data).toStrictEqual(dataArray);
+  });
+
+  it('tEXt chunk', () => {
+    const text = {
+      Field1: 'Value1',
+      'Field 2': 'Value 2',
+      'Field:latin1': 'héhé',
+    };
+    const encoded = encode({ ...simpleRGBAImageData, text });
+    const decoded = decode(encoded);
+    expect(decoded.text).toStrictEqual(text);
+  });
+
+  it('tEXt chunk - invalid data', () => {
+    expect(() =>
+      encode({ ...simpleRGBAImageData, text: { 'InvalidK€yword': 'value' } }),
+    ).toThrow('invalid latin1 text');
+    expect(() =>
+      encode({ ...simpleRGBAImageData, text: { key: 'InvalidValu€' } }),
+    ).toThrow(/invalid latin1 text/);
+    expect(() =>
+      encode({
+        ...simpleRGBAImageData,
+        text: { ['keywordTooLong'.repeat(10)]: 'value' },
+      }),
+    ).toThrow(/keyword length/);
   });
 
   it('errors', () => {

@@ -1,8 +1,9 @@
 import { IOBuffer } from 'iobuffer';
 import { deflate } from 'pako';
 
-import { crc } from './common';
+import { writeCrc } from './helpers/crc';
 import { writeSignature } from './helpers/signature';
+import { encodetEXt } from './helpers/text';
 import {
   ColorType,
   CompressionMethod,
@@ -13,7 +14,6 @@ import {
   DeflateFunctionOptions,
   PngEncoderOptions,
   ImageData,
-  DecodedPng,
   PngDataArray,
   BitDepth,
 } from './types';
@@ -22,8 +22,17 @@ const defaultZlibOptions: DeflateFunctionOptions = {
   level: 3,
 };
 
+interface PngToEncode {
+  width: number;
+  height: number;
+  data: PngDataArray;
+  depth: BitDepth;
+  channels: number;
+  text?: ImageData['text'];
+}
+
 export default class PngEncoder extends IOBuffer {
-  private readonly _png: DecodedPng;
+  private readonly _png: PngToEncode;
   private readonly _zlibOptions: DeflateFunctionOptions;
   private _colorType: ColorType;
 
@@ -39,6 +48,11 @@ export default class PngEncoder extends IOBuffer {
     writeSignature(this);
     this.encodeIHDR();
     this.encodeData();
+    if (this._png.text) {
+      for (const [keyword, text] of Object.entries(this._png.text)) {
+        encodetEXt(this, keyword, text);
+      }
+    }
     this.encodeIEND();
     return this.toArray();
   }
@@ -57,7 +71,7 @@ export default class PngEncoder extends IOBuffer {
     this.writeByte(FilterMethod.ADAPTIVE);
     this.writeByte(InterlaceMethod.NO_INTERLACE);
 
-    this.writeCrc(17);
+    writeCrc(this, 17);
   }
 
   // https://www.w3.org/TR/PNG/#11IEND
@@ -66,7 +80,7 @@ export default class PngEncoder extends IOBuffer {
 
     this.writeChars('IEND');
 
-    this.writeCrc(4);
+    writeCrc(this, 4);
   }
 
   // https://www.w3.org/TR/PNG/#11IDAT
@@ -77,7 +91,7 @@ export default class PngEncoder extends IOBuffer {
 
     this.writeBytes(data);
 
-    this.writeCrc(data.length + 4);
+    writeCrc(this, data.length + 4);
   }
 
   private encodeData(): void {
@@ -101,15 +115,15 @@ export default class PngEncoder extends IOBuffer {
     this.encodeIDAT(compressed);
   }
 
-  private _checkData(data: ImageData): DecodedPng {
+  private _checkData(data: ImageData): PngToEncode {
     const { colorType, channels, depth } = getColorType(data);
-    const png: DecodedPng = {
+    const png: PngToEncode = {
       width: checkInteger(data.width, 'width'),
       height: checkInteger(data.height, 'height'),
       channels,
       data: data.data,
       depth,
-      text: {},
+      text: data.text,
     };
     this._colorType = colorType;
     const expectedSize = png.width * png.height * channels;
@@ -119,19 +133,6 @@ export default class PngEncoder extends IOBuffer {
       );
     }
     return png;
-  }
-
-  private writeCrc(length: number): void {
-    this.writeUint32(
-      crc(
-        new Uint8Array(
-          this.buffer,
-          this.byteOffset + this.offset - length,
-          length,
-        ),
-        length,
-      ),
-    );
   }
 }
 
