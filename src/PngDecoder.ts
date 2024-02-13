@@ -4,6 +4,7 @@ import { inflate, Inflate as Inflator } from 'pako';
 import { crc } from './common';
 import { decodeInterlaceNull } from './helpers/decodeInterlaceNull';
 import { checkSignature } from './helpers/signature';
+import { readKeyword, readLatin1 } from './helpers/text';
 import {
   ColorType,
   CompressionMethod,
@@ -17,8 +18,6 @@ import {
   IndexedColors,
   PngDecoderOptions,
 } from './types';
-
-const NULL = '\0';
 
 export default class PngDecoder extends IOBuffer {
   private readonly _checkCrc: boolean;
@@ -246,11 +245,7 @@ export default class PngDecoder extends IOBuffer {
 
   // https://www.w3.org/TR/PNG/#11iCCP
   private decodeiCCP(length: number): void {
-    let name = '';
-    let char;
-    while ((char = this.readChar()) !== NULL) {
-      name += char;
-    }
+    const name = readKeyword(this);
     const compressionMethod = this.readUint8();
     if (compressionMethod !== CompressionMethod.DEFLATE) {
       throw new Error(
@@ -266,12 +261,8 @@ export default class PngDecoder extends IOBuffer {
 
   // https://www.w3.org/TR/PNG/#11tEXt
   private decodetEXt(length: number): void {
-    let keyword = '';
-    let char;
-    while ((char = this.readChar()) !== NULL) {
-      keyword += char;
-    }
-    this._png.text[keyword] = this.readChars(length - keyword.length - 1);
+    const keyword = readKeyword(this);
+    this._png.text[keyword] = readLatin1(this, length - keyword.length - 1);
   }
 
   // https://www.w3.org/TR/PNG/#11pHYs
