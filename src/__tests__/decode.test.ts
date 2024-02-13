@@ -109,6 +109,32 @@ describe('decode', () => {
     expect(img.iccEmbeddedProfile.name).toBe('ICC profile');
     expect(img.iccEmbeddedProfile.profile).toHaveLength(672);
   });
+
+  it('tEXt chunk - ASCII', () => {
+    const { text } = loadAndDecode('text-ascii.png');
+    expect(text).toStrictEqual({
+      Smiles: 'CCCC',
+      'date:create': '2024-02-12T15:56:01+00:00',
+      'date:modify': '2024-02-12T15:55:48+00:00',
+      'date:timestamp': '2024-02-12T16:04:26+00:00',
+      'exif:ExifOffset': '78, ',
+      'exif:PixelXDimension': '175, ',
+      'exif:PixelYDimension': '51, ',
+    });
+  });
+
+  it('tEXt chunk - latin1', () => {
+    const { text } = loadAndDecode('text-excalidraw.png');
+    expect(text).toHaveProperty(['application/vnd.excalidraw+json']);
+    const json = JSON.parse(text['application/vnd.excalidraw+json']);
+    expect(json).toMatchObject({
+      version: '1',
+      encoding: 'bstring',
+      compressed: true,
+    });
+    // Binary string that we don't know how to interpret.
+    expect(json.encoded).toHaveLength(654);
+  });
 });
 
 function loadAndDecode(img: string, options?: PngDecoderOptions): DecodedPng {
