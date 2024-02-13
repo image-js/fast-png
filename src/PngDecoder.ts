@@ -1,10 +1,10 @@
 import { IOBuffer } from 'iobuffer';
 import { inflate, Inflate as Inflator } from 'pako';
 
-import { crc } from './common';
+import { checkCrc } from './helpers/crc';
 import { decodeInterlaceNull } from './helpers/decodeInterlaceNull';
 import { checkSignature } from './helpers/signature';
-import { readKeyword, readLatin1 } from './helpers/text';
+import { decodetEXt, readKeyword, textChunkName } from './helpers/text';
 import {
   ColorType,
   CompressionMethod,
@@ -95,8 +95,8 @@ export default class PngDecoder extends IOBuffer {
       case 'iCCP': // 11.3.3.3 iCCP Embedded ICC profile
         this.decodeiCCP(length);
         break;
-      case 'tEXt': // 11.3.4.3 tEXt Textual data
-        this.decodetEXt(length);
+      case textChunkName: // 11.3.4.3 tEXt Textual data
+        decodetEXt(this._png.text, this, length);
         break;
       case 'pHYs': // 11.3.5.3 pHYs Physical pixel dimensions
         this.decodepHYs();
@@ -109,21 +109,7 @@ export default class PngDecoder extends IOBuffer {
       throw new Error(`Length mismatch while decoding chunk ${type}`);
     }
     if (this._checkCrc) {
-      const expectedCrc = this.readUint32();
-      const crcLength = length + 4; // includes type
-      const actualCrc = crc(
-        new Uint8Array(
-          this.buffer,
-          this.byteOffset + this.offset - crcLength - 4,
-          crcLength,
-        ),
-        crcLength,
-      ); // "- 4" because we already advanced by reading the CRC
-      if (actualCrc !== expectedCrc) {
-        throw new Error(
-          `CRC mismatch for chunk ${type}. Expected ${expectedCrc}, found ${actualCrc}`,
-        );
-      }
+      checkCrc(this, length + 4, type);
     } else {
       this.skip(4);
     }
@@ -257,12 +243,6 @@ export default class PngDecoder extends IOBuffer {
       name,
       profile: inflate(compressedProfile),
     };
-  }
-
-  // https://www.w3.org/TR/PNG/#11tEXt
-  private decodetEXt(length: number): void {
-    const keyword = readKeyword(this);
-    this._png.text[keyword] = readLatin1(this, length - keyword.length - 1);
   }
 
   // https://www.w3.org/TR/PNG/#11pHYs

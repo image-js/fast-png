@@ -1,10 +1,51 @@
 import { IOBuffer } from 'iobuffer';
 
-const latin1Decoder = new TextDecoder('latin1');
+import { writeCrc } from './crc';
+
+// https://www.w3.org/TR/png/#11tEXt
+
+export const textChunkName = 'tEXt' as const;
 
 const NULL = 0;
 
-const keywordRegex = /^[\x20-\x7e\xa1-\xff]+$/;
+const latin1Decoder = new TextDecoder('latin1');
+
+function validateKeyword(keyword: string) {
+  validateLatin1(keyword);
+  if (keyword.length < 1 || keyword.length > 79) {
+    throw new Error('keyword length must be between 1 and 79');
+  }
+}
+
+// eslint-disable-next-line no-control-regex
+const latin1Regex = /^[\x00-\xff]*$/;
+function validateLatin1(text: string) {
+  if (!latin1Regex.test(text)) {
+    throw new Error('invalid latin1 text');
+  }
+}
+
+export function decodetEXt(
+  text: Record<string, string>,
+  buffer: IOBuffer,
+  length: number,
+) {
+  const keyword = readKeyword(buffer);
+  text[keyword] = readLatin1(buffer, length - keyword.length - 1);
+}
+
+export function encodetEXt(buffer: IOBuffer, keyword: string, text: string) {
+  validateKeyword(keyword);
+  validateLatin1(text);
+  const length = keyword.length + 1 /* NULL */ + text.length;
+
+  buffer.writeUint32(length);
+  buffer.writeChars(textChunkName);
+  buffer.writeChars(keyword);
+  buffer.writeByte(NULL);
+  buffer.writeChars(text);
+  writeCrc(buffer, length + 4);
+}
 
 // https://www.w3.org/TR/png/#11keywords
 export function readKeyword(buffer: IOBuffer): string {
@@ -20,9 +61,7 @@ export function readKeyword(buffer: IOBuffer): string {
   // NULL
   buffer.skip(1);
 
-  if (!keywordRegex.test(keyword)) {
-    throw new Error(`keyword contains invalid characters: ${keyword}`);
-  }
+  validateKeyword(keyword);
 
   return keyword;
 }
