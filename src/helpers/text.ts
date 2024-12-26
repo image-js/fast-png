@@ -4,7 +4,7 @@ import { writeCrc } from './crc';
 
 // https://www.w3.org/TR/png/#11tEXt
 
-export const textChunkName = 'tEXt' as const;
+export const textChunkName = 'tEXt';
 
 const NULL = 0;
 

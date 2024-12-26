@@ -111,6 +111,13 @@ describe('decode', () => {
   });
 
   it('tEXt chunk - ASCII', () => {
+    const { text } = loadAndDecode('note.png');
+    expect(text).toStrictEqual({
+      Note: 'Distance to target [Km]: 10',
+    });
+  });
+
+  it('tEXt chunk - ASCII', () => {
     const { text } = loadAndDecode('text-ascii.png');
     expect(text).toStrictEqual({
       Smiles: 'CCCC',
