@@ -28,7 +28,7 @@
     "prettier": "prettier --check src",
     "prettier-write": "prettier --write src",
     "test": "npm run test-only && npm run eslint && npm run prettier && npm run check-types",
-    "test-only": "jest --coverage",
+    "test-only": "vitest run --coverage",
     "tsc": "npm run clean && npm run tsc-cjs && npm run tsc-esm",
     "tsc-cjs": "tsc --project tsconfig.cjs.json",
     "tsc-esm": "tsc --project tsconfig.esm.json"
@@ -42,16 +42,15 @@
   },
   "homepage": "https://github.com/image-js/fast-png#readme",
   "devDependencies": {
-    "@types/jest": "^29.5.12",
-    "@types/node": "^20.11.17",
-    "eslint": "^8.56.0",
-    "eslint-config-cheminfo-typescript": "^12.1.0",
-    "jest": "^29.7.0",
+    "@types/node": "^22.13.0",
+    "@vitest/coverage-v8": "^3.0.4",
+    "eslint": "^9.19.0",
+    "eslint-config-cheminfo-typescript": "^17.0.0",
     "pngjs": "^7.0.0",
-    "prettier": "^3.2.5",
-    "rimraf": "^5.0.5",
-    "ts-jest": "^29.1.2",
-    "typescript": "^5.3.3"
+    "prettier": "^3.4.2",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.4"
   },
   "dependencies": {
     "@types/pako": "^2.0.3",

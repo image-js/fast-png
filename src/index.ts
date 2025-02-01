@@ -1,6 +1,6 @@
 import PngDecoder from './PngDecoder';
 import PngEncoder from './PngEncoder';
-import {
+import type {
   DecoderInputType,
   PngDecoderOptions,
   DecodedPng,

@@ -4,7 +4,10 @@
     "moduleResolution": "node",
     "sourceMap": true,
     "strict": true,
-    "target": "es2020"
+    "target": "es2022",
+    "lib": ["es2022"],
+    "skipLibCheck": true,
+    "allowJs": false
   },
   "include": ["./src/**/*"]
 }

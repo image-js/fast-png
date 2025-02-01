@@ -1,4 +1,4 @@
-import { IOBuffer } from 'iobuffer';
+import type { IOBuffer } from 'iobuffer';
 
 const crcTable: number[] = [];
 for (let n = 0; n < 256; n++) {

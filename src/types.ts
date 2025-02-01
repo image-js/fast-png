@@ -1,7 +1,7 @@
-import { IOBuffer } from 'iobuffer';
-import { DeflateFunctionOptions } from 'pako';
+import type { IOBuffer } from 'iobuffer';
+import type { DeflateFunctionOptions } from 'pako';
 
-export { DeflateFunctionOptions };
+export type { DeflateFunctionOptions } from 'pako';
 
 export type PngDataArray = Uint8Array | Uint8ClampedArray | Uint16Array;
 

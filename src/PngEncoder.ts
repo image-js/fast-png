@@ -10,7 +10,7 @@ import {
   FilterMethod,
   InterlaceMethod,
 } from './internalTypes';
-import {
+import type {
   DeflateFunctionOptions,
   PngEncoderOptions,
   ImageData,

@@ -1,4 +1,4 @@
-import { PngDataArray } from '../types';
+import type { PngDataArray } from '../types';
 
 import {
   unfilterAverage,

@@ -11,7 +11,7 @@ import {
   FilterMethod,
   InterlaceMethod,
 } from './internalTypes';
-import {
+import type {
   BitDepth,
   DecodedPng,
   DecoderInputType,
@@ -141,6 +141,9 @@ export default class PngDecoder extends IOBuffer {
       case ColorType.TRUECOLOUR_ALPHA:
         channels = 4;
         break;
+      // Kept for exhaustiveness.
+      // eslint-disable-next-line unicorn/no-useless-switch-case
+      case ColorType.UNKNOWN:
       default:
         throw new Error(`Unknown color type: ${colorType}`);
     }
@@ -221,11 +224,17 @@ export default class PngDecoder extends IOBuffer {
         }
         break;
       }
+      // Kept for exhaustiveness.
+      /* eslint-disable unicorn/no-useless-switch-case */
+      case ColorType.UNKNOWN:
+      case ColorType.GREYSCALE_ALPHA:
+      case ColorType.TRUECOLOUR_ALPHA:
       default: {
         throw new Error(
           `tRNS chunk is not supported for color type ${this._colorType}`,
         );
       }
+      /* eslint-enable unicorn/no-useless-switch-case */
     }
   }
 

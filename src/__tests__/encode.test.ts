@@ -1,7 +1,9 @@
 // @ts-expect-error TS not defined but this is a test
 import { PNG } from 'pngjs';
+import { describe, expect, it } from 'vitest';
 
-import { encode, decode, ImageData } from '../index';
+import type { ImageData } from '../index';
+import { encode, decode } from '../index';
 
 const simpleRGBAData = new Uint8Array([
   255, 255, 255, 255, 0, 0, 0, 255, 0, 0, 0, 255, 255, 255, 255, 255,
