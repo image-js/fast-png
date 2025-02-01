@@ -1,4 +1,4 @@
-import { IOBuffer } from 'iobuffer';
+import type { IOBuffer } from 'iobuffer';
 
 import { writeCrc } from './crc';
 
@@ -12,13 +12,13 @@ const latin1Decoder = new TextDecoder('latin1');
 
 function validateKeyword(keyword: string) {
   validateLatin1(keyword);
-  if (keyword.length < 1 || keyword.length > 79) {
+  if (keyword.length === 0 || keyword.length > 79) {
     throw new Error('keyword length must be between 1 and 79');
   }
 }
 
 // eslint-disable-next-line no-control-regex
-const latin1Regex = /^[\x00-\xff]*$/;
+const latin1Regex = /^[\u0000-\u00FF]*$/;
 function validateLatin1(text: string) {
   if (!latin1Regex.test(text)) {
     throw new Error('invalid latin1 text');

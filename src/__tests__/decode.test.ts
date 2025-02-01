@@ -1,8 +1,11 @@
-import assert from 'assert';
-import { readFileSync } from 'fs';
-import { join } from 'path';
+import assert from 'node:assert';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
-import { decode, PngDecoderOptions, DecodedPng } from '../index';
+import { describe, expect, it } from 'vitest';
+
+import type { PngDecoderOptions, DecodedPng } from '../index';
+import { decode } from '../index';
 
 describe('decode', () => {
   it('BW2x2', () => {
