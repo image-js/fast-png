@@ -1,5 +1,18 @@
 # Changelog
 
+## [6.3.0](https://github.com/image-js/fast-png/compare/v6.2.0...v6.3.0) (2025-02-01)
+
+
+### Features
+
+* add hasPngSignature method ([#36](https://github.com/image-js/fast-png/issues/36)) ([98c771e](https://github.com/image-js/fast-png/commit/98c771e5ce549da6b5ca9a891fa303d643a75363))
+* add support for tEXt in encoder ([ff545ce](https://github.com/image-js/fast-png/commit/ff545ceb792a84ddd5366a0223fbe036e4a9c57d))
+
+
+### Bug Fixes
+
+* correctly decode non-ASCII tEXt chunks ([76391df](https://github.com/image-js/fast-png/commit/76391dfd7ed3fbfb2402197f279e441469ed1084))
+
 ## [6.2.0](https://github.com/image-js/fast-png/compare/v6.1.0...v6.2.0) (2023-07-18)
 
 
