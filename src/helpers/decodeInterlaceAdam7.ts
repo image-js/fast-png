@@ -4,6 +4,12 @@ import type { DecodeInterlaceNullParams } from './decodeInterlaceNull';
 const uint16 = new Uint16Array([0x00ff]);
 const uint8 = new Uint8Array(uint16.buffer);
 const osIsLittleEndian = uint8[0] === 0xff;
+/**
+ * Decodes the Adam7 interlaced PNG data.
+ *
+ * @param params - DecodeInterlaceNullParams
+ * @returns - array of pixel data.
+ */
 export function decodeInterlaceAdam7(params: DecodeInterlaceNullParams) {
   const { data, width, height, channels, depth } = params;
 
