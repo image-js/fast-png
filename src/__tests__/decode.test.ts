@@ -29,7 +29,6 @@ describe('decode', () => {
       height: 5,
       depth: 8,
       channels: 3,
-      interlace: 1,
     });
     expect(image.data).toEqual(
       new Uint8Array([
@@ -46,7 +45,21 @@ describe('decode', () => {
       height: 1057,
       depth: 8,
       channels: 4,
-      interlace: 1,
+    });
+
+    const image3 = loadAndDecode('16BitInterlace2x2.png');
+    check(image3, {
+      width: 2,
+      height: 2,
+      depth: 16,
+      channels: 3,
+    });
+    const image4 = loadAndDecode('16BitInterlace10x10.png');
+    check(image4, {
+      width: 10,
+      height: 10,
+      depth: 16,
+      channels: 1,
     });
   });
 
@@ -57,7 +70,6 @@ describe('decode', () => {
       height: 10,
       depth: 8,
       channels: 4,
-      interlace: 0,
     });
     expect(img.data).toBeInstanceOf(Uint8Array);
     expect(img.data).toHaveLength(10 * 10 * 4);

@@ -101,10 +101,13 @@ describe('encode', () => {
   });
 
   it('interlaced RGBA', () => {
-    const data = encode({
-      ...simpleRGBAImageData,
-      interlace: 1,
-    });
+    const data = encode(
+      {
+        ...simpleRGBAImageData,
+      },
+      { interlace: 'Adam7' },
+    );
+
     expect(data).toBeInstanceOf(Uint8Array);
     const decoded = decode(data);
     const expected = {
@@ -113,7 +116,6 @@ describe('encode', () => {
       depth: 8,
     };
     check(decoded, expected);
-    expect(decoded.interlace).toBe(1);
     expect(decoded.data).toBeInstanceOf(Uint8Array);
     expect(decoded.data).toStrictEqual(simpleRGBAData);
   });
