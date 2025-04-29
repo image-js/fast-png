@@ -220,11 +220,11 @@ function writeDataInterlaced(
     { x: 0, y: 1, xStep: 1, yStep: 2 },
   ];
   const { width, height, channels, depth } = imageData;
-  let bytesPerPixel = 0;
+  let pixelSize = 0;
   if (depth === 8) {
-    bytesPerPixel = (channels * depth) / 8;
+    pixelSize = (channels * depth) / 8;
   } else if (depth === 16) {
-    bytesPerPixel = (channels * depth) / 8 / 2;
+    pixelSize = (channels * depth) / 8 / 2;
   }
   // Process each pass
   for (let passIndex = 0; passIndex < 7; passIndex++) {
@@ -237,7 +237,7 @@ function writeDataInterlaced(
     );
 
     if (passWidth <= 0 || passHeight <= 0) continue;
-    const passLineBytes = passWidth * bytesPerPixel;
+    const passLineBytes = passWidth * pixelSize;
     // For each scanline in this pass
     for (let y = 0; y < passHeight; y++) {
       const imageY = pass.y + y * pass.yStep;
@@ -251,8 +251,8 @@ function writeDataInterlaced(
       for (let x = 0; x < passWidth; x++) {
         const imageX = pass.x + x * pass.xStep;
         if (imageX < width && imageY < height) {
-          const srcPos = (imageY * width + imageX) * bytesPerPixel;
-          for (let i = 0; i < bytesPerPixel; i++) {
+          const srcPos = (imageY * width + imageX) * pixelSize;
+          for (let i = 0; i < pixelSize; i++) {
             rawScanline[rawOffset++] = data[srcPos + i];
           }
         }
