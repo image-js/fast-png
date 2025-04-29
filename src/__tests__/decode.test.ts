@@ -47,14 +47,14 @@ describe('decode', () => {
       channels: 4,
     });
 
-    const image3 = loadAndDecode('16BitInterlace2x2.png');
+    const image3 = loadAndDecode('16bitInterlace2x2.png');
     check(image3, {
       width: 2,
       height: 2,
       depth: 16,
       channels: 3,
     });
-    const image4 = loadAndDecode('16BitInterlace10x10.png');
+    const image4 = loadAndDecode('16bitInterlace10x10.png');
     check(image4, {
       width: 10,
       height: 10,
