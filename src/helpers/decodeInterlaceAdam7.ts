@@ -1,6 +1,9 @@
 import { applyUnfilter } from './applyUnfilter';
 import type { DecodeInterlaceNullParams } from './decodeInterlaceNull';
 
+const uint16 = new Uint16Array([0x00ff]);
+const uint8 = new Uint8Array(uint16.buffer);
+const osIsLittleEndian = uint8[0] === 0xff;
 export function decodeInterlaceAdam7(params: DecodeInterlaceNullParams) {
   const { data, width, height, channels, depth } = params;
 
@@ -17,9 +20,6 @@ export function decodeInterlaceAdam7(params: DecodeInterlaceNullParams) {
 
   const bytesPerPixel = (channels * depth) / 8;
   const resultData = new Uint8Array(height * width * bytesPerPixel);
-
-  // Set default background (usually not needed as we'll fill all pixels)
-  resultData.fill(0);
 
   let offset = 0;
 
@@ -68,6 +68,20 @@ export function decodeInterlaceAdam7(params: DecodeInterlaceNullParams) {
       }
     }
   }
+  if (depth === 16) {
+    const uint16Data = new Uint16Array(resultData.buffer);
+    if (osIsLittleEndian) {
+      for (let k = 0; k < uint16Data.length; k++) {
+        // PNG is always big endian. Swap the bytes.
+        uint16Data[k] = swap16(uint16Data[k]);
+      }
+    }
+    return uint16Data;
+  } else {
+    return resultData;
+  }
+}
 
-  return resultData;
+function swap16(val: number): number {
+  return ((val & 0xff) << 8) | ((val >> 8) & 0xff);
 }
