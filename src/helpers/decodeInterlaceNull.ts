@@ -14,7 +14,7 @@ const osIsLittleEndian = uint8[0] === 0xff;
 
 const empty = new Uint8Array(0);
 
-interface DecodeInterlaceNullParams {
+export interface DecodeInterlaceNullParams {
   data: Uint8Array;
   width: number;
   height: number;

@@ -1,6 +1,8 @@
 import type { IOBuffer } from 'iobuffer';
 import type { DeflateFunctionOptions } from 'pako';
 
+import type { InterlaceMethod } from './internalTypes';
+
 export type { DeflateFunctionOptions } from 'pako';
 
 export type PngDataArray = Uint8Array | Uint8ClampedArray | Uint16Array;
@@ -41,6 +43,7 @@ export interface ImageData {
   data: PngDataArray;
   depth?: BitDepth;
   channels?: number;
+  interlace?: InterlaceMethod;
   text?: Record<string, string>;
 }
 
@@ -55,6 +58,7 @@ export interface DecodedPng {
   palette?: IndexedColors;
   transparency?: Uint16Array;
   iccEmbeddedProfile?: IccEmbeddedProfile;
+  interlace: InterlaceMethod;
 }
 
 export interface PngDecoderOptions {

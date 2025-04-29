@@ -4,12 +4,8 @@ import { deflate } from 'pako';
 import { writeCrc } from './helpers/crc';
 import { writeSignature } from './helpers/signature';
 import { encodetEXt } from './helpers/text';
-import {
-  ColorType,
-  CompressionMethod,
-  FilterMethod,
-  InterlaceMethod,
-} from './internalTypes';
+import type { InterlaceMethod } from './internalTypes';
+import { ColorType, CompressionMethod, FilterMethod } from './internalTypes';
 import type {
   DeflateFunctionOptions,
   PngEncoderOptions,
@@ -29,6 +25,7 @@ interface PngToEncode {
   depth: BitDepth;
   channels: number;
   text?: ImageData['text'];
+  interlace?: InterlaceMethod;
 }
 
 export default class PngEncoder extends IOBuffer {
@@ -69,7 +66,7 @@ export default class PngEncoder extends IOBuffer {
     this.writeByte(this._colorType);
     this.writeByte(CompressionMethod.DEFLATE);
     this.writeByte(FilterMethod.ADAPTIVE);
-    this.writeByte(InterlaceMethod.NO_INTERLACE);
+    this.writeByte(this._png.interlace || 0);
 
     writeCrc(this, 17);
   }
@@ -95,20 +92,27 @@ export default class PngEncoder extends IOBuffer {
   }
 
   private encodeData(): void {
-    const { width, height, channels, depth, data } = this._png;
+    const { width, height, channels, depth, data, interlace } = this._png;
     const slotsPerLine = channels * width;
     const newData = new IOBuffer().setBigEndian();
     let offset = 0;
-    for (let i = 0; i < height; i++) {
-      newData.writeByte(0); // no filter
-      /* istanbul ignore else */
-      if (depth === 8) {
-        offset = writeDataBytes(data, newData, slotsPerLine, offset);
-      } else if (depth === 16) {
-        offset = writeDataUint16(data, newData, slotsPerLine, offset);
-      } else {
-        throw new Error('unreachable');
+    if (interlace === 0) {
+      for (let i = 0; i < height; i++) {
+        newData.writeByte(0); // no filter
+        /* istanbul ignore else */
+        if (depth === 8) {
+          offset = writeDataBytes(data, newData, slotsPerLine, offset);
+        } else if (depth === 16) {
+          offset = writeDataUint16(data, newData, slotsPerLine, offset);
+        } else {
+          throw new Error('unreachable');
+        }
       }
+    } else if (interlace === 1) {
+      // Adam7 interlacing
+      offset = writeDataBytesInterlaced(this._png, data, newData, offset);
+    } else {
+      throw new RangeError(`unsupported interlace method: ${interlace}`);
     }
     const buffer = newData.toArray();
     const compressed = deflate(buffer, this._zlibOptions);
@@ -124,6 +128,7 @@ export default class PngEncoder extends IOBuffer {
       data: data.data,
       depth,
       text: data.text,
+      interlace: data.interlace || 0,
     };
     this._colorType = colorType;
     const expectedSize = png.width * png.height * channels;
@@ -190,6 +195,61 @@ function writeDataBytes(
 ): number {
   for (let j = 0; j < slotsPerLine; j++) {
     newData.writeByte(data[offset++]);
+  }
+  return offset;
+}
+
+function writeDataBytesInterlaced(
+  imageData: PngToEncode,
+  data: PngDataArray,
+  newData: IOBuffer,
+  offset: number,
+) {
+  const passes = [
+    { x: 0, y: 0, xStep: 8, yStep: 8 },
+    { x: 4, y: 0, xStep: 8, yStep: 8 },
+    { x: 0, y: 4, xStep: 4, yStep: 8 },
+    { x: 2, y: 0, xStep: 4, yStep: 4 },
+    { x: 0, y: 2, xStep: 2, yStep: 4 },
+    { x: 1, y: 0, xStep: 2, yStep: 2 },
+    { x: 0, y: 1, xStep: 1, yStep: 2 },
+  ];
+  const { width, height, channels, depth } = imageData;
+  const bytesPerPixel = (channels * depth) / 8;
+
+  // Process each pass
+  for (let passIndex = 0; passIndex < 7; passIndex++) {
+    const pass = passes[passIndex];
+    const passWidth = Math.floor(
+      (width - pass.x + pass.xStep - 1) / pass.xStep,
+    );
+    const passHeight = Math.floor(
+      (height - pass.y + pass.yStep - 1) / pass.yStep,
+    );
+
+    if (passWidth <= 0 || passHeight <= 0) continue;
+    const passLineBytes = passWidth * bytesPerPixel;
+    // For each scanline in this pass
+    for (let y = 0; y < passHeight; y++) {
+      const imageY = pass.y + y * pass.yStep;
+      // Extract raw scanline data
+      const rawScanline = new Uint8Array(passLineBytes);
+      let rawOffset = 0;
+      for (let x = 0; x < passWidth; x++) {
+        const imageX = pass.x + x * pass.xStep;
+        if (imageX < width && imageY < height) {
+          const srcPos = (imageY * width + imageX) * bytesPerPixel;
+          for (let i = 0; i < bytesPerPixel; i++) {
+            rawScanline[rawOffset++] = data[srcPos + i];
+          }
+        } else {
+          // Skip pixels outside image bounds
+          rawOffset += bytesPerPixel;
+        }
+      }
+      newData.writeByte(0); // no filter
+      newData.writeBytes(rawScanline);
+    }
   }
   return offset;
 }

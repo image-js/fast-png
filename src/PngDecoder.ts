@@ -2,6 +2,7 @@ import { IOBuffer } from 'iobuffer';
 import { inflate, Inflate as Inflator } from 'pako';
 
 import { checkCrc } from './helpers/crc';
+import { decodeInterlaceAdam7 } from './helpers/decodeInterlaceAdam7';
 import { decodeInterlaceNull } from './helpers/decodeInterlaceNull';
 import { checkSignature } from './helpers/signature';
 import { decodetEXt, readKeyword, textChunkName } from './helpers/text';
@@ -45,6 +46,7 @@ export default class PngDecoder extends IOBuffer {
       data: new Uint8Array(0),
       depth: 1,
       text: {},
+      interlace: InterlaceMethod.UNKNOWN,
     };
     this._end = false;
     this._hasPalette = false;
@@ -158,6 +160,7 @@ export default class PngDecoder extends IOBuffer {
 
     this._filterMethod = this.readUint8() as FilterMethod;
     this._interlaceMethod = this.readUint8() as InterlaceMethod;
+    this._png.interlace = this._interlaceMethod;
   }
 
   // https://www.w3.org/TR/PNG/#11PLTE
@@ -276,6 +279,14 @@ export default class PngDecoder extends IOBuffer {
 
     if (this._interlaceMethod === InterlaceMethod.NO_INTERLACE) {
       this._png.data = decodeInterlaceNull({
+        data: data as Uint8Array,
+        width: this._png.width,
+        height: this._png.height,
+        channels: this._png.channels,
+        depth: this._png.depth,
+      });
+    } else if (this._interlaceMethod === InterlaceMethod.ADAM7) {
+      this._png.data = decodeInterlaceAdam7({
         data: data as Uint8Array,
         width: this._png.width,
         height: this._png.height,
