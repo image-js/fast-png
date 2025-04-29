@@ -123,10 +123,6 @@ export default class PngEncoder extends IOBuffer {
       } else if (depth === 16) {
         offset = writeDataUint16Interlaced(this._png, data, newData, offset);
       }
-    } else {
-      throw new RangeError(
-        `unsupported interlace method: ${this._interlaceMethod}`,
-      );
     }
     const buffer = newData.toArray();
     const compressed = deflate(buffer, this._zlibOptions);

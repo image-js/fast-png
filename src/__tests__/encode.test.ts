@@ -120,6 +120,36 @@ describe('encode', () => {
     expect(decoded.data).toStrictEqual(simpleRGBAData);
   });
 
+  it('interlaced RGB 16bit', () => {
+    const data = encode(
+      {
+        width: 2,
+        height: 2,
+        data: new Uint16Array([
+          65535, 65535, 65535, 0, 0, 0, 0, 0, 0, 65535, 65535, 65535,
+        ]),
+        depth: 16,
+        channels: 3,
+      },
+      { interlace: 'Adam7' },
+    );
+
+    expect(data).toBeInstanceOf(Uint8Array);
+    const decoded = decode(data);
+    const expected = {
+      width: 2,
+      height: 2,
+      depth: 16,
+    };
+    check(decoded, expected);
+    expect(decoded.data).toBeInstanceOf(Uint16Array);
+    expect(decoded.data).toStrictEqual(
+      new Uint16Array([
+        65535, 65535, 65535, 0, 0, 0, 0, 0, 0, 65535, 65535, 65535,
+      ]),
+    );
+  });
+
   it('tEXt chunk', () => {
     const text = {
       Field1: 'Value1',
