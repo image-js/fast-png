@@ -46,7 +46,6 @@ export default class PngDecoder extends IOBuffer {
       data: new Uint8Array(0),
       depth: 1,
       text: {},
-      interlace: InterlaceMethod.UNKNOWN,
     };
     this._end = false;
     this._hasPalette = false;
@@ -160,7 +159,6 @@ export default class PngDecoder extends IOBuffer {
 
     this._filterMethod = this.readUint8() as FilterMethod;
     this._interlaceMethod = this.readUint8() as InterlaceMethod;
-    this._png.interlace = this._interlaceMethod;
   }
 
   // https://www.w3.org/TR/PNG/#11PLTE
@@ -276,7 +274,6 @@ export default class PngDecoder extends IOBuffer {
     if (this._filterMethod !== FilterMethod.ADAPTIVE) {
       throw new Error(`Filter method ${this._filterMethod} not supported`);
     }
-
     if (this._interlaceMethod === InterlaceMethod.NO_INTERLACE) {
       this._png.data = decodeInterlaceNull({
         data: data as Uint8Array,

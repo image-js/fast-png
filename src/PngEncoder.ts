@@ -4,8 +4,12 @@ import { deflate } from 'pako';
 import { writeCrc } from './helpers/crc';
 import { writeSignature } from './helpers/signature';
 import { encodetEXt } from './helpers/text';
-import type { InterlaceMethod } from './internalTypes';
-import { ColorType, CompressionMethod, FilterMethod } from './internalTypes';
+import {
+  InterlaceMethod,
+  ColorType,
+  CompressionMethod,
+  FilterMethod,
+} from './internalTypes';
 import type {
   DeflateFunctionOptions,
   PngEncoderOptions,
@@ -25,19 +29,23 @@ interface PngToEncode {
   depth: BitDepth;
   channels: number;
   text?: ImageData['text'];
-  interlace?: InterlaceMethod;
 }
 
 export default class PngEncoder extends IOBuffer {
   private readonly _png: PngToEncode;
   private readonly _zlibOptions: DeflateFunctionOptions;
   private _colorType: ColorType;
-
+  private readonly _interlaceMethod: InterlaceMethod;
   public constructor(data: ImageData, options: PngEncoderOptions = {}) {
     super();
     this._colorType = ColorType.UNKNOWN;
     this._zlibOptions = { ...defaultZlibOptions, ...options.zlib };
     this._png = this._checkData(data);
+
+    this._interlaceMethod =
+      (options.interlace === 'Adam7'
+        ? InterlaceMethod.ADAM7
+        : InterlaceMethod.NO_INTERLACE) ?? InterlaceMethod.NO_INTERLACE;
     this.setBigEndian();
   }
 
@@ -66,7 +74,7 @@ export default class PngEncoder extends IOBuffer {
     this.writeByte(this._colorType);
     this.writeByte(CompressionMethod.DEFLATE);
     this.writeByte(FilterMethod.ADAPTIVE);
-    this.writeByte(this._png.interlace || 0);
+    this.writeByte(this._interlaceMethod);
 
     writeCrc(this, 17);
   }
@@ -92,11 +100,11 @@ export default class PngEncoder extends IOBuffer {
   }
 
   private encodeData(): void {
-    const { width, height, channels, depth, data, interlace } = this._png;
+    const { width, height, channels, depth, data } = this._png;
     const slotsPerLine = channels * width;
     const newData = new IOBuffer().setBigEndian();
     let offset = 0;
-    if (interlace === 0) {
+    if (this._interlaceMethod === InterlaceMethod.NO_INTERLACE) {
       for (let i = 0; i < height; i++) {
         newData.writeByte(0); // no filter
         /* istanbul ignore else */
@@ -108,7 +116,7 @@ export default class PngEncoder extends IOBuffer {
           throw new Error('unreachable');
         }
       }
-    } else if (interlace === 1) {
+    } else if (this._interlaceMethod === InterlaceMethod.ADAM7) {
       // Adam7 interlacing
       if (depth === 8) {
         offset = writeDataBytesInterlaced(this._png, data, newData, offset);
@@ -116,7 +124,9 @@ export default class PngEncoder extends IOBuffer {
         offset = writeDataUint16Interlaced(this._png, data, newData, offset);
       }
     } else {
-      throw new RangeError(`unsupported interlace method: ${interlace}`);
+      throw new RangeError(
+        `unsupported interlace method: ${this._interlaceMethod}`,
+      );
     }
     const buffer = newData.toArray();
     const compressed = deflate(buffer, this._zlibOptions);
@@ -132,7 +142,6 @@ export default class PngEncoder extends IOBuffer {
       data: data.data,
       depth,
       text: data.text,
-      interlace: data.interlace || 0,
     };
     this._colorType = colorType;
     const expectedSize = png.width * png.height * channels;
@@ -246,20 +255,11 @@ function writeDataBytesInterlaced(
           for (let i = 0; i < bytesPerPixel; i++) {
             rawScanline[rawOffset++] = data[srcPos + i];
           }
-        } else {
-          // Skip pixels outside image bounds
-          rawOffset += bytesPerPixel;
         }
       }
       newData.writeByte(0); // no filter
-      if (depth === 8) {
-        newData.writeBytes(rawScanline);
-      } else if (depth === 16) {
-        for (const value of rawScanline) {
-          newData.writeByte((value >> 8) & 0xff); // High byte
-          newData.writeByte(value & 0xff);
-        }
-      }
+
+      newData.writeBytes(rawScanline);
     }
   }
   return offset;
