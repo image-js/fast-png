@@ -23,12 +23,31 @@ describe('decode', () => {
   });
 
   it('interlaced', () => {
-    expect(() => loadAndDecode('interlaced.png')).toThrow(
-      'Interlace method 1 not supported',
+    const image = loadAndDecode('ColorGrid5x5-interlaced.png');
+    check(image, {
+      width: 5,
+      height: 5,
+      depth: 8,
+      channels: 3,
+      interlace: 1,
+    });
+    expect(image.data).toEqual(
+      new Uint8Array([
+        0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 255, 255, 255, 255, 255, 255,
+        0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 255, 255, 255, 255, 0,
+        0, 0, 255, 0, 0, 0, 255, 0, 0, 255, 0, 0, 0, 255, 255, 255, 255, 0, 0,
+        0, 255, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 255, 255, 255, 0, 0, 0,
+      ]),
     );
-    expect(() => loadAndDecode('ColorGrid5x5-interlaced.png')).toThrow(
-      'Interlace method 1 not supported',
-    );
+
+    const image2 = loadAndDecode('interlaced.png');
+    check(image2, {
+      width: 817,
+      height: 1057,
+      depth: 8,
+      channels: 4,
+      interlace: 1,
+    });
   });
 
   it('ColorGrid5x5', () => {
@@ -38,6 +57,7 @@ describe('decode', () => {
       height: 10,
       depth: 8,
       channels: 4,
+      interlace: 0,
     });
     expect(img.data).toBeInstanceOf(Uint8Array);
     expect(img.data).toHaveLength(10 * 10 * 4);

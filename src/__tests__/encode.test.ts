@@ -63,12 +63,14 @@ describe('encode', () => {
       channels: 3,
     });
     expect(data).toBeInstanceOf(Uint8Array);
+
     const decoded = decode(data);
     const expected = {
       width: 2,
       height: 2,
       depth: 16,
     };
+    checkPngJs(data, expected);
     check(decoded, expected);
     checkPngJs(data, expected);
     expect(decoded.data).toBeInstanceOf(Uint16Array);
@@ -96,6 +98,24 @@ describe('encode', () => {
     checkPngJs(data, expected);
     expect(decoded.data).toBeInstanceOf(Uint8Array);
     expect(decoded.data).toStrictEqual(dataArray);
+  });
+
+  it('interlaced RGBA', () => {
+    const data = encode({
+      ...simpleRGBAImageData,
+      interlace: 1,
+    });
+    expect(data).toBeInstanceOf(Uint8Array);
+    const decoded = decode(data);
+    const expected = {
+      width: 2,
+      height: 2,
+      depth: 8,
+    };
+    check(decoded, expected);
+    expect(decoded.interlace).toBe(1);
+    expect(decoded.data).toBeInstanceOf(Uint8Array);
+    expect(decoded.data).toStrictEqual(simpleRGBAData);
   });
 
   it('tEXt chunk', () => {
