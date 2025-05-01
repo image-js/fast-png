@@ -63,12 +63,14 @@ describe('encode', () => {
       channels: 3,
     });
     expect(data).toBeInstanceOf(Uint8Array);
+
     const decoded = decode(data);
     const expected = {
       width: 2,
       height: 2,
       depth: 16,
     };
+    checkPngJs(data, expected);
     check(decoded, expected);
     checkPngJs(data, expected);
     expect(decoded.data).toBeInstanceOf(Uint16Array);
@@ -96,6 +98,56 @@ describe('encode', () => {
     checkPngJs(data, expected);
     expect(decoded.data).toBeInstanceOf(Uint8Array);
     expect(decoded.data).toStrictEqual(dataArray);
+  });
+
+  it('interlaced RGBA', () => {
+    const data = encode(
+      {
+        ...simpleRGBAImageData,
+      },
+      { interlace: 'Adam7' },
+    );
+
+    expect(data).toBeInstanceOf(Uint8Array);
+    const decoded = decode(data);
+    const expected = {
+      width: 2,
+      height: 2,
+      depth: 8,
+    };
+    check(decoded, expected);
+    expect(decoded.data).toBeInstanceOf(Uint8Array);
+    expect(decoded.data).toStrictEqual(simpleRGBAData);
+  });
+
+  it('interlaced RGB 16bit', () => {
+    const data = encode(
+      {
+        width: 2,
+        height: 2,
+        data: new Uint16Array([
+          65535, 65535, 65535, 0, 0, 0, 0, 0, 0, 65535, 65535, 65535,
+        ]),
+        depth: 16,
+        channels: 3,
+      },
+      { interlace: 'Adam7' },
+    );
+
+    expect(data).toBeInstanceOf(Uint8Array);
+    const decoded = decode(data);
+    const expected = {
+      width: 2,
+      height: 2,
+      depth: 16,
+    };
+    check(decoded, expected);
+    expect(decoded.data).toBeInstanceOf(Uint16Array);
+    expect(decoded.data).toStrictEqual(
+      new Uint16Array([
+        65535, 65535, 65535, 0, 0, 0, 0, 0, 0, 65535, 65535, 65535,
+      ]),
+    );
   });
 
   it('tEXt chunk', () => {

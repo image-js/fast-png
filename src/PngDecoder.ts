@@ -2,6 +2,7 @@ import { IOBuffer } from 'iobuffer';
 import { inflate, Inflate as Inflator } from 'pako';
 
 import { checkCrc } from './helpers/crc';
+import { decodeInterlaceAdam7 } from './helpers/decodeInterlaceAdam7';
 import { decodeInterlaceNull } from './helpers/decodeInterlaceNull';
 import { checkSignature } from './helpers/signature';
 import { decodetEXt, readKeyword, textChunkName } from './helpers/text';
@@ -273,9 +274,16 @@ export default class PngDecoder extends IOBuffer {
     if (this._filterMethod !== FilterMethod.ADAPTIVE) {
       throw new Error(`Filter method ${this._filterMethod} not supported`);
     }
-
     if (this._interlaceMethod === InterlaceMethod.NO_INTERLACE) {
       this._png.data = decodeInterlaceNull({
+        data: data as Uint8Array,
+        width: this._png.width,
+        height: this._png.height,
+        channels: this._png.channels,
+        depth: this._png.depth,
+      });
+    } else if (this._interlaceMethod === InterlaceMethod.ADAM7) {
+      this._png.data = decodeInterlaceAdam7({
         data: data as Uint8Array,
         width: this._png.width,
         height: this._png.height,

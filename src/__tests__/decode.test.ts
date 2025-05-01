@@ -23,12 +23,44 @@ describe('decode', () => {
   });
 
   it('interlaced', () => {
-    expect(() => loadAndDecode('interlaced.png')).toThrow(
-      'Interlace method 1 not supported',
+    const image = loadAndDecode('ColorGrid5x5-interlaced.png');
+    check(image, {
+      width: 5,
+      height: 5,
+      depth: 8,
+      channels: 3,
+    });
+    expect(image.data).toEqual(
+      new Uint8Array([
+        0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 255, 255, 255, 255, 255, 255,
+        0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 255, 255, 255, 255, 0,
+        0, 0, 255, 0, 0, 0, 255, 0, 0, 255, 0, 0, 0, 255, 255, 255, 255, 0, 0,
+        0, 255, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 255, 255, 255, 0, 0, 0,
+      ]),
     );
-    expect(() => loadAndDecode('ColorGrid5x5-interlaced.png')).toThrow(
-      'Interlace method 1 not supported',
-    );
+
+    const image2 = loadAndDecode('interlaced.png');
+    check(image2, {
+      width: 817,
+      height: 1057,
+      depth: 8,
+      channels: 4,
+    });
+
+    const image3 = loadAndDecode('16bitInterlace2x2.png');
+    check(image3, {
+      width: 2,
+      height: 2,
+      depth: 16,
+      channels: 3,
+    });
+    const image4 = loadAndDecode('16bitInterlace10x10.png');
+    check(image4, {
+      width: 10,
+      height: 10,
+      depth: 16,
+      channels: 1,
+    });
   });
 
   it('ColorGrid5x5', () => {

@@ -62,6 +62,7 @@ export interface PngDecoderOptions {
 }
 
 export interface PngEncoderOptions {
+  interlace?: 'null' | 'Adam7';
   zlib?: DeflateFunctionOptions;
 }
 
