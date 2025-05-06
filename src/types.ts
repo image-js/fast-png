@@ -55,6 +55,20 @@ export interface DecodedPng {
   palette?: IndexedColors;
   transparency?: Uint16Array;
   iccEmbeddedProfile?: IccEmbeddedProfile;
+  frames?: DecodedPngFrame[];
+}
+
+export interface DecodedPngFrame {
+  sequenceNumber: number;
+  width: number;
+  height: number;
+  xOffset: number;
+  yOffset: number;
+  delayNumber: number;
+  delayDenominator: number;
+  disposeOp: number;
+  blendOp: number;
+  data: Uint8Array;
 }
 
 export interface PngDecoderOptions {
