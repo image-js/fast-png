@@ -234,7 +234,7 @@ export default class PngDecoder extends IOBuffer {
     }
     this._inflator.push(new Uint8Array(this.buffer, dataOffset, dataLength));
     const lastFrame = this._png.frames?.at(-1);
-    if (this._inflator.result.length > 0 && lastFrame) {
+    if (this._inflator.result?.length > 0 && lastFrame) {
       lastFrame.data = this._inflator.result.slice() as Uint8Array;
       this._inflator = new Inflator();
     }
@@ -329,9 +329,9 @@ export default class PngDecoder extends IOBuffer {
         depth: this._png.depth,
       }) as Uint8Array;
     }
-    const lastFrame = this._png.frames?.at(-1);
+    const firstFrame = this._png.frames?.at(0);
 
-    this._png.data = lastFrame?.data as Uint8Array;
+    this._png.data = firstFrame?.data as Uint8Array;
   }
   private decodeImage(): void {
     if (this._inflator.err) {

@@ -154,7 +154,7 @@ describe('decode', () => {
 
   it('tEXt chunk - ASCII', () => {
     const { text } = loadAndDecode('text-ascii.png');
-    expect(text).toStrictEqual({
+    expect(text).toEqual({
       Smiles: 'CCCC',
       'date:create': '2024-02-12T15:56:01+00:00',
       'date:modify': '2024-02-12T15:55:48+00:00',
@@ -174,8 +174,45 @@ describe('decode', () => {
       encoding: 'bstring',
       compressed: true,
     });
+
     // Binary string that we don't know how to interpret.
     expect(json.encoded).toHaveLength(654);
+  });
+
+  it('APNG small greyscale image', () => {
+    const decodedApng = loadAndDecode('testApng.png');
+    expect(decodedApng.frames).toBeDefined();
+    expect(decodedApng.frames?.length).toStrictEqual(2);
+
+    const frame1 = decodedApng.frames?.at(0);
+    const frame2 = decodedApng.frames?.at(1);
+
+    expect(frame1?.data.length).toEqual(200);
+    expect(frame2?.data.length).toEqual(200);
+    expect(frame1?.data.slice(0, 11)).toStrictEqual(
+      new Uint8Array([255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255]),
+    );
+    expect(frame2?.data.slice(0, 11)).toStrictEqual(
+      new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255]),
+    );
+  });
+  it('APNG big RGBA image', () => {
+    const decodedApng = loadAndDecode('beachBall.png');
+    expect(decodedApng.frames).toBeDefined();
+    expect(decodedApng.frames?.length).toStrictEqual(20);
+    expect(decodedApng.data.length).toEqual(40000);
+
+    const frame1 = decodedApng.frames?.at(0);
+    const frame2 = decodedApng.frames?.at(1);
+    if (frame1 && frame2) {
+      expect(frame1.data).toEqual(decodedApng.data);
+      expect(frame1.data.slice(0, 11)).toStrictEqual(
+        new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
+      );
+      expect(frame2.data.length).toEqual(
+        frame2.width * frame2.height * decodedApng.channels,
+      );
+    }
   });
 });
 
