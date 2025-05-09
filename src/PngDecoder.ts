@@ -354,11 +354,22 @@ export default class PngDecoder extends IOBuffer {
           height: this._png.height,
           channels: this._png.channels,
           depth: this._png.depth,
-          data: new Uint8Array(
-            this._png.width * this._png.height * this._png.channels,
-          ),
+          data:
+            this._png.depth === 8
+              ? new Uint8Array(
+                  this._png.width * this._png.height * this._png.channels,
+                )
+              : new Uint16Array(
+                  this._png.width * this._png.height * this._png.channels,
+                ),
           text: this._png.text,
         };
+        if (this._hasPalette) {
+          imageFrame.palette = this._palette;
+        }
+        if (this._hasTransparency) {
+          imageFrame.transparency = this._transparency;
+        }
         if (
           i === 0 ||
           (frame.xOffset === 0 &&
@@ -368,8 +379,12 @@ export default class PngDecoder extends IOBuffer {
         ) {
           imageFrame.data.set(frame.data);
         } else {
-          const prevFrame = this._png.frames?.at(i - 1);
-          this.disposeFrame(prevFrame as DecodedPngFrame, imageFrame);
+          const prevFrame = result.at(i - 1);
+          this.disposeFrame(
+            frame.disposeOp as DisposeOpType,
+            prevFrame as DecodedPng,
+            imageFrame,
+          );
           this.addFrameDataToCanvas(imageFrame, frame);
         }
 
@@ -378,14 +393,18 @@ export default class PngDecoder extends IOBuffer {
     }
     return result;
   }
-  private disposeFrame(frame: DecodedPngFrame, imageFrame: DecodedPng): void {
-    switch (frame.disposeOp) {
+  private disposeFrame(
+    disposeOp: DisposeOpType,
+    prevFrame: DecodedPng,
+    imageFrame: DecodedPng,
+  ): void {
+    switch (disposeOp) {
       case DisposeOpType.NONE:
         break;
       case DisposeOpType.BACKGROUND:
         for (let row = 0; row < this._png.height; row++) {
           for (let col = 0; col < this._png.width; col++) {
-            const index = (row * frame.width + col) * this._png.channels;
+            const index = (row * prevFrame.width + col) * this._png.channels;
             for (let channel = 0; channel < this._png.channels; channel++) {
               imageFrame.data[index + channel] = 0;
             }
@@ -393,7 +412,7 @@ export default class PngDecoder extends IOBuffer {
         }
         break;
       case DisposeOpType.PREVIOUS:
-        imageFrame.data.set(frame.data);
+        imageFrame.data.set(prevFrame.data);
         break;
       default:
         throw new Error('Unknown disposeOp');
@@ -403,6 +422,7 @@ export default class PngDecoder extends IOBuffer {
     imageFrame: DecodedPng,
     frame: DecodedPngFrame,
   ): void {
+    const maxValue = 1 << this._png.depth;
     switch (frame.blendOp) {
       case BlendOpType.SOURCE:
         for (let row = 0; row < frame.height; row++) {
@@ -418,6 +438,7 @@ export default class PngDecoder extends IOBuffer {
           }
         }
         break;
+      // https://www.w3.org/TR/png-3/#13Alpha-channel-processing
       case BlendOpType.OVER:
         for (let row = 0; row < frame.height; row++) {
           for (let col = 0; col < frame.width; col++) {
@@ -426,8 +447,16 @@ export default class PngDecoder extends IOBuffer {
               this._png.channels;
             const frameIndex = (row * frame.width + col) * this._png.channels;
             for (let channel = 0; channel < this._png.channels; channel++) {
-              imageFrame.data[index + channel] +=
-                frame.data[frameIndex + channel];
+              const sourceAlpha =
+                frame.data[frameIndex + this._png.channels - 1] / maxValue;
+              const foregroundValue =
+                channel % (this._png.channels - 1) === 0
+                  ? 1
+                  : frame.data[frameIndex + channel];
+              const value =
+                sourceAlpha * foregroundValue +
+                (1 - sourceAlpha) * imageFrame.data[index + channel];
+              imageFrame.data[index + channel] += value;
             }
           }
         }

@@ -23,7 +23,6 @@ export const FilterMethod = {
 } as const;
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export type FilterMethod = (typeof FilterMethod)[keyof typeof FilterMethod];
-
 export const InterlaceMethod = {
   UNKNOWN: -1,
   NO_INTERLACE: 0,
@@ -35,6 +34,9 @@ export const DisposeOpType = {
   BACKGROUND: 1,
   PREVIOUS: 2,
 } as const;
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export type DisposeOpType = (typeof DisposeOpType)[keyof typeof DisposeOpType];
+
 export const BlendOpType = {
   SOURCE: 0,
   OVER: 1,
