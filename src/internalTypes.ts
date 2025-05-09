@@ -29,6 +29,16 @@ export const InterlaceMethod = {
   NO_INTERLACE: 0,
   ADAM7: 1,
 } as const;
+
+export const DisposeOpType = {
+  NONE: 0,
+  BACKGROUND: 1,
+  PREVIOUS: 2,
+} as const;
+export const BlendOpType = {
+  SOURCE: 0,
+  OVER: 1,
+} as const;
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export type InterlaceMethod =
   (typeof InterlaceMethod)[keyof typeof InterlaceMethod];

@@ -9,8 +9,10 @@ import { decodetEXt, readKeyword, textChunkName } from './helpers/text';
 import {
   ColorType,
   CompressionMethod,
+  DisposeOpType,
   FilterMethod,
   InterlaceMethod,
+  BlendOpType,
 } from './internalTypes';
 import type {
   BitDepth,
@@ -68,13 +70,14 @@ export default class PngDecoder extends IOBuffer {
     this.setBigEndian();
   }
 
-  public decode(): DecodedPng {
+  public decode(): DecodedPng | DecodedPng[] {
     checkSignature(this);
     while (!this._end) {
       this.decodeChunk();
     }
     if (this._isAnimated) {
-      this.decodeApngImage();
+      const result = this.decodeApngImage();
+      return result;
     } else {
       this.decodeImage();
     }
@@ -320,18 +323,118 @@ export default class PngDecoder extends IOBuffer {
   }
 
   private decodeApngImage() {
-    for (const frame of this._png.frames as DecodedPngFrame[]) {
-      frame.data = decodeInterlaceNull({
-        data: frame.data,
-        width: frame.width,
-        height: frame.height,
-        channels: this._png.channels,
-        depth: this._png.depth,
-      }) as Uint8Array;
+    const result: DecodedPng[] = [];
+    if (this._interlaceMethod === InterlaceMethod.NO_INTERLACE) {
+      for (const frame of this._png.frames as DecodedPngFrame[]) {
+        frame.data = decodeInterlaceNull({
+          data: frame.data,
+          width: frame.width,
+          height: frame.height,
+          channels: this._png.channels,
+          depth: this._png.depth,
+        }) as Uint8Array;
+      }
+    } else if (this._interlaceMethod === InterlaceMethod.ADAM7) {
+      for (const frame of this._png.frames as DecodedPngFrame[]) {
+        frame.data = decodeInterlaceAdam7({
+          data: frame.data,
+          width: frame.width,
+          height: frame.height,
+          channels: this._png.channels,
+          depth: this._png.depth,
+        }) as Uint8Array;
+      }
     }
-    const firstFrame = this._png.frames?.at(0);
 
-    this._png.data = firstFrame?.data as Uint8Array;
+    for (let i = 0; i < this._numberOfFrames; i++) {
+      const frame = this._png.frames?.at(i);
+      if (frame) {
+        const imageFrame: DecodedPng = {
+          width: this._png.width,
+          height: this._png.height,
+          channels: this._png.channels,
+          depth: this._png.depth,
+          data: new Uint8Array(
+            this._png.width * this._png.height * this._png.channels,
+          ),
+          text: this._png.text,
+        };
+        if (
+          i === 0 ||
+          (frame.xOffset === 0 &&
+            frame.yOffset === 0 &&
+            frame.width === this._png.width &&
+            frame.height === this._png.height)
+        ) {
+          imageFrame.data.set(frame.data);
+        } else {
+          const prevFrame = this._png.frames?.at(i - 1);
+          this.disposeFrame(prevFrame as DecodedPngFrame, imageFrame);
+          this.addFrameDataToCanvas(imageFrame, frame);
+        }
+
+        result.push(imageFrame);
+      }
+    }
+    return result;
+  }
+  private disposeFrame(frame: DecodedPngFrame, imageFrame: DecodedPng): void {
+    switch (frame.disposeOp) {
+      case DisposeOpType.NONE:
+        break;
+      case DisposeOpType.BACKGROUND:
+        for (let row = 0; row < this._png.height; row++) {
+          for (let col = 0; col < this._png.width; col++) {
+            const index = (row * frame.width + col) * this._png.channels;
+            for (let channel = 0; channel < this._png.channels; channel++) {
+              imageFrame.data[index + channel] = 0;
+            }
+          }
+        }
+        break;
+      case DisposeOpType.PREVIOUS:
+        imageFrame.data.set(frame.data);
+        break;
+      default:
+        throw new Error('Unknown disposeOp');
+    }
+  }
+  private addFrameDataToCanvas(
+    imageFrame: DecodedPng,
+    frame: DecodedPngFrame,
+  ): void {
+    switch (frame.blendOp) {
+      case BlendOpType.SOURCE:
+        for (let row = 0; row < frame.height; row++) {
+          for (let col = 0; col < frame.width; col++) {
+            const index =
+              ((row + frame.yOffset) * this._png.width + frame.xOffset + col) *
+              this._png.channels;
+            const frameIndex = (row * frame.width + col) * this._png.channels;
+            for (let channel = 0; channel < this._png.channels; channel++) {
+              imageFrame.data[index + channel] =
+                frame.data[frameIndex + channel];
+            }
+          }
+        }
+        break;
+      case BlendOpType.OVER:
+        for (let row = 0; row < frame.height; row++) {
+          for (let col = 0; col < frame.width; col++) {
+            const index =
+              ((row + frame.yOffset) * frame.width + col + frame.xOffset) *
+              this._png.channels;
+            const frameIndex = (row * frame.width + col) * this._png.channels;
+            for (let channel = 0; channel < this._png.channels; channel++) {
+              imageFrame.data[index + channel] +=
+                frame.data[frameIndex + channel];
+            }
+          }
+        }
+        break;
+      default:
+        throw new Error('Unknown blendOp');
+    }
   }
   private decodeImage(): void {
     if (this._inflator.err) {
