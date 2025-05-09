@@ -2,7 +2,7 @@
 import { PNG } from 'pngjs';
 import { describe, expect, it } from 'vitest';
 
-import type { ImageData } from '../index';
+import type { DecodedPng, ImageData } from '../index';
 import { encode, decode } from '../index';
 
 const simpleRGBAData = new Uint8Array([
@@ -18,7 +18,7 @@ describe('encode', () => {
   it('simple RGBA', () => {
     const data = encode(simpleRGBAImageData);
     expect(data).toBeInstanceOf(Uint8Array);
-    const decoded = decode(data);
+    const decoded = decode(data) as DecodedPng;
     const expected = {
       width: 2,
       height: 2,
@@ -39,7 +39,7 @@ describe('encode', () => {
       channels: 1,
     });
     expect(data).toBeInstanceOf(Uint8Array);
-    const decoded = decode(data);
+    const decoded = decode(data) as DecodedPng;
     const expected = {
       width: 2,
       height: 3,
@@ -64,7 +64,7 @@ describe('encode', () => {
     });
     expect(data).toBeInstanceOf(Uint8Array);
 
-    const decoded = decode(data);
+    const decoded = decode(data) as DecodedPng;
     const expected = {
       width: 2,
       height: 2,
@@ -88,7 +88,7 @@ describe('encode', () => {
       channels: 2,
     });
     expect(data).toBeInstanceOf(Uint8Array);
-    const decoded = decode(data);
+    const decoded = decode(data) as DecodedPng;
     const expected = {
       width: 2,
       height: 3,
@@ -109,7 +109,7 @@ describe('encode', () => {
     );
 
     expect(data).toBeInstanceOf(Uint8Array);
-    const decoded = decode(data);
+    const decoded = decode(data) as DecodedPng;
     const expected = {
       width: 2,
       height: 2,
@@ -135,7 +135,7 @@ describe('encode', () => {
     );
 
     expect(data).toBeInstanceOf(Uint8Array);
-    const decoded = decode(data);
+    const decoded = decode(data) as DecodedPng;
     const expected = {
       width: 2,
       height: 2,
@@ -157,7 +157,7 @@ describe('encode', () => {
       'Field:latin1': 'héhé',
     };
     const encoded = encode({ ...simpleRGBAImageData, text });
-    const decoded = decode(encoded);
+    const decoded = decode(encoded) as DecodedPng;
     expect(decoded.text).toStrictEqual(text);
   });
 

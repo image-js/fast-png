@@ -14,7 +14,7 @@ export * from './types';
 function decodePng(
   data: DecoderInputType,
   options?: PngDecoderOptions,
-): DecodedPng {
+): DecodedPng | DecodedPng[] {
   const decoder = new PngDecoder(data, options);
   return decoder.decode();
 }
