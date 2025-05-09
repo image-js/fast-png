@@ -213,27 +213,30 @@ describe('decode', () => {
       );
     }
   });
-  it('APNG GREY interlaced 8 bit image', () => {
-    const decodedApng = loadAndDecode('8bitInterlaceApng.png') as DecodedPng[];
+  it('RGB square 8-bit image', () => {
+    const decodedApng = loadAndDecode('square.png') as DecodedPng[];
+
     expect(decodedApng).toBeDefined();
-    expect(decodedApng.length).toStrictEqual(4);
+    expect(decodedApng.length).toStrictEqual(2);
     expect(decodedApng[0].data.length).toEqual(25);
     const frame1 = decodedApng.at(0);
     const frame2 = decodedApng.at(1);
-    const frame3 = decodedApng.at(2);
-    if (frame1 && frame2 && frame3) {
+    if (frame1 && frame2) {
       expect(frame1.data).toStrictEqual(
         new Uint8Array([
-          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 255, 0, 0, 0, 255,
-          255, 0, 0, 0,
+          1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 2, 2, 2, 1, 1, 2, 2, 2, 1, 1, 1, 1,
+          1, 1,
         ]),
       );
       expect(frame2.data).toEqual(
         new Uint8Array([
-          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 255, 0, 0,
-          0, 255, 255,
+          2, 2, 2, 2, 2, 2, 1, 1, 1, 2, 2, 1, 1, 1, 2, 2, 1, 1, 1, 2, 2, 2, 2,
+          2, 2,
         ]),
       );
+      expect(frame1.palette?.length).toStrictEqual(3);
+      expect(frame1.palette?.at(1)).toEqual([0, 0, 255, 255]);
+      expect(frame1.palette?.at(2)).toEqual([255, 0, 0, 255]);
     }
   });
 });
