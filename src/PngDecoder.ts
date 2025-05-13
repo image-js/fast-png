@@ -241,6 +241,7 @@ export default class PngDecoder extends IOBuffer {
       lastFrame.data = this._inflator.result.slice() as Uint8Array;
       this._inflator = new Inflator();
     }
+
     this.skip(length);
   }
 
@@ -324,31 +325,27 @@ export default class PngDecoder extends IOBuffer {
 
   private decodeApngImage() {
     const result: DecodedPng[] = [];
-    if (this._interlaceMethod === InterlaceMethod.NO_INTERLACE) {
-      for (const frame of this._png.frames as DecodedPngFrame[]) {
-        frame.data = decodeInterlaceNull({
-          data: frame.data,
-          width: frame.width,
-          height: frame.height,
-          channels: this._png.channels,
-          depth: this._png.depth,
-        }) as Uint8Array;
-      }
-    } else if (this._interlaceMethod === InterlaceMethod.ADAM7) {
-      for (const frame of this._png.frames as DecodedPngFrame[]) {
-        frame.data = decodeInterlaceAdam7({
-          data: frame.data,
-          width: frame.width,
-          height: frame.height,
-          channels: this._png.channels,
-          depth: this._png.depth,
-        }) as Uint8Array;
-      }
-    }
-
     for (let i = 0; i < this._numberOfFrames; i++) {
       const frame = this._png.frames?.at(i);
       if (frame) {
+        if (this._interlaceMethod === InterlaceMethod.NO_INTERLACE) {
+          frame.data = decodeInterlaceNull({
+            data: frame.data,
+            width: frame.width,
+            height: frame.height,
+            channels: this._png.channels,
+            depth: this._png.depth,
+          }) as Uint8Array;
+        } else if (this._interlaceMethod === InterlaceMethod.ADAM7) {
+          frame.data = decodeInterlaceAdam7({
+            data: frame.data,
+            width: frame.width,
+            height: frame.height,
+            channels: this._png.channels,
+            depth: this._png.depth,
+          }) as Uint8Array;
+        }
+
         const imageFrame: DecodedPng = {
           width: this._png.width,
           height: this._png.height,
@@ -423,14 +420,18 @@ export default class PngDecoder extends IOBuffer {
     frame: DecodedPngFrame,
   ): void {
     const maxValue = 1 << this._png.depth;
+    const calculatePixelIndices = (row: number, col: number) => {
+      const index =
+        ((row + frame.yOffset) * this._png.width + frame.xOffset + col) *
+        this._png.channels;
+      const frameIndex = (row * frame.width + col) * this._png.channels;
+      return { index, frameIndex };
+    };
     switch (frame.blendOp) {
       case BlendOpType.SOURCE:
         for (let row = 0; row < frame.height; row++) {
           for (let col = 0; col < frame.width; col++) {
-            const index =
-              ((row + frame.yOffset) * this._png.width + frame.xOffset + col) *
-              this._png.channels;
-            const frameIndex = (row * frame.width + col) * this._png.channels;
+            const { index, frameIndex } = calculatePixelIndices(row, col);
             for (let channel = 0; channel < this._png.channels; channel++) {
               imageFrame.data[index + channel] =
                 frame.data[frameIndex + channel];
@@ -442,10 +443,7 @@ export default class PngDecoder extends IOBuffer {
       case BlendOpType.OVER:
         for (let row = 0; row < frame.height; row++) {
           for (let col = 0; col < frame.width; col++) {
-            const index =
-              ((row + frame.yOffset) * frame.width + col + frame.xOffset) *
-              this._png.channels;
-            const frameIndex = (row * frame.width + col) * this._png.channels;
+            const { index, frameIndex } = calculatePixelIndices(row, col);
             for (let channel = 0; channel < this._png.channels; channel++) {
               const sourceAlpha =
                 frame.data[frameIndex + this._png.channels - 1] / maxValue;
@@ -453,9 +451,10 @@ export default class PngDecoder extends IOBuffer {
                 channel % (this._png.channels - 1) === 0
                   ? 1
                   : frame.data[frameIndex + channel];
-              const value =
+              const value = Math.floor(
                 sourceAlpha * foregroundValue +
-                (1 - sourceAlpha) * imageFrame.data[index + channel];
+                  (1 - sourceAlpha) * imageFrame.data[index + channel],
+              );
               imageFrame.data[index + channel] += value;
             }
           }
