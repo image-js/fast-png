@@ -239,6 +239,12 @@ describe('decode', () => {
       expect(frame1.palette?.at(2)).toEqual([255, 0, 0, 255]);
     }
   });
+  it('RGB square 8-bit image', () => {
+    const decodedApng = loadAndDecode('blend_op.png') as DecodedPng[];
+    expect(decodedApng.length).toEqual(128);
+    expect(decodedApng[0].data[0]).toEqual(255);
+    expect(decodedApng[110].data[1]).toEqual(1);
+  });
 });
 
 function loadAndDecode(
