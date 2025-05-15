@@ -150,6 +150,27 @@ describe('encode', () => {
     );
   });
 
+  it('greyscale 1bit depth 12x1', () => {
+    const data = encode({
+      width: 12,
+      height: 1,
+      data: new Uint8Array([255, 0]),
+      depth: 1,
+      channels: 1,
+    });
+
+    expect(data).toBeInstanceOf(Uint8Array);
+    const decoded = decode(data);
+    const expected = {
+      width: 12,
+      height: 1,
+      depth: 1,
+    };
+    check(decoded, expected);
+    expect(decoded.data).toBeInstanceOf(Uint8Array);
+    expect(decoded.data).toStrictEqual(new Uint8Array([255, 0]));
+  });
+
   it('tEXt chunk', () => {
     const text = {
       Field1: 'Value1',
@@ -214,15 +235,6 @@ describe('encode', () => {
         channels: 3,
       }),
     ).toThrow('wrong data size. Found 10, expected 3');
-    expect(() =>
-      encode({
-        width: 1,
-        height: 1,
-        depth: 1,
-        data: new Uint8Array(10),
-        channels: 3,
-      }),
-    ).toThrow('unsupported bit depth: 1');
   });
 });
 
