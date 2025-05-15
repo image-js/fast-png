@@ -27,8 +27,9 @@ export function decodeInterlaceNull(
 ): PngDataArray {
   const { data, width, height, channels, depth } = params;
 
-  const bytesPerPixel = (channels * depth) / 8;
-  const bytesPerLine = width * bytesPerPixel;
+  const bytesPerPixel = Math.ceil((channels * depth) / 8);
+  const bytesPerLine =
+    depth === 1 ? Math.ceil(width / 8) : width * bytesPerPixel;
   const newData = new Uint8Array(height * bytesPerLine);
 
   let prevLine = empty;
@@ -38,6 +39,7 @@ export function decodeInterlaceNull(
 
   for (let i = 0; i < height; i++) {
     currentLine = data.subarray(offset + 1, offset + 1 + bytesPerLine);
+
     newLine = newData.subarray(i * bytesPerLine, (i + 1) * bytesPerLine);
     switch (data[offset]) {
       case 0:
@@ -83,6 +85,18 @@ export function decodeInterlaceNull(
       }
     }
     return uint16Data;
+  } else if (depth === 1) {
+    const uint8Data = new Uint8Array(width * height * channels);
+
+    let pixelIndex = 0;
+    for (let k = 0; k < newData.length && pixelIndex < uint8Data.length; k++) {
+      const bitsToProcess = Math.min(8, uint8Data.length - pixelIndex);
+
+      for (let bit = 0; bit < bitsToProcess; bit++) {
+        uint8Data[pixelIndex++] = (newData[k] >> (7 - bit)) & 1;
+      }
+    }
+    return uint8Data;
   } else {
     return newData;
   }

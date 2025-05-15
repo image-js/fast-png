@@ -101,14 +101,15 @@ export default class PngEncoder extends IOBuffer {
 
   private encodeData(): void {
     const { width, height, channels, depth, data } = this._png;
-    const slotsPerLine = channels * width;
+    const slotsPerLine =
+      depth !== 1 ? channels * width : Math.ceil(width / 8) * channels;
     const newData = new IOBuffer().setBigEndian();
     let offset = 0;
     if (this._interlaceMethod === InterlaceMethod.NO_INTERLACE) {
       for (let i = 0; i < height; i++) {
         newData.writeByte(0); // no filter
         /* istanbul ignore else */
-        if (depth === 8) {
+        if (depth === 8 || depth === 1) {
           offset = writeDataBytes(data, newData, slotsPerLine, offset);
         } else if (depth === 16) {
           offset = writeDataUint16(data, newData, slotsPerLine, offset);
@@ -136,7 +137,10 @@ export default class PngEncoder extends IOBuffer {
       text: data.text,
     };
     this._colorType = colorType;
-    const expectedSize = png.width * png.height * channels;
+    const expectedSize =
+      depth !== 1
+        ? png.width * png.height * channels
+        : Math.ceil(png.width / 8) * png.height * channels;
     if (png.data.length !== expectedSize) {
       throw new RangeError(
         `wrong data size. Found ${png.data.length}, expected ${expectedSize}`,
@@ -164,7 +168,7 @@ function getColorType(data: ImageData): GetColorTypeReturn {
   if (channels !== 4 && channels !== 3 && channels !== 2 && channels !== 1) {
     throw new RangeError(`unsupported number of channels: ${channels}`);
   }
-  if (depth !== 8 && depth !== 16) {
+  if (depth !== 8 && depth !== 16 && depth !== 1) {
     throw new RangeError(`unsupported bit depth: ${depth}`);
   }
 
