@@ -17,16 +17,20 @@ import {
 import type {
   BitDepth,
   DecodedPng,
-  DecodedPngFrame,
+  DecodedApng,
+  DecodedApngFrame,
+  ApngFrame,
   DecoderInputType,
   IndexedColors,
   PngDecoderOptions,
+  PngDataArray,
 } from './types';
 
 export default class PngDecoder extends IOBuffer {
   private readonly _checkCrc: boolean;
   private _inflator: Inflator;
   private readonly _png: DecodedPng;
+  private readonly _apng: DecodedApng;
   private _end: boolean;
   private _hasPalette: boolean;
   private _palette: IndexedColors;
@@ -39,6 +43,7 @@ export default class PngDecoder extends IOBuffer {
   private _isAnimated: boolean;
   private _numberOfFrames: number;
   private _numberOfPlays: number;
+  private _frames: ApngFrame[];
   public constructor(data: DecoderInputType, options: PngDecoderOptions = {}) {
     super(data);
     const { checkCrc = false } = options;
@@ -52,7 +57,16 @@ export default class PngDecoder extends IOBuffer {
       depth: 1,
       text: {},
     };
-
+    this._apng = {
+      width: -1,
+      height: -1,
+      channels: -1,
+      depth: 1,
+      numberOfFrames: 0,
+      numberOfPlays: 0,
+      text: {},
+      frames: [],
+    };
     this._end = false;
     this._hasPalette = false;
     this._palette = [];
@@ -65,31 +79,40 @@ export default class PngDecoder extends IOBuffer {
     this._isAnimated = false;
     this._numberOfFrames = 0;
     this._numberOfPlays = 0;
+    this._frames = [];
     // PNG is always big endian
     // https://www.w3.org/TR/PNG/#7Integers-and-byte-order
     this.setBigEndian();
   }
 
-  public decode(): DecodedPng | DecodedPng[] {
+  public decode(): DecodedPng {
     checkSignature(this);
     while (!this._end) {
-      this.decodeChunk();
+      const length = this.readUint32();
+      const type = this.readChars(4);
+
+      this.decodeChunk(length, type);
     }
-    if (this._isAnimated) {
-      const result = this.decodeApngImage();
-      return result;
-    } else {
-      this.decodeImage();
-    }
+    this.decodeImage();
 
     return this._png;
   }
 
+  public decodeApng(): DecodedApng {
+    checkSignature(this);
+    while (!this._end) {
+      const length = this.readUint32();
+      const type = this.readChars(4);
+      this.decodeApngChunk(length, type);
+    }
+    this.decodeApngImage();
+    return this._apng;
+  }
+
   // https://www.w3.org/TR/PNG/#5Chunk-layout
-  private decodeChunk(): void {
-    const length = this.readUint32();
-    const type = this.readChars(4);
+  private decodeChunk(length: number, type: string): void {
     const offset = this.offset;
+
     switch (type) {
       // 11.2 Critical chunks
       case 'IHDR': // 11.2.2 IHDR Image header
@@ -97,10 +120,6 @@ export default class PngDecoder extends IOBuffer {
         break;
       case 'PLTE': // 11.2.3 PLTE Palette
         this.decodePLTE(length);
-        break;
-
-      case 'fdAT':
-        this.decodeIDAT(length, true);
         break;
       case 'IDAT': // 11.2.4 IDAT Image data
         this.decodeIDAT(length);
@@ -121,11 +140,42 @@ export default class PngDecoder extends IOBuffer {
       case 'pHYs': // 11.3.5.3 pHYs Physical pixel dimensions
         this.decodepHYs();
         break;
+      default:
+        this.skip(length);
+        break;
+    }
+    if (this.offset - offset !== length) {
+      throw new Error(`Length mismatch while decoding chunk ${type}`);
+    }
+    if (this._checkCrc) {
+      checkCrc(this, length + 4, type);
+    } else {
+      this.skip(4);
+    }
+  }
+  private decodeApngChunk(length: number, type: string): void {
+    const offset = this.offset;
+    switch (type) {
+      // 11.2 Critical chunks
+      case 'IHDR': // 11.2.2 IHDR Image header
+      case 'PLTE': // 11.2.3 PLTE Palette
+      case 'IDAT': // 11.2.4 IDAT Image data
+      case 'IEND': // 11.2.5 IEND Image trailer
+      case 'tRNS': // 11.3.2.1 tRNS Transparency
+      case 'iCCP': // 11.3.3.3 iCCP Embedded ICC profile
+      case textChunkName: // 11.3.4.3 tEXt Textual data
+      case 'pHYs': // 11.3.5.3 pHYs Physical pixel dimensions
+        this.decodeChunk(length, type);
+        this.offset = offset + length;
+        break;
       case 'acTL':
         this.decodeACTL();
         break;
       case 'fcTL':
         this.decodeFCTL();
+        break;
+      case 'fdAT':
+        this.decodeFDAT(length);
         break;
       default:
         this.skip(length);
@@ -185,17 +235,17 @@ export default class PngDecoder extends IOBuffer {
 
     this._filterMethod = this.readUint8() as FilterMethod;
     this._interlaceMethod = this.readUint8() as InterlaceMethod;
+    console.log(this);
   }
 
   private decodeACTL(): void {
     this._numberOfFrames = this.readUint32();
     this._numberOfPlays = this.readUint32();
     this._isAnimated = true;
-    this._png.frames = [];
   }
 
   private decodeFCTL(): void {
-    const image: DecodedPngFrame = {
+    const image: ApngFrame = {
       sequenceNumber: this.readUint32(),
       width: this.readUint32(),
       height: this.readUint32(),
@@ -207,7 +257,7 @@ export default class PngDecoder extends IOBuffer {
       blendOp: this.readUint8(),
       data: new Uint8Array(0),
     };
-    this._png.frames?.push(image);
+    this._frames.push(image);
   }
   // https://www.w3.org/TR/PNG/#11PLTE
   private decodePLTE(length: number): void {
@@ -226,23 +276,31 @@ export default class PngDecoder extends IOBuffer {
   }
 
   // https://www.w3.org/TR/PNG/#11IDAT
-  protected decodeIDAT(length: number, isFrameData?: boolean): void {
-    let dataLength = length;
-    let dataOffset = this.offset + this.byteOffset;
-
-    // If it's an fdAT chunk, skip the 4-byte sequence number
-    if (isFrameData) {
-      dataOffset += 4;
-      dataLength -= 4;
-    }
+  private decodeIDAT(length: number): void {
+    const dataLength = length;
+    const dataOffset = this.offset + this.byteOffset;
     this._inflator.push(new Uint8Array(this.buffer, dataOffset, dataLength));
-    const lastFrame = this._png.frames?.at(-1);
-    if (this._inflator.result?.length > 0 && lastFrame) {
-      lastFrame.data = this._inflator.result.slice() as Uint8Array;
-      this._inflator = new Inflator();
-    }
 
     this.skip(length);
+  }
+  private decodeFDAT(length: number): void {
+    let dataLength = length;
+    let dataOffset = this.offset + this.byteOffset;
+    dataOffset += 4;
+    dataLength -= 4;
+    if (this._inflator.result) {
+      this._png.data = this._inflator.result as PngDataArray;
+      this._inflator = new Inflator();
+    }
+    this._inflator.push(new Uint8Array(this.buffer, dataOffset, dataLength));
+
+    const lastFrame = this._frames.at(-1) as ApngFrame;
+
+    lastFrame.data = this._inflator.result.slice() as Uint8Array;
+    this._inflator = new Inflator();
+
+    this.skip(length);
+    console.log(this);
   }
 
   // https://www.w3.org/TR/PNG/#11tRNS
@@ -324,48 +382,36 @@ export default class PngDecoder extends IOBuffer {
   }
 
   private decodeApngImage() {
-    const result: DecodedPng[] = [];
-    for (let i = 0; i < this._numberOfFrames; i++) {
-      const frame = this._png.frames?.at(i);
-      if (frame) {
-        if (this._interlaceMethod === InterlaceMethod.NO_INTERLACE) {
-          frame.data = decodeInterlaceNull({
-            data: frame.data,
-            width: frame.width,
-            height: frame.height,
-            channels: this._png.channels,
-            depth: this._png.depth,
-          }) as Uint8Array;
-        } else if (this._interlaceMethod === InterlaceMethod.ADAM7) {
-          frame.data = decodeInterlaceAdam7({
-            data: frame.data,
-            width: frame.width,
-            height: frame.height,
-            channels: this._png.channels,
-            depth: this._png.depth,
-          }) as Uint8Array;
-        }
+    this._apng.width = this._png.width;
+    this._apng.height = this._png.height;
+    this._apng.channels = this._png.channels;
+    this._apng.depth = this._png.depth;
+    this._apng.numberOfFrames = this._numberOfFrames;
+    this._apng.numberOfPlays = this._numberOfPlays;
+    this._apng.text = this._png.text;
+    this._apng.resolution = this._png.resolution;
 
-        const imageFrame: DecodedPng = {
-          width: this._png.width,
-          height: this._png.height,
-          channels: this._png.channels,
-          depth: this._png.depth,
-          data:
-            this._png.depth === 8
-              ? new Uint8Array(
-                  this._png.width * this._png.height * this._png.channels,
-                )
-              : new Uint16Array(
-                  this._png.width * this._png.height * this._png.channels,
-                ),
-          text: this._png.text,
-        };
+    for (let i = 0; i < this._frames.length; i++) {
+      const newFrame: DecodedApngFrame = {
+        sequenceNumber: this._frames[i].sequenceNumber,
+        delayNumber: this._frames[i].delayNumber,
+        delayDenominator: this._frames[i].delayDenominator,
+        data: this._apng.depth === 8 ? new Uint8Array(0) : new Uint16Array(0),
+      };
+      const frame = this._frames.at(i);
+      if (frame) {
+        frame.data = decodeInterlaceNull({
+          data: frame.data,
+          width: frame.width,
+          height: frame.height,
+          channels: this._apng.channels,
+          depth: this._apng.depth,
+        }) as Uint8Array;
         if (this._hasPalette) {
-          imageFrame.palette = this._palette;
+          this._apng.palette = this._palette;
         }
         if (this._hasTransparency) {
-          imageFrame.transparency = this._transparency;
+          this._apng.transparency = this._transparency;
         }
         if (
           i === 0 ||
@@ -374,34 +420,30 @@ export default class PngDecoder extends IOBuffer {
             frame.width === this._png.width &&
             frame.height === this._png.height)
         ) {
-          imageFrame.data.set(frame.data);
+          newFrame.data.set(frame.data);
         } else {
-          const prevFrame = result.at(i - 1);
-          this.disposeFrame(
-            frame.disposeOp as DisposeOpType,
-            prevFrame as DecodedPng,
-            imageFrame,
-          );
-          this.addFrameDataToCanvas(imageFrame, frame);
+          const prevFrame = this._apng.frames.at(i - 1);
+          this.disposeFrame(frame, prevFrame as DecodedApngFrame, newFrame);
+          this.addFrameDataToCanvas(newFrame, frame);
         }
 
-        result.push(imageFrame);
+        this._apng.frames.push(newFrame);
       }
     }
-    return result;
+    return this._apng;
   }
   private disposeFrame(
-    disposeOp: DisposeOpType,
-    prevFrame: DecodedPng,
-    imageFrame: DecodedPng,
+    frame: ApngFrame,
+    prevFrame: DecodedApngFrame,
+    imageFrame: DecodedApngFrame,
   ): void {
-    switch (disposeOp) {
+    switch (frame.disposeOp) {
       case DisposeOpType.NONE:
         break;
       case DisposeOpType.BACKGROUND:
         for (let row = 0; row < this._png.height; row++) {
           for (let col = 0; col < this._png.width; col++) {
-            const index = (row * prevFrame.width + col) * this._png.channels;
+            const index = (row * frame.width + col) * this._png.channels;
             for (let channel = 0; channel < this._png.channels; channel++) {
               imageFrame.data[index + channel] = 0;
             }
@@ -416,8 +458,8 @@ export default class PngDecoder extends IOBuffer {
     }
   }
   private addFrameDataToCanvas(
-    imageFrame: DecodedPng,
-    frame: DecodedPngFrame,
+    imageFrame: DecodedApngFrame,
+    frame: ApngFrame,
   ): void {
     const maxValue = 1 << this._png.depth;
     const calculatePixelIndices = (row: number, col: number) => {
@@ -470,7 +512,10 @@ export default class PngDecoder extends IOBuffer {
         `Error while decompressing the data: ${this._inflator.err}`,
       );
     }
-    const data = this._inflator.result;
+
+    const data = this._isAnimated
+      ? (this._frames?.at(0) as ApngFrame).data
+      : this._inflator.result;
 
     if (this._filterMethod !== FilterMethod.ADAPTIVE) {
       throw new Error(`Filter method ${this._filterMethod} not supported`);

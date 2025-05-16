@@ -55,10 +55,24 @@ export interface DecodedPng {
   palette?: IndexedColors;
   transparency?: Uint16Array;
   iccEmbeddedProfile?: IccEmbeddedProfile;
-  frames?: DecodedPngFrame[];
 }
 
-export interface DecodedPngFrame {
+export interface DecodedApng {
+  width: number;
+  height: number;
+  depth: BitDepth;
+  channels: number;
+  numberOfFrames: number;
+  numberOfPlays: number;
+  text: Record<string, string>;
+  resolution?: PngResolution;
+  palette?: IndexedColors;
+  transparency?: Uint16Array;
+  iccEmbeddedProfile?: IccEmbeddedProfile;
+  frames: DecodedApngFrame[];
+}
+
+export interface ApngFrame {
   sequenceNumber: number;
   width: number;
   height: number;
@@ -69,6 +83,13 @@ export interface DecodedPngFrame {
   disposeOp: number;
   blendOp: number;
   data: Uint8Array;
+}
+
+export interface DecodedApngFrame {
+  sequenceNumber: number;
+  delayNumber: number;
+  delayDenominator: number;
+  data: PngDataArray;
 }
 
 export interface PngDecoderOptions {
