@@ -119,6 +119,16 @@ describe('decode', () => {
     expect(img.transparency[0]).toBe(0);
   });
 
+  it('1bit depth ', () => {
+    const decoded = loadAndDecode('bwImage.png');
+    expect(decoded.data).toBeInstanceOf(Uint8Array);
+    // Width of 225/8 = 28.125 so we need 29 bytes. Last pixel will fit on
+    // the 29th byte.
+    expect(decoded.data.length).toEqual(6525);
+    expect(decoded.data[28]).toEqual(128);
+    expect(decoded.data[57]).toEqual(128);
+  });
+
   it('should not throw when CRC is correct', () => {
     loadAndDecode('palette.png', { checkCrc: true });
   });
