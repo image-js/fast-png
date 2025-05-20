@@ -287,9 +287,10 @@ export default class PngDecoder extends IOBuffer {
 
     this._inflator.push(new Uint8Array(this.buffer, dataOffset, dataLength));
     if (this._inflator.err) {
-      throw new Error(this._inflator.msg);
+      throw new Error(
+        `Error while decompressing the data: ${this._inflator.err}`,
+      );
     }
-
     this.skip(length);
   }
   private decodeFDAT(length: number): void {
@@ -300,7 +301,9 @@ export default class PngDecoder extends IOBuffer {
     dataLength -= 4;
     this._inflator.push(new Uint8Array(this.buffer, dataOffset, dataLength));
     if (this._inflator.err) {
-      throw new Error(this._inflator.msg);
+      throw new Error(
+        `Error while decompressing the data: ${this._inflator.err}`,
+      );
     }
     this.skip(length);
   }
