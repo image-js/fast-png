@@ -23,7 +23,6 @@ import type {
   DecoderInputType,
   IndexedColors,
   PngDecoderOptions,
-  PngDataArray,
 } from './types';
 
 export default class PngDecoder extends IOBuffer {
@@ -235,7 +234,6 @@ export default class PngDecoder extends IOBuffer {
 
     this._filterMethod = this.readUint8() as FilterMethod;
     this._interlaceMethod = this.readUint8() as InterlaceMethod;
-    console.log(this);
   }
 
   private decodeACTL(): void {
@@ -279,28 +277,52 @@ export default class PngDecoder extends IOBuffer {
   private decodeIDAT(length: number): void {
     const dataLength = length;
     const dataOffset = this.offset + this.byteOffset;
-    this._inflator.push(new Uint8Array(this.buffer, dataOffset, dataLength));
 
-    this.skip(length);
+    this._inflator.push(new Uint8Array(this.buffer, dataOffset, dataLength));
+    if (this._inflator.err) {
+      throw new Error(this._inflator.msg);
+    }
+
+    if (this._isAnimated) {
+      const result = this._inflator.result;
+
+      const lastFrame = this._frames.at(-1) as ApngFrame;
+      // Handles situations where frame has ACTL and IDAT chunks, skipping
+      // FCTL chunk.
+      if (lastFrame) {
+        lastFrame.data = result as Uint8Array;
+      } else {
+        this._frames.push({
+          sequenceNumber: 0,
+          width: this._png.width,
+          height: this._png.height,
+          xOffset: 0,
+          yOffset: 0,
+          delayNumber: 0,
+          delayDenominator: 0,
+          disposeOp: DisposeOpType.NONE,
+          blendOp: BlendOpType.SOURCE,
+          data: result as Uint8Array,
+        });
+      }
+
+      this._inflator = new Inflator();
+    }
+    this.skip(dataLength);
   }
   private decodeFDAT(length: number): void {
     let dataLength = length;
     let dataOffset = this.offset + this.byteOffset;
     dataOffset += 4;
     dataLength -= 4;
-    if (this._inflator.result) {
-      this._png.data = this._inflator.result as PngDataArray;
-      this._inflator = new Inflator();
-    }
     this._inflator.push(new Uint8Array(this.buffer, dataOffset, dataLength));
-
+    if (this._inflator.err) {
+      throw new Error(this._inflator.msg);
+    }
     const lastFrame = this._frames.at(-1) as ApngFrame;
-
-    lastFrame.data = this._inflator.result.slice() as Uint8Array;
+    lastFrame.data = this._inflator.result as Uint8Array;
     this._inflator = new Inflator();
-
     this.skip(length);
-    console.log(this);
   }
 
   // https://www.w3.org/TR/PNG/#11tRNS
@@ -391,22 +413,32 @@ export default class PngDecoder extends IOBuffer {
     this._apng.text = this._png.text;
     this._apng.resolution = this._png.resolution;
 
-    for (let i = 0; i < this._frames.length; i++) {
+    for (let i = 0; i < this._numberOfFrames; i++) {
       const newFrame: DecodedApngFrame = {
         sequenceNumber: this._frames[i].sequenceNumber,
         delayNumber: this._frames[i].delayNumber,
         delayDenominator: this._frames[i].delayDenominator,
-        data: this._apng.depth === 8 ? new Uint8Array(0) : new Uint16Array(0),
+        data:
+          this._apng.depth === 8
+            ? new Uint8Array(
+                this._apng.width * this._apng.height * this._apng.channels,
+              )
+            : new Uint16Array(
+                this._apng.width * this._apng.height * this._apng.channels,
+              ),
       };
+
       const frame = this._frames.at(i);
+
       if (frame) {
         frame.data = decodeInterlaceNull({
-          data: frame.data,
+          data: frame.data as Uint8Array,
           width: frame.width,
           height: frame.height,
           channels: this._apng.channels,
           depth: this._apng.depth,
-        }) as Uint8Array;
+        });
+
         if (this._hasPalette) {
           this._apng.palette = this._palette;
         }
@@ -420,13 +452,12 @@ export default class PngDecoder extends IOBuffer {
             frame.width === this._png.width &&
             frame.height === this._png.height)
         ) {
-          newFrame.data.set(frame.data);
+          newFrame.data = frame.data;
         } else {
           const prevFrame = this._apng.frames.at(i - 1);
           this.disposeFrame(frame, prevFrame as DecodedApngFrame, newFrame);
           this.addFrameDataToCanvas(newFrame, frame);
         }
-
         this._apng.frames.push(newFrame);
       }
     }

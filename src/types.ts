@@ -82,7 +82,7 @@ export interface ApngFrame {
   delayDenominator: number;
   disposeOp: number;
   blendOp: number;
-  data: Uint8Array;
+  data: PngDataArray;
 }
 
 export interface DecodedApngFrame {
