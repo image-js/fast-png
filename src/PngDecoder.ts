@@ -43,6 +43,8 @@ export default class PngDecoder extends IOBuffer {
   private _numberOfFrames: number;
   private _numberOfPlays: number;
   private _frames: ApngFrame[];
+  private _writingDataChunks: boolean;
+
   public constructor(data: DecoderInputType, options: PngDecoderOptions = {}) {
     super(data);
     const { checkCrc = false } = options;
@@ -79,6 +81,7 @@ export default class PngDecoder extends IOBuffer {
     this._numberOfFrames = 0;
     this._numberOfPlays = 0;
     this._frames = [];
+    this._writingDataChunks = false;
     // PNG is always big endian
     // https://www.w3.org/TR/PNG/#7Integers-and-byte-order
     this.setBigEndian();
@@ -154,6 +157,9 @@ export default class PngDecoder extends IOBuffer {
   }
   private decodeApngChunk(length: number, type: string): void {
     const offset = this.offset;
+    if (type !== 'fdAT' && type !== 'IDAT' && this._writingDataChunks) {
+      this.pushDataToFrame();
+    }
     switch (type) {
       // 11.2 Critical chunks
       case 'IHDR': // 11.2.2 IHDR Image header
@@ -275,6 +281,7 @@ export default class PngDecoder extends IOBuffer {
 
   // https://www.w3.org/TR/PNG/#11IDAT
   private decodeIDAT(length: number): void {
+    this._writingDataChunks = true;
     const dataLength = length;
     const dataOffset = this.offset + this.byteOffset;
 
@@ -283,34 +290,10 @@ export default class PngDecoder extends IOBuffer {
       throw new Error(this._inflator.msg);
     }
 
-    if (this._isAnimated) {
-      const result = this._inflator.result;
-
-      const lastFrame = this._frames.at(-1) as ApngFrame;
-      // Handles situations where frame has ACTL and IDAT chunks, skipping
-      // FCTL chunk.
-      if (lastFrame) {
-        lastFrame.data = result as Uint8Array;
-      } else {
-        this._frames.push({
-          sequenceNumber: 0,
-          width: this._png.width,
-          height: this._png.height,
-          xOffset: 0,
-          yOffset: 0,
-          delayNumber: 0,
-          delayDenominator: 0,
-          disposeOp: DisposeOpType.NONE,
-          blendOp: BlendOpType.SOURCE,
-          data: result as Uint8Array,
-        });
-      }
-
-      this._inflator = new Inflator();
-    }
-    this.skip(dataLength);
+    this.skip(length);
   }
   private decodeFDAT(length: number): void {
+    this._writingDataChunks = true;
     let dataLength = length;
     let dataOffset = this.offset + this.byteOffset;
     dataOffset += 4;
@@ -319,9 +302,6 @@ export default class PngDecoder extends IOBuffer {
     if (this._inflator.err) {
       throw new Error(this._inflator.msg);
     }
-    const lastFrame = this._frames.at(-1) as ApngFrame;
-    lastFrame.data = this._inflator.result as Uint8Array;
-    this._inflator = new Inflator();
     this.skip(length);
   }
 
@@ -579,6 +559,29 @@ export default class PngDecoder extends IOBuffer {
     if (this._hasTransparency) {
       this._png.transparency = this._transparency;
     }
+  }
+
+  private pushDataToFrame() {
+    const result = this._inflator.result;
+    const lastFrame = this._frames.at(-1);
+    if (lastFrame) {
+      lastFrame.data = result as Uint8Array;
+    } else {
+      this._frames.push({
+        sequenceNumber: 0,
+        width: this._png.width,
+        height: this._png.height,
+        xOffset: 0,
+        yOffset: 0,
+        delayNumber: 0,
+        delayDenominator: 0,
+        disposeOp: DisposeOpType.NONE,
+        blendOp: BlendOpType.SOURCE,
+        data: result as Uint8Array,
+      });
+    }
+    this._inflator = new Inflator();
+    this._writingDataChunks = false;
   }
 }
 

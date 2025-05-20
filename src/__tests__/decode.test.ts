@@ -246,6 +246,12 @@ describe('decode', () => {
     expect(decodedApng.frames[0].data[0]).toEqual(255);
     expect(decodedApng.frames[110].data[1]).toEqual(1);
   });
+  it('RGBA image with multiple data chunks per frame', () => {
+    const decodedApng = loadAndDecodeApng('rickApng.png');
+    expect(decodedApng.frames.length).toEqual(decodedApng.numberOfFrames);
+    expect(decodedApng.width).toEqual(1300);
+    expect(decodedApng.height).toEqual(1300);
+  });
 });
 
 function loadAndDecode(img: string, options?: PngDecoderOptions): DecodedPng {
