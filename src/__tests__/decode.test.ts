@@ -224,7 +224,7 @@ describe('decode', () => {
       );
     }
   });
-  it('RGB square 8-bit image', () => {
+  it('APNG RGB square 8-bit image', () => {
     const decodedApng = loadAndDecodeApng('squareApng.png');
 
     expect(decodedApng).toBeDefined();
@@ -250,17 +250,30 @@ describe('decode', () => {
       expect(decodedApng.palette?.at(2)).toEqual([255, 0, 0, 255]);
     }
   });
-  it('RGB square 8-bit image', () => {
+  it('APNG RGB blend 8-bit image', () => {
     const decodedApng = loadAndDecodeApng('blendOpApng.png');
     expect(decodedApng.frames.length).toEqual(decodedApng.numberOfFrames);
     expect(decodedApng.frames[0].data[0]).toEqual(255);
     expect(decodedApng.frames[110].data[1]).toEqual(1);
   });
-  it('RGBA image with multiple data chunks per frame', () => {
+  it('APNG RGBA image with multiple data chunks per frame', () => {
     const decodedApng = loadAndDecodeApng('rickApng.png');
     expect(decodedApng.frames.length).toEqual(decodedApng.numberOfFrames);
     expect(decodedApng.width).toEqual(1300);
     expect(decodedApng.height).toEqual(1300);
+  });
+  it('decode APNG image as PNG', () => {
+    const decodedPng = loadAndDecode('beachBallApng.png');
+    expect(decodedPng.data).toBeDefined();
+    expect(decodedPng.width).toEqual(100);
+    expect(decodedPng.height).toEqual(100);
+  });
+  it('decode PNG image as APNG', () => {
+    const decodedApng = loadAndDecodeApng('palette.png');
+    expect(decodedApng.frames[0]).toBeDefined();
+    expect(decodedApng.frames.length).toEqual(decodedApng.numberOfFrames);
+    expect(decodedApng.width).toEqual(150);
+    expect(decodedApng.height).toEqual(200);
   });
 });
 

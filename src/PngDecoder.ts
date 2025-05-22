@@ -63,7 +63,7 @@ export default class PngDecoder extends IOBuffer {
       height: -1,
       channels: -1,
       depth: 1,
-      numberOfFrames: 0,
+      numberOfFrames: 1,
       numberOfPlays: 0,
       text: {},
       frames: [],
@@ -78,7 +78,7 @@ export default class PngDecoder extends IOBuffer {
     this._interlaceMethod = InterlaceMethod.UNKNOWN;
     this._colorType = ColorType.UNKNOWN;
     this._isAnimated = false;
-    this._numberOfFrames = 0;
+    this._numberOfFrames = 1;
     this._numberOfPlays = 0;
     this._frames = [];
     this._writingDataChunks = false;
@@ -105,6 +105,7 @@ export default class PngDecoder extends IOBuffer {
     while (!this._end) {
       const length = this.readUint32();
       const type = this.readChars(4);
+
       this.decodeApngChunk(length, type);
     }
     this.decodeApngImage();
@@ -161,18 +162,6 @@ export default class PngDecoder extends IOBuffer {
       this.pushDataToFrame();
     }
     switch (type) {
-      // 11.2 Critical chunks
-      case 'IHDR': // 11.2.2 IHDR Image header
-      case 'PLTE': // 11.2.3 PLTE Palette
-      case 'IDAT': // 11.2.4 IDAT Image data
-      case 'IEND': // 11.2.5 IEND Image trailer
-      case 'tRNS': // 11.3.2.1 tRNS Transparency
-      case 'iCCP': // 11.3.3.3 iCCP Embedded ICC profile
-      case textChunkName: // 11.3.4.3 tEXt Textual data
-      case 'pHYs': // 11.3.5.3 pHYs Physical pixel dimensions
-        this.decodeChunk(length, type);
-        this.offset = offset + length;
-        break;
       case 'acTL':
         this.decodeACTL();
         break;
@@ -183,7 +172,8 @@ export default class PngDecoder extends IOBuffer {
         this.decodeFDAT(length);
         break;
       default:
-        this.skip(length);
+        this.decodeChunk(length, type);
+        this.offset = offset + length;
         break;
     }
     if (this.offset - offset !== length) {
@@ -395,7 +385,6 @@ export default class PngDecoder extends IOBuffer {
     this._apng.numberOfPlays = this._numberOfPlays;
     this._apng.text = this._png.text;
     this._apng.resolution = this._png.resolution;
-
     for (let i = 0; i < this._numberOfFrames; i++) {
       const newFrame: DecodedApngFrame = {
         sequenceNumber: this._frames[i].sequenceNumber,
@@ -412,7 +401,6 @@ export default class PngDecoder extends IOBuffer {
       };
 
       const frame = this._frames.at(i);
-
       if (frame) {
         frame.data = decodeInterlaceNull({
           data: frame.data as Uint8Array,
