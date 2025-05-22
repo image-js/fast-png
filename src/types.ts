@@ -57,6 +57,41 @@ export interface DecodedPng {
   iccEmbeddedProfile?: IccEmbeddedProfile;
 }
 
+export interface DecodedApng {
+  width: number;
+  height: number;
+  depth: BitDepth;
+  channels: number;
+  numberOfFrames: number;
+  numberOfPlays: number;
+  text: Record<string, string>;
+  resolution?: PngResolution;
+  palette?: IndexedColors;
+  transparency?: Uint16Array;
+  iccEmbeddedProfile?: IccEmbeddedProfile;
+  frames: DecodedApngFrame[];
+}
+
+export interface ApngFrame {
+  sequenceNumber: number;
+  width: number;
+  height: number;
+  xOffset: number;
+  yOffset: number;
+  delayNumber: number;
+  delayDenominator: number;
+  disposeOp: number;
+  blendOp: number;
+  data: PngDataArray;
+}
+
+export interface DecodedApngFrame {
+  sequenceNumber: number;
+  delayNumber: number;
+  delayDenominator: number;
+  data: PngDataArray;
+}
+
 export interface PngDecoderOptions {
   checkCrc?: boolean;
 }

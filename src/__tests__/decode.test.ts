@@ -4,8 +4,8 @@ import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import type { PngDecoderOptions, DecodedPng } from '../index';
-import { decode } from '../index';
+import type { PngDecoderOptions, DecodedPng, DecodedApng } from '../index';
+import { decode, decodeApng } from '../index';
 
 describe('decode', () => {
   it('BW2x2', () => {
@@ -164,7 +164,7 @@ describe('decode', () => {
 
   it('tEXt chunk - ASCII', () => {
     const { text } = loadAndDecode('text-ascii.png');
-    expect(text).toStrictEqual({
+    expect(text).toEqual({
       Smiles: 'CCCC',
       'date:create': '2024-02-12T15:56:01+00:00',
       'date:modify': '2024-02-12T15:55:48+00:00',
@@ -184,13 +184,107 @@ describe('decode', () => {
       encoding: 'bstring',
       compressed: true,
     });
+
     // Binary string that we don't know how to interpret.
     expect(json.encoded).toHaveLength(654);
+  });
+
+  it('APNG small greyscale image', () => {
+    const decodedApng = loadAndDecodeApng('testApng.png');
+    expect(decodedApng).toBeDefined();
+    expect(decodedApng.frames.length).toStrictEqual(2);
+
+    const frame1 = decodedApng.frames.at(0);
+    const frame2 = decodedApng.frames.at(1);
+
+    expect(frame1?.data.length).toEqual(200);
+    expect(frame2?.data.length).toEqual(200);
+    expect(frame1?.data.slice(0, 11)).toStrictEqual(
+      new Uint8Array([255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255]),
+    );
+    expect(frame2?.data.slice(0, 11)).toStrictEqual(
+      new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255]),
+    );
+  });
+  it('APNG big RGBA image', () => {
+    const decodedApng = loadAndDecodeApng('beachBallApng.png');
+    expect(decodedApng).toBeDefined();
+    expect(decodedApng.frames.length).toStrictEqual(decodedApng.numberOfFrames);
+
+    expect(decodedApng.frames[0].data.length).toEqual(40000);
+
+    const frame1 = decodedApng.frames.at(0);
+    const frame2 = decodedApng.frames.at(1);
+    if (frame1 && frame2) {
+      expect(frame1.data.slice(0, 11)).toStrictEqual(
+        new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
+      );
+      expect(frame2.data.length).toEqual(
+        decodedApng.width * decodedApng.height * decodedApng.channels,
+      );
+    }
+  });
+  it('APNG RGB square 8-bit image', () => {
+    const decodedApng = loadAndDecodeApng('squareApng.png');
+
+    expect(decodedApng).toBeDefined();
+    expect(decodedApng.frames.length).toStrictEqual(decodedApng.numberOfFrames);
+    expect(decodedApng.frames[0].data.length).toEqual(25);
+    const frame1 = decodedApng.frames.at(0);
+    const frame2 = decodedApng.frames.at(1);
+    if (frame1 && frame2) {
+      expect(frame1.data).toStrictEqual(
+        new Uint8Array([
+          1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 2, 2, 2, 1, 1, 2, 2, 2, 1, 1, 1, 1,
+          1, 1,
+        ]),
+      );
+      expect(frame2.data).toEqual(
+        new Uint8Array([
+          2, 2, 2, 2, 2, 2, 1, 1, 1, 2, 2, 1, 1, 1, 2, 2, 1, 1, 1, 2, 2, 2, 2,
+          2, 2,
+        ]),
+      );
+      expect(decodedApng.palette?.length).toStrictEqual(3);
+      expect(decodedApng.palette?.at(1)).toEqual([0, 0, 255, 255]);
+      expect(decodedApng.palette?.at(2)).toEqual([255, 0, 0, 255]);
+    }
+  });
+  it('APNG RGB blend 8-bit image', () => {
+    const decodedApng = loadAndDecodeApng('blendOpApng.png');
+    expect(decodedApng.frames.length).toEqual(decodedApng.numberOfFrames);
+    expect(decodedApng.frames[0].data[0]).toEqual(255);
+    expect(decodedApng.frames[110].data[1]).toEqual(1);
+  });
+  it('APNG RGBA image with multiple data chunks per frame', () => {
+    const decodedApng = loadAndDecodeApng('rickApng.png');
+    expect(decodedApng.frames.length).toEqual(decodedApng.numberOfFrames);
+    expect(decodedApng.width).toEqual(1300);
+    expect(decodedApng.height).toEqual(1300);
+  });
+  it('decode APNG image as PNG', () => {
+    const decodedPng = loadAndDecode('beachBallApng.png');
+    expect(decodedPng.data).toBeDefined();
+    expect(decodedPng.width).toEqual(100);
+    expect(decodedPng.height).toEqual(100);
+  });
+  it('decode PNG image as APNG', () => {
+    const decodedApng = loadAndDecodeApng('palette.png');
+    expect(decodedApng.frames[0]).toBeDefined();
+    expect(decodedApng.frames.length).toEqual(decodedApng.numberOfFrames);
+    expect(decodedApng.width).toEqual(150);
+    expect(decodedApng.height).toEqual(200);
   });
 });
 
 function loadAndDecode(img: string, options?: PngDecoderOptions): DecodedPng {
   return decode(readFileSync(join(__dirname, '../../img', img)), options);
+}
+function loadAndDecodeApng(
+  img: string,
+  options?: PngDecoderOptions,
+): DecodedApng {
+  return decodeApng(readFileSync(join(__dirname, '../../img', img)), options);
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
