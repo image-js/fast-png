@@ -1,5 +1,14 @@
 # Changelog
 
+## [6.4.0](https://github.com/image-js/fast-png/compare/v6.3.0...v6.4.0) (2025-05-22)
+
+
+### Features
+
+* add 1bit codec support ([#49](https://github.com/image-js/fast-png/issues/49)) ([ca41315](https://github.com/image-js/fast-png/commit/ca41315f8186b5d5fff588b9660d91592532d4c9))
+* add support for APNG ([#48](https://github.com/image-js/fast-png/issues/48)) ([a1eae12](https://github.com/image-js/fast-png/commit/a1eae124fd91c99020846441d4da307d86124f60))
+* add support for interlaced images ([#46](https://github.com/image-js/fast-png/issues/46)) ([ba91f96](https://github.com/image-js/fast-png/commit/ba91f96af903bb7168daaffc8fef2230e730ef56))
+
 ## [6.3.0](https://github.com/image-js/fast-png/compare/v6.2.0...v6.3.0) (2025-02-01)
 
 
