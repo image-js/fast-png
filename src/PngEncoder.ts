@@ -16,6 +16,7 @@ import type {
   ImageData,
   PngDataArray,
   BitDepth,
+  IndexedColors,
 } from './types';
 
 const defaultZlibOptions: DeflateFunctionOptions = {
@@ -29,6 +30,7 @@ interface PngToEncode {
   depth: BitDepth;
   channels: number;
   text?: ImageData['text'];
+  palette?: IndexedColors;
 }
 
 export default class PngEncoder extends IOBuffer {
@@ -52,6 +54,9 @@ export default class PngEncoder extends IOBuffer {
   public encode(): Uint8Array {
     writeSignature(this);
     this.encodeIHDR();
+    if (this._png.palette) {
+      this.encodePLTE();
+    }
     this.encodeData();
     if (this._png.text) {
       for (const [keyword, text] of Object.entries(this._png.text)) {
@@ -88,6 +93,20 @@ export default class PngEncoder extends IOBuffer {
     writeCrc(this, 4);
   }
 
+  private encodePLTE() {
+    const paletteLength =
+      (this._png.palette?.length as number) *
+      (this._png.palette as IndexedColors)[0].length;
+    this.writeUint32(paletteLength);
+    this.writeChars('PLTE');
+    for (const color of this._png.palette as IndexedColors) {
+      for (const channel of color) {
+        this.writeByte(channel);
+      }
+    }
+    writeCrc(this, 4 + paletteLength);
+  }
+
   // https://www.w3.org/TR/PNG/#11IDAT
   private encodeIDAT(data: PngDataArray): void {
     this.writeUint32(data.length);
@@ -102,14 +121,28 @@ export default class PngEncoder extends IOBuffer {
   private encodeData(): void {
     const { width, height, channels, depth, data } = this._png;
     const slotsPerLine =
-      depth !== 1 ? channels * width : Math.ceil(width / 8) * channels;
+      depth === 1
+        ? Math.ceil(width / 8) * channels
+        : depth === 4
+          ? Math.ceil(width / 2) * channels
+          : channels * width;
+    if (depth === 1 || depth === 4) {
+      this._png.data = stackPixelsIntoBytes(
+        data as Uint8Array,
+        width,
+        height,
+        depth,
+        channels,
+      );
+    }
+    console.log(this._png.data);
     const newData = new IOBuffer().setBigEndian();
     let offset = 0;
     if (this._interlaceMethod === InterlaceMethod.NO_INTERLACE) {
       for (let i = 0; i < height; i++) {
         newData.writeByte(0); // no filter
         /* istanbul ignore else */
-        if (depth === 8 || depth === 1) {
+        if (depth === 8 || depth === 1 || depth === 4) {
           offset = writeDataBytes(data, newData, slotsPerLine, offset);
         } else if (depth === 16) {
           offset = writeDataUint16(data, newData, slotsPerLine, offset);
@@ -135,12 +168,11 @@ export default class PngEncoder extends IOBuffer {
       data: data.data,
       depth,
       text: data.text,
+      palette: data.palette,
     };
     this._colorType = colorType;
-    const expectedSize =
-      depth !== 1
-        ? png.width * png.height * channels
-        : Math.ceil(png.width / 8) * png.height * channels;
+    const expectedSize = png.width * png.height * channels;
+
     if (png.data.length !== expectedSize) {
       throw new RangeError(
         `wrong data size. Found ${png.data.length}, expected ${expectedSize}`,
@@ -168,7 +200,7 @@ function getColorType(data: ImageData): GetColorTypeReturn {
   if (channels !== 4 && channels !== 3 && channels !== 2 && channels !== 1) {
     throw new RangeError(`unsupported number of channels: ${channels}`);
   }
-  if (depth !== 8 && depth !== 16 && depth !== 1) {
+  if (depth !== 8 && depth !== 16 && depth !== 1 && depth !== 4) {
     throw new RangeError(`unsupported bit depth: ${depth}`);
   }
 
@@ -206,6 +238,28 @@ function writeDataBytes(
     newData.writeByte(data[offset++]);
   }
   return offset;
+}
+function stackPixelsIntoBytes(
+  data: PngDataArray,
+  width: number,
+  height: number,
+  bitDepth: number,
+  channels: number,
+): Uint8Array {
+  const pixelsPerByte = 8 / bitDepth;
+  const bytesPerLine = Math.ceil((width / pixelsPerByte) * channels);
+  const result = new Uint8Array(bytesPerLine * height);
+
+  let index = 0;
+  let byte = 0;
+  for (let i = 0; i < data.length; i++) {
+    for (let pixel = 0; pixel < pixelsPerByte; pixel++) {
+      byte = (byte << (bitDepth * pixel)) | data[i++];
+    }
+    result[index++] = byte;
+  }
+
+  return result;
 }
 
 function writeDataInterlaced(

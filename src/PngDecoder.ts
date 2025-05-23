@@ -401,7 +401,17 @@ export default class PngDecoder extends IOBuffer {
       };
 
       const frame = this._frames.at(i);
+
       if (frame) {
+        if (this._apng.depth < 8) {
+          frame.data = this.unpackPixelsWithLowBitDepth({
+            data: frame.data as Uint8Array,
+            width: frame.width,
+            height: frame.height,
+            channels: this._apng.channels,
+            depth: this._apng.depth,
+          });
+        }
         frame.data = decodeInterlaceNull({
           data: frame.data as Uint8Array,
           width: frame.width,
@@ -522,9 +532,20 @@ export default class PngDecoder extends IOBuffer {
     if (this._filterMethod !== FilterMethod.ADAPTIVE) {
       throw new Error(`Filter method ${this._filterMethod} not supported`);
     }
+    console.log('Inflator result:', this._inflator.result);
+    if (this._png.depth < 8) {
+      this._png.data = this.unpackPixelsWithLowBitDepth({
+        data: data as Uint8Array,
+        width: this._png.width,
+        height: this._png.height,
+        channels: this._png.channels,
+        depth: this._png.depth,
+      });
+    }
+    console.log('Unpacked data:', this._png.data);
     if (this._interlaceMethod === InterlaceMethod.NO_INTERLACE) {
       this._png.data = decodeInterlaceNull({
-        data: data as Uint8Array,
+        data: this._png.data as Uint8Array,
         width: this._png.width,
         height: this._png.height,
         channels: this._png.channels,
@@ -574,6 +595,84 @@ export default class PngDecoder extends IOBuffer {
     this._inflator = new Inflator();
     this._writingDataChunks = false;
   }
+
+  private unpackPixelsWithLowBitDepth(packedData: {
+    data: Uint8Array;
+    width: number;
+    height: number;
+    channels: number;
+    depth: number;
+  }) {
+    const pixelsPerByte = 8 / this._png.depth;
+    const expectedPixels = (packedData.width + 1) * packedData.height;
+
+    // Create output array sized for the actual number of pixels
+    const newData = new Uint8Array(expectedPixels);
+
+    let outputIndex = 0;
+    let inputIndex = 0;
+
+    // Process each scanline
+    for (let row = 0; row < packedData.height; row++) {
+      // Skip filter byte at start of each scanline (if present)
+      // Adjust this logic based on your PNG structure
+      newData[outputIndex++] = packedData.data[inputIndex++];
+      // Skip filter byte
+
+      let pixelsInThisRow = 0;
+
+      // Process packed bytes in this scanline
+      while (
+        pixelsInThisRow < packedData.width &&
+        inputIndex < packedData.data.length
+      ) {
+        const packedByte = packedData.data[inputIndex];
+        const pixels = splitByteToPixels(packedByte, this._png.depth);
+
+        // Only take the pixels we need for this row
+        const pixelsToTake = Math.min(
+          pixels.length,
+          packedData.width - pixelsInThisRow,
+        );
+
+        for (let i = 0; i < pixelsToTake; i++) {
+          newData[outputIndex++] = pixels[i];
+        }
+
+        pixelsInThisRow += pixelsToTake;
+        inputIndex++;
+      }
+    }
+    return newData;
+  }
+  /*
+  private unpackPixelsWithLowBitDepth(packedData: {
+    data: Uint8Array;
+    width: number;
+    height: number;
+    channels: number;
+    depth: number;
+  }) {
+    const actualWidth = packedData.width + 1;
+    let actualIndex = 0;
+
+    const newData = new Uint8Array(actualWidth * packedData.height);
+    console.log(newData.length, packedData.data.length);
+    for (let i = 0; i < packedData.data.length - 1; i++) {
+      if (i % actualWidth === 0 || i === 0) {
+        newData[actualIndex++] = packedData.data[i];
+      } else {
+        const pixels = splitByteToPixels(packedData.data[i], this._png.depth);
+        newData.set(pixels, actualIndex);
+        actualIndex += pixels.length;
+        console.log(actualIndex, i);
+      }
+    }
+    const pixels = splitByteToPixels(packedData.data.at(-1), this._png.depth);
+
+    console.log(newData);
+    return newData;
+  }*/
 }
 
 function checkBitDepth(value: number): BitDepth {
@@ -587,4 +686,21 @@ function checkBitDepth(value: number): BitDepth {
     throw new Error(`invalid bit depth: ${value}`);
   }
   return value;
+}
+
+function splitByteToPixels(byte: number, bitDepth: number) {
+  if (![1, 2, 4, 8].includes(bitDepth)) {
+    throw new Error('bitDepth must be one of 1, 2, 4, or 8');
+  }
+
+  const pixels = [];
+  const pixelsPerByte = 8 / bitDepth;
+  const mask = (1 << bitDepth) - 1;
+
+  for (let i = 0; i < pixelsPerByte; i++) {
+    const shiftAmount = 8 - bitDepth - bitDepth * i;
+    const pixel = (byte >> shiftAmount) & mask;
+    pixels.push(pixel);
+  }
+  return pixels;
 }

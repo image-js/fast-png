@@ -28,8 +28,8 @@ export function decodeInterlaceNull(
   const { data, width, height, channels, depth } = params;
 
   const bytesPerPixel = Math.ceil((channels * depth) / 8);
-  const bytesPerLine =
-    depth === 1 ? Math.ceil(width / 8) : width * bytesPerPixel;
+
+  const bytesPerLine = width * bytesPerPixel;
   const newData = new Uint8Array(height * bytesPerLine);
 
   let prevLine = empty;
