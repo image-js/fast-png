@@ -42,6 +42,8 @@ export interface ImageData {
   depth?: BitDepth;
   channels?: number;
   text?: Record<string, string>;
+  palette?: IndexedColors;
+  transparency?: Uint16Array;
 }
 
 export interface DecodedPng {

@@ -28,8 +28,8 @@ export function decodeInterlaceNull(
   const { data, width, height, channels, depth } = params;
 
   const bytesPerPixel = Math.ceil((channels * depth) / 8);
-  const bytesPerLine =
-    depth === 1 ? Math.ceil(width / 8) : width * bytesPerPixel;
+
+  const bytesPerLine = Math.ceil((depth / 8) * channels * width);
   const newData = new Uint8Array(height * bytesPerLine);
 
   let prevLine = empty;
@@ -39,7 +39,6 @@ export function decodeInterlaceNull(
 
   for (let i = 0; i < height; i++) {
     currentLine = data.subarray(offset + 1, offset + 1 + bytesPerLine);
-
     newLine = newData.subarray(i * bytesPerLine, (i + 1) * bytesPerLine);
     switch (data[offset]) {
       case 0:
