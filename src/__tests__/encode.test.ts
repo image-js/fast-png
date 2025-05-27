@@ -1,3 +1,5 @@
+import { writeFileSync } from 'node:fs';
+
 // @ts-expect-error TS not defined but this is a test
 import { PNG } from 'pngjs';
 import { describe, expect, it } from 'vitest';
@@ -62,6 +64,8 @@ describe('encode', () => {
       data: dataArray,
       channels: 3,
     });
+    writeFileSync('test.png', data);
+
     expect(data).toBeInstanceOf(Uint8Array);
 
     const decoded = decode(data);
