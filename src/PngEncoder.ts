@@ -143,13 +143,10 @@ export default class PngEncoder extends IOBuffer {
     if (this._interlaceMethod === InterlaceMethod.NO_INTERLACE) {
       for (let i = 0; i < height; i++) {
         newData.writeByte(0); // no filter
-        /* istanbul ignore else */
-        if (depth === 8 || depth === 1 || depth === 4 || depth === 2) {
-          offset = writeDataBytes(data, newData, slotsPerLine, offset);
-        } else if (depth === 16) {
+        if (depth === 16) {
           offset = writeDataUint16(data, newData, slotsPerLine, offset);
         } else {
-          throw new Error('unreachable');
+          offset = writeDataBytes(data, newData, slotsPerLine, offset);
         }
       }
     } else if (this._interlaceMethod === InterlaceMethod.ADAM7) {
