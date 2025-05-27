@@ -310,7 +310,10 @@ describe('decode', () => {
   });
 });
 
-function loadAndDecode(img: string, options?: PngDecoderOptions): DecodedPng {
+export function loadAndDecode(
+  img: string,
+  options?: PngDecoderOptions,
+): DecodedPng {
   return decode(readFileSync(join(__dirname, '../../img', img)), options);
 }
 function loadAndDecodeApng(
