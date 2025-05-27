@@ -24,7 +24,7 @@ export function decodeInterlaceAdam7(params: DecodeInterlaceNullParams) {
     { x: 0, y: 1, xStep: 1, yStep: 2 }, // Pass 7
   ];
 
-  const bytesPerPixel = (channels * depth) / 8;
+  const bytesPerPixel = Math.ceil(channels * depth) / 8;
   const resultData = new Uint8Array(height * width * bytesPerPixel);
 
   let offset = 0;

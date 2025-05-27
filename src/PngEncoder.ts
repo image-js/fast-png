@@ -124,7 +124,6 @@ export default class PngEncoder extends IOBuffer {
   // https://www.w3.org/TR/PNG/#11IDAT
   private encodeIDAT(data: PngDataArray): void {
     this.writeUint32(data.length);
-
     this.writeChars('IDAT');
 
     this.writeBytes(data);
@@ -134,7 +133,10 @@ export default class PngEncoder extends IOBuffer {
 
   private encodeData(): void {
     const { width, height, channels, depth, data } = this._png;
-    const slotsPerLine = Math.ceil((width * depth) / 8) * channels;
+    const slotsPerLine =
+      depth <= 8
+        ? Math.ceil((width * depth) / 8) * channels
+        : Math.ceil((((width * depth) / 8) * channels) / 2);
 
     const newData = new IOBuffer().setBigEndian();
     let offset = 0;
@@ -265,10 +267,10 @@ function writeDataInterlaced(
   ];
   const { width, height, channels, depth } = imageData;
   let pixelSize = 0;
-  if (depth === 8) {
-    pixelSize = (channels * depth) / 8;
-  } else if (depth === 16) {
+  if (depth === 16) {
     pixelSize = (channels * depth) / 8 / 2;
+  } else {
+    pixelSize = (channels * depth) / 8;
   }
   // Process each pass
   for (let passIndex = 0; passIndex < 7; passIndex++) {
@@ -287,7 +289,7 @@ function writeDataInterlaced(
       const imageY = pass.y + y * pass.yStep;
       // Extract raw scanline data
       const rawScanline =
-        depth === 8
+        depth <= 8
           ? new Uint8Array(passLineBytes)
           : new Uint16Array(passLineBytes);
 

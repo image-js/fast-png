@@ -536,7 +536,7 @@ export default class PngDecoder extends IOBuffer {
       });
     } else if (this._interlaceMethod === InterlaceMethod.ADAM7) {
       this._png.data = decodeInterlaceAdam7({
-        data: this._png.data as Uint8Array,
+        data: data as Uint8Array,
         width: this._png.width,
         height: this._png.height,
         channels: this._png.channels,

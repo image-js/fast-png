@@ -27,7 +27,7 @@ export function decodeInterlaceNull(
 ): PngDataArray {
   const { data, width, height, channels, depth } = params;
 
-  const bytesPerPixel = Math.ceil((channels * depth) / 8);
+  const bytesPerPixel = Math.ceil(depth / 8) * channels;
 
   const bytesPerLine = Math.ceil((depth / 8) * channels * width);
   const newData = new Uint8Array(height * bytesPerLine);
