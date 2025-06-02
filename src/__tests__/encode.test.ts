@@ -66,7 +66,6 @@ describe('encode', () => {
       data: dataArray,
       channels: 3,
     });
-    writeFileSync('test.png', data);
 
     expect(data).toBeInstanceOf(Uint8Array);
 
