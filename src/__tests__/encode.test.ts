@@ -5,6 +5,8 @@ import { describe, expect, it } from 'vitest';
 import type { ImageData } from '../index';
 import { encode, decode } from '../index';
 
+import { loadAndDecode } from './decode.test';
+
 const simpleRGBAData = new Uint8Array([
   255, 255, 255, 255, 0, 0, 0, 255, 0, 0, 0, 255, 255, 255, 255, 255,
 ]);
@@ -62,6 +64,7 @@ describe('encode', () => {
       data: dataArray,
       channels: 3,
     });
+
     expect(data).toBeInstanceOf(Uint8Array);
 
     const decoded = decode(data);
@@ -180,6 +183,20 @@ describe('encode', () => {
     const encoded = encode({ ...simpleRGBAImageData, text });
     const decoded = decode(encoded);
     expect(decoded.text).toStrictEqual(text);
+  });
+  it('PLTE chunk', () => {
+    const decoded = loadAndDecode('mud_bricks.png');
+    const encoded = encode(decoded);
+    expect(encoded).toBeInstanceOf(Uint8Array);
+    const result = decode(encoded);
+    expect(result).toEqual(decoded);
+  });
+  it('PLTE and tRNS chunks', () => {
+    const decoded = loadAndDecode('cocoa_stage2.png');
+    const encoded = encode(decoded);
+    expect(encoded).toBeInstanceOf(Uint8Array);
+    const result = decode(encoded);
+    expect(result).toEqual(decoded);
   });
 
   it('tEXt chunk - invalid data', () => {

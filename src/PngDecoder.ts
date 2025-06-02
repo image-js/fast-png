@@ -115,7 +115,6 @@ export default class PngDecoder extends IOBuffer {
   // https://www.w3.org/TR/PNG/#5Chunk-layout
   private decodeChunk(length: number, type: string): void {
     const offset = this.offset;
-
     switch (type) {
       // 11.2 Critical chunks
       case 'IHDR': // 11.2.2 IHDR Image header
@@ -261,6 +260,7 @@ export default class PngDecoder extends IOBuffer {
       );
     }
     const l = length / 3;
+
     this._hasPalette = true;
     const palette: IndexedColors = [];
     this._palette = palette;
@@ -317,9 +317,11 @@ export default class PngDecoder extends IOBuffer {
         }
         this._hasTransparency = true;
         this._transparency = new Uint16Array(length / 2);
+
         for (let i = 0; i < length / 2; i++) {
           this._transparency[i] = this.readUint16();
         }
+
         break;
       }
       case ColorType.INDEXED_COLOUR: {
@@ -401,6 +403,7 @@ export default class PngDecoder extends IOBuffer {
       };
 
       const frame = this._frames.at(i);
+
       if (frame) {
         frame.data = decodeInterlaceNull({
           data: frame.data as Uint8Array,
@@ -522,6 +525,7 @@ export default class PngDecoder extends IOBuffer {
     if (this._filterMethod !== FilterMethod.ADAPTIVE) {
       throw new Error(`Filter method ${this._filterMethod} not supported`);
     }
+
     if (this._interlaceMethod === InterlaceMethod.NO_INTERLACE) {
       this._png.data = decodeInterlaceNull({
         data: data as Uint8Array,

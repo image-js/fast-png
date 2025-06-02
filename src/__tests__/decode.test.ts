@@ -30,6 +30,7 @@ describe('decode', () => {
       depth: 8,
       channels: 3,
     });
+
     expect(image.data).toEqual(
       new Uint8Array([
         0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 255, 255, 255, 255, 255, 255,
@@ -40,6 +41,7 @@ describe('decode', () => {
     );
 
     const image2 = loadAndDecode('interlaced.png');
+
     check(image2, {
       width: 817,
       height: 1057,
@@ -224,6 +226,37 @@ describe('decode', () => {
       );
     }
   });
+  it('Minecraft texture with PLTE', () => {
+    const decoded = loadAndDecode('polished_basalt_side.png');
+    expect(decoded.width).toEqual(16);
+    expect(decoded.height).toEqual(16);
+    expect(decoded.data.length).toEqual(128);
+    expect(decoded.palette).toBeDefined();
+    expect(decoded.palette?.length).toEqual(6);
+    expect(decoded.palette?.at(0)).toEqual([116, 116, 116]);
+  });
+  it('Minecraft texture with PLTE and tRNS', () => {
+    const decoded = loadAndDecode('cocoa_stage2.png');
+    expect(decoded.width).toEqual(16);
+    expect(decoded.height).toEqual(16);
+    expect(decoded.data.length).toEqual(128);
+    expect(decoded.data.at(7)).toEqual(18);
+    expect(decoded.palette).toBeDefined();
+    expect(decoded.palette?.length).toEqual(8);
+    expect(decoded.palette?.at(0)).toEqual([0, 0, 0, 0]);
+    expect(decoded.palette?.at(1)).toEqual([226, 177, 124, 255]);
+  });
+  it('Minecraft texture with PLTE and bitDepth 2', () => {
+    const decoded = loadAndDecode('blue_concrete.png');
+    expect(decoded.width).toEqual(160);
+    expect(decoded.height).toEqual(160);
+    expect(decoded.data.length).toEqual(6400);
+    expect(decoded.data.at(1)).toEqual(170);
+    expect(decoded.palette).toBeDefined();
+    expect(decoded.palette?.length).toEqual(4);
+    expect(decoded.palette?.at(0)).toEqual([44, 46, 142]);
+    expect(decoded.palette?.at(1)).toEqual([44, 46, 143]);
+  });
   it('APNG RGB square 8-bit image', () => {
     const decodedApng = loadAndDecodeApng('squareApng.png');
 
@@ -277,7 +310,10 @@ describe('decode', () => {
   });
 });
 
-function loadAndDecode(img: string, options?: PngDecoderOptions): DecodedPng {
+export function loadAndDecode(
+  img: string,
+  options?: PngDecoderOptions,
+): DecodedPng {
   return decode(readFileSync(join(__dirname, '../../img', img)), options);
 }
 function loadAndDecodeApng(

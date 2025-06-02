@@ -16,6 +16,7 @@ import type {
   ImageData,
   PngDataArray,
   BitDepth,
+  IndexedColors,
 } from './types';
 
 const defaultZlibOptions: DeflateFunctionOptions = {
@@ -29,6 +30,7 @@ interface PngToEncode {
   depth: BitDepth;
   channels: number;
   text?: ImageData['text'];
+  palette?: IndexedColors;
 }
 
 export default class PngEncoder extends IOBuffer {
@@ -52,6 +54,13 @@ export default class PngEncoder extends IOBuffer {
   public encode(): Uint8Array {
     writeSignature(this);
     this.encodeIHDR();
+    if (this._png.palette) {
+      this.encodePLTE();
+      if (this._png.palette[0].length === 4) {
+        this.encodeTRNS();
+      }
+    }
+
     this.encodeData();
     if (this._png.text) {
       for (const [keyword, text] of Object.entries(this._png.text)) {
@@ -88,10 +97,33 @@ export default class PngEncoder extends IOBuffer {
     writeCrc(this, 4);
   }
 
+  private encodePLTE() {
+    const paletteLength = (this._png.palette?.length as number) * 3;
+    this.writeUint32(paletteLength);
+    this.writeChars('PLTE');
+    for (const color of this._png.palette as IndexedColors) {
+      this.writeByte(color[0]);
+      this.writeByte(color[1]);
+      this.writeByte(color[2]);
+    }
+    writeCrc(this, 4 + paletteLength);
+  }
+
+  private encodeTRNS() {
+    const alpha = (this._png.palette as IndexedColors).filter((color) => {
+      return color.at(-1) !== 255;
+    });
+    this.writeUint32(alpha.length);
+    this.writeChars('tRNS');
+    for (const el of alpha) {
+      this.writeByte(el.at(-1) as number);
+    }
+    writeCrc(this, 4 + alpha.length);
+  }
+
   // https://www.w3.org/TR/PNG/#11IDAT
   private encodeIDAT(data: PngDataArray): void {
     this.writeUint32(data.length);
-
     this.writeChars('IDAT');
 
     this.writeBytes(data);
@@ -102,19 +134,19 @@ export default class PngEncoder extends IOBuffer {
   private encodeData(): void {
     const { width, height, channels, depth, data } = this._png;
     const slotsPerLine =
-      depth !== 1 ? channels * width : Math.ceil(width / 8) * channels;
+      depth <= 8
+        ? Math.ceil((width * depth) / 8) * channels
+        : Math.ceil((((width * depth) / 8) * channels) / 2);
+
     const newData = new IOBuffer().setBigEndian();
     let offset = 0;
     if (this._interlaceMethod === InterlaceMethod.NO_INTERLACE) {
       for (let i = 0; i < height; i++) {
         newData.writeByte(0); // no filter
-        /* istanbul ignore else */
-        if (depth === 8 || depth === 1) {
-          offset = writeDataBytes(data, newData, slotsPerLine, offset);
-        } else if (depth === 16) {
+        if (depth === 16) {
           offset = writeDataUint16(data, newData, slotsPerLine, offset);
         } else {
-          throw new Error('unreachable');
+          offset = writeDataBytes(data, newData, slotsPerLine, offset);
         }
       }
     } else if (this._interlaceMethod === InterlaceMethod.ADAM7) {
@@ -127,7 +159,8 @@ export default class PngEncoder extends IOBuffer {
   }
 
   private _checkData(data: ImageData): PngToEncode {
-    const { colorType, channels, depth } = getColorType(data);
+    const { colorType, channels, depth } = getColorType(data, data.palette);
+
     const png: PngToEncode = {
       width: checkInteger(data.width, 'width'),
       height: checkInteger(data.height, 'height'),
@@ -135,12 +168,14 @@ export default class PngEncoder extends IOBuffer {
       data: data.data,
       depth,
       text: data.text,
+      palette: data.palette,
     };
     this._colorType = colorType;
     const expectedSize =
-      depth !== 1
-        ? png.width * png.height * channels
-        : Math.ceil(png.width / 8) * png.height * channels;
+      depth < 8
+        ? Math.ceil((png.width * depth) / 8) * png.height * channels
+        : png.width * png.height * channels;
+
     if (png.data.length !== expectedSize) {
       throw new RangeError(
         `wrong data size. Found ${png.data.length}, expected ${expectedSize}`,
@@ -163,13 +198,13 @@ interface GetColorTypeReturn {
   colorType: ColorType;
 }
 
-function getColorType(data: ImageData): GetColorTypeReturn {
+function getColorType(
+  data: ImageData,
+  palette?: IndexedColors,
+): GetColorTypeReturn {
   const { channels = 4, depth = 8 } = data;
   if (channels !== 4 && channels !== 3 && channels !== 2 && channels !== 1) {
     throw new RangeError(`unsupported number of channels: ${channels}`);
-  }
-  if (depth !== 8 && depth !== 16 && depth !== 1) {
-    throw new RangeError(`unsupported bit depth: ${depth}`);
   }
 
   const returnValue: GetColorTypeReturn = {
@@ -185,7 +220,11 @@ function getColorType(data: ImageData): GetColorTypeReturn {
       returnValue.colorType = ColorType.TRUECOLOUR;
       break;
     case 1:
-      returnValue.colorType = ColorType.GREYSCALE;
+      if (palette) {
+        returnValue.colorType = ColorType.INDEXED_COLOUR;
+      } else {
+        returnValue.colorType = ColorType.GREYSCALE;
+      }
       break;
     case 2:
       returnValue.colorType = ColorType.GREYSCALE_ALPHA;
@@ -225,10 +264,10 @@ function writeDataInterlaced(
   ];
   const { width, height, channels, depth } = imageData;
   let pixelSize = 0;
-  if (depth === 8) {
-    pixelSize = (channels * depth) / 8;
-  } else if (depth === 16) {
+  if (depth === 16) {
     pixelSize = (channels * depth) / 8 / 2;
+  } else {
+    pixelSize = (channels * depth) / 8;
   }
   // Process each pass
   for (let passIndex = 0; passIndex < 7; passIndex++) {
@@ -247,7 +286,7 @@ function writeDataInterlaced(
       const imageY = pass.y + y * pass.yStep;
       // Extract raw scanline data
       const rawScanline =
-        depth === 8
+        depth <= 8
           ? new Uint8Array(passLineBytes)
           : new Uint16Array(passLineBytes);
 
