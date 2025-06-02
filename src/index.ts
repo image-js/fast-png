@@ -1,15 +1,17 @@
 import PngDecoder from './PngDecoder';
 import PngEncoder from './PngEncoder';
-import {
+import type {
   DecoderInputType,
   PngDecoderOptions,
   DecodedPng,
+  DecodedApng,
   ImageData,
   PngEncoderOptions,
   IndexedColorBitDepth,
   IndexedColors,
 } from './types';
 
+export { hasPngSignature } from './helpers/signature';
 export * from './types';
 
 function decodePng(
@@ -78,4 +80,12 @@ function rgb(
   return res;
 }
 
-export { decodePng as decode, encodePng as encode, rgb };
+function decodeApng(
+  data: DecoderInputType,
+  options?: PngDecoderOptions,
+): DecodedApng {
+  const decoder = new PngDecoder(data, options);
+  return decoder.decodeApng();
+}
+
+export { decodePng as decode, encodePng as encode, decodeApng, rgb };

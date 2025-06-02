@@ -1,7 +1,7 @@
-import { IOBuffer } from 'iobuffer';
-import { DeflateFunctionOptions } from 'pako';
+import type { IOBuffer } from 'iobuffer';
+import type { DeflateFunctionOptions } from 'pako';
 
-export { DeflateFunctionOptions };
+export type { DeflateFunctionOptions } from 'pako';
 
 export type PngDataArray = Uint8Array | Uint8ClampedArray | Uint16Array;
 
@@ -43,6 +43,9 @@ export interface ImageData {
   data: PngDataArray;
   depth?: BitDepth;
   channels?: number;
+  text?: Record<string, string>;
+  palette?: IndexedColors;
+  transparency?: Uint16Array;
 }
 
 export interface DecodedPng {
@@ -51,10 +54,46 @@ export interface DecodedPng {
   data: PngDataArray;
   depth: BitDepth;
   channels: number;
-  text: { [key: string]: string };
+  text: Record<string, string>;
   resolution?: PngResolution;
   palette?: IndexedColors;
+  transparency?: Uint16Array;
   iccEmbeddedProfile?: IccEmbeddedProfile;
+}
+
+export interface DecodedApng {
+  width: number;
+  height: number;
+  depth: BitDepth;
+  channels: number;
+  numberOfFrames: number;
+  numberOfPlays: number;
+  text: Record<string, string>;
+  resolution?: PngResolution;
+  palette?: IndexedColors;
+  transparency?: Uint16Array;
+  iccEmbeddedProfile?: IccEmbeddedProfile;
+  frames: DecodedApngFrame[];
+}
+
+export interface ApngFrame {
+  sequenceNumber: number;
+  width: number;
+  height: number;
+  xOffset: number;
+  yOffset: number;
+  delayNumber: number;
+  delayDenominator: number;
+  disposeOp: number;
+  blendOp: number;
+  data: PngDataArray;
+}
+
+export interface DecodedApngFrame {
+  sequenceNumber: number;
+  delayNumber: number;
+  delayDenominator: number;
+  data: PngDataArray;
 }
 
 export interface PngDecoderOptions {
@@ -62,6 +101,7 @@ export interface PngDecoderOptions {
 }
 
 export interface PngEncoderOptions {
+  interlace?: 'null' | 'Adam7';
   zlib?: DeflateFunctionOptions;
 }
 

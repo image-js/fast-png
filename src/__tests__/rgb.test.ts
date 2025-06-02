@@ -1,8 +1,11 @@
-import assert from 'assert';
-import fs from 'fs';
-import path from 'path';
+import assert from 'node:assert';
+import fs from 'node:fs';
+import path from 'node:path';
 
-import { rgb, IndexedColors, decode, encode, IndexedColorBitDepth } from '..';
+import { describe, it } from 'vitest';
+
+import type { IndexedColors, IndexedColorBitDepth } from '..';
+import { rgb, decode, encode } from '..';
 
 describe('rgb', () => {
   it('1 bit', () => {
