@@ -1,5 +1,3 @@
-import { writeFileSync } from 'node:fs';
-
 // @ts-expect-error TS not defined but this is a test
 import { PNG } from 'pngjs';
 import { describe, expect, it } from 'vitest';
