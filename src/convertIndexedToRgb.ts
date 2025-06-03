@@ -1,8 +1,8 @@
-import type { DecodedPng, IndexedColors } from './types';
+import type { DecodedPng, IndexedColorBitDepth, IndexedColors } from './types';
 
 export function convertIndexedToRgb(decodedImage: DecodedPng) {
   const palette = decodedImage.palette as IndexedColors;
-  const depth = decodedImage.depth;
+  const depth = decodedImage.depth as IndexedColorBitDepth;
   const indexSize = decodedImage.data.length * (8 / depth);
   const resSize = indexSize * palette[0].length;
   const res = new Uint8Array(resSize);
@@ -24,9 +24,6 @@ export function convertIndexedToRgb(decodedImage: DecodedPng) {
     case 8:
       bit = 0xff;
       break;
-    // Kept for exhaustiveness.
-    // eslint-disable-next-line unicorn/no-useless-switch-case
-    case 16:
     default:
       throw new Error('Incorrect depth value');
   }
