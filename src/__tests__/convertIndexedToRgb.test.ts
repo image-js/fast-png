@@ -144,4 +144,17 @@ describe('rgb', () => {
 
     expect(newImageParsed.data.byteLength).toStrictEqual(1024);
   });
+  it('returns an error', () => {
+    const decodedImage: DecodedPng = {
+      width: 1,
+      height: 1,
+      data: new Uint8Array([27]),
+      depth: 1,
+      channels: 1,
+      text: {},
+    };
+    expect(() => {
+      convertIndexedToRgb(decodedImage);
+    }).toThrow('Color palette is undefined.');
+  });
 });

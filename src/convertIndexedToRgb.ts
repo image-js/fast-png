@@ -1,8 +1,11 @@
-import type { DecodedPng, IndexedColorBitDepth, IndexedColors } from './types';
+import type { DecodedPng, IndexedColorBitDepth } from './types';
 
 export function convertIndexedToRgb(decodedImage: DecodedPng) {
-  const palette = decodedImage.palette as IndexedColors;
+  const palette = decodedImage.palette;
   const depth = decodedImage.depth as IndexedColorBitDepth;
+  if (!palette) {
+    throw new Error('Color palette is undefined.');
+  }
   const indexSize = decodedImage.data.length * (8 / depth);
   const resSize = indexSize * palette[0].length;
   const res = new Uint8Array(resSize);
