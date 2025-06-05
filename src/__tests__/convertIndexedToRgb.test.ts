@@ -8,10 +8,7 @@ import { loadAndDecode } from './decode.test';
 
 describe('rgb', () => {
   it('1 bit', () => {
-    const palette: IndexedColors = [
-      [0, 0, 1],
-      [0, 0, 2],
-    ];
+    const palette: IndexedColors = [[0, 0, 1]];
     const decodedImage: DecodedPng = {
       width: 1,
       height: 1,
@@ -21,24 +18,17 @@ describe('rgb', () => {
       channels: 1,
       text: {},
     };
-
     const view = convertIndexedToRgb(decodedImage);
-    expect(view).toStrictEqual(
-      Uint8Array.from([
-        0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 2, 0, 0, 2, 0, 0, 1, 0, 0, 2, 0, 0, 2,
-      ]),
-    );
+    expect(view).toStrictEqual(Uint8Array.from([0, 0, 1]));
   });
 
   it('2 bit', () => {
     const palette: IndexedColors = [
       [0, 0, 1],
-      [0, 0, 2],
-      [0, 0, 3],
       [0, 0, 4],
     ];
     const decodedImage: DecodedPng = {
-      width: 1,
+      width: 2,
       height: 1,
       data: new Uint8Array([27]),
       depth: 2,
@@ -48,9 +38,7 @@ describe('rgb', () => {
     };
 
     const view = convertIndexedToRgb(decodedImage);
-    expect(view).toStrictEqual(
-      Uint8Array.from([0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4]),
-    );
+    expect(view).toStrictEqual(Uint8Array.from([0, 0, 1, 0, 0, 4]));
   });
 
   it('4 bit', () => {
@@ -67,7 +55,7 @@ describe('rgb', () => {
     ];
 
     const decodedImage: DecodedPng = {
-      width: 4,
+      width: 8,
       height: 1,
       data: new Uint8Array([18, 52, 86, 120]),
       depth: 4,
@@ -148,6 +136,72 @@ describe('rgb', () => {
 
     expect(newImageParsed.data.byteLength).toStrictEqual(1024);
   });
+});
+describe('rgba', () => {
+  it('1 bit with RGBA', () => {
+    const palette: IndexedColors = [
+      [0, 0, 1, 255],
+      [0, 0, 2, 255],
+    ];
+    const decodedImage: DecodedPng = {
+      width: 8,
+      height: 2,
+      data: new Uint8Array([18, 52]),
+      depth: 1,
+      palette,
+      channels: 1,
+      text: {},
+    };
+
+    const view = convertIndexedToRgb(decodedImage);
+    expect(view).toStrictEqual(
+      Uint8Array.from(
+        [
+          [
+            0, 0, 1, 255, 0, 0, 1, 255, 0, 0, 1, 255, 0, 0, 2, 255, 0, 0, 1,
+            255, 0, 0, 1, 255, 0, 0, 2, 255, 0, 0, 1, 255,
+          ],
+          [
+            0, 0, 1, 255, 0, 0, 1, 255, 0, 0, 2, 255, 0, 0, 2, 255, 0, 0, 1,
+            255, 0, 0, 2, 255, 0, 0, 1, 255, 0, 0, 1, 255,
+          ],
+        ].flat(),
+      ),
+    );
+  });
+  it('4 bit with RGBA', () => {
+    const palette: IndexedColors = [
+      [0, 0, 0, 25],
+      [0, 0, 1, 255],
+      [0, 0, 2, 90],
+      [0, 0, 3, 0],
+      [0, 0, 4, 0],
+      [0, 0, 5, 255],
+      [0, 0, 6, 255],
+      [0, 0, 7, 255],
+      [0, 0, 8, 255],
+    ];
+
+    const decodedImage: DecodedPng = {
+      width: 8,
+      height: 1,
+      data: new Uint8Array([18, 52, 86, 120]),
+      depth: 4,
+      palette,
+      channels: 1,
+      text: {},
+    };
+
+    const view = convertIndexedToRgb(decodedImage);
+    expect(view).toStrictEqual(
+      Uint8Array.from([
+        0, 0, 1, 255, 0, 0, 2, 90, 0, 0, 3, 0, 0, 0, 4, 0, 0, 0, 5, 255, 0, 0,
+        6, 255, 0, 0, 7, 255, 0, 0, 8, 255,
+      ]),
+    );
+  });
+});
+describe('errors', () => {
   it('returns an error', () => {
     const decodedImage: DecodedPng = {
       width: 1,
@@ -160,5 +214,24 @@ describe('rgb', () => {
     expect(() => {
       convertIndexedToRgb(decodedImage);
     }).toThrow('Color palette is undefined.');
+  });
+  it('throws if data length is not correct', () => {
+    const palette: IndexedColors = [
+      [0, 0, 1],
+      [0, 0, 4],
+    ];
+    const decodedImage: DecodedPng = {
+      width: 2,
+      height: 1,
+      data: new Uint8Array([27, 22]),
+      depth: 2,
+      palette,
+      channels: 1,
+      text: {},
+    };
+
+    expect(() => {
+      convertIndexedToRgb(decodedImage);
+    }).toThrow(new RangeError('wrong data size. Found 2, expected 1'));
   });
 });
