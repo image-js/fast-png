@@ -23,8 +23,10 @@ describe('rgb', () => {
     };
 
     const view = convertIndexedToRgb(decodedImage);
-    expect(Buffer.from(view).toString('hex')).toStrictEqual(
-      '000001000001000001000002000002000001000002000002',
+    expect(view).toStrictEqual(
+      Uint8Array.from([
+        0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 2, 0, 0, 2, 0, 0, 1, 0, 0, 2, 0, 0, 2,
+      ]),
     );
   });
 
@@ -46,8 +48,8 @@ describe('rgb', () => {
     };
 
     const view = convertIndexedToRgb(decodedImage);
-    expect(Buffer.from(view).toString('hex')).toStrictEqual(
-      '000001000002000003000004',
+    expect(view).toStrictEqual(
+      Uint8Array.from([0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4]),
     );
   });
 
@@ -75,8 +77,10 @@ describe('rgb', () => {
     };
 
     const view = convertIndexedToRgb(decodedImage);
-    expect(Buffer.from(view).toString('hex')).toStrictEqual(
-      '000001000002000003000004000005000006000007000008',
+    expect(view).toStrictEqual(
+      Uint8Array.from([
+        0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 0, 5, 0, 0, 6, 0, 0, 7, 0, 0, 8,
+      ]),
     );
   });
 
@@ -99,8 +103,8 @@ describe('rgb', () => {
     };
 
     const view = convertIndexedToRgb(decodedImage);
-    expect(Buffer.from(view).toString('hex')).toStrictEqual(
-      '000001000002000003000004',
+    expect(view).toStrictEqual(
+      Uint8Array.from([0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4]),
     );
   });
 
