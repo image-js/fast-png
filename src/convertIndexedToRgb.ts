@@ -1,12 +1,17 @@
 import type { DecodedPng, IndexedColorBitDepth } from './types';
 
+/**
+ * Converts indexed data into RGB/RGBA format
+ * @param decodedImage - Image to decode data from.
+ * @returns Uint8Array with RGB data.
+ */
 export function convertIndexedToRgb(decodedImage: DecodedPng) {
   const palette = decodedImage.palette;
   const depth = decodedImage.depth as IndexedColorBitDepth;
   if (!palette) {
     throw new Error('Color palette is undefined.');
   }
-  isDataValid(decodedImage);
+  checkDataSize(decodedImage);
   const indexSize = decodedImage.width * decodedImage.height;
   const resSize = indexSize * palette[0].length;
   const res = new Uint8Array(resSize);
@@ -30,16 +35,20 @@ export function convertIndexedToRgb(decodedImage: DecodedPng) {
     default:
       throw new Error('Incorrect depth value');
   }
-  const totalPixels = decodedImage.width * decodedImage.height;
-  for (let indexByte = 0; indexByte < totalPixels; indexByte++) {
+  for (const byte of decodedImage.data) {
     let bit2 = bit;
     let shift = 8;
-    while (bit2 && indexPos < totalPixels) {
+    while (bit2) {
       shift -= depth;
-      indexes[indexPos++] = (decodedImage.data[indexByte] & bit2) >> shift;
-      bit2 >>= depth;
+      indexes[indexPos++] = (byte & bit2) >> shift;
+
+      bit2 = bit2 >> depth;
+      if (indexPos % decodedImage.width === 0) {
+        break;
+      }
     }
   }
+
   if (decodedImage.palette) {
     for (const index of indexes) {
       const color = decodedImage.palette.at(index);
@@ -53,7 +62,7 @@ export function convertIndexedToRgb(decodedImage: DecodedPng) {
   return res;
 }
 
-function isDataValid(image: DecodedPng): boolean {
+function checkDataSize(image: DecodedPng): void {
   const expectedSize =
     image.depth < 8
       ? Math.ceil((image.width * image.depth) / 8) *
@@ -66,5 +75,4 @@ function isDataValid(image: DecodedPng): boolean {
       `wrong data size. Found ${image.data.length}, expected ${expectedSize}`,
     );
   }
-  return true;
 }
