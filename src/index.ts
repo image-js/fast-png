@@ -24,6 +24,7 @@ function encodePng(png: ImageData, options?: PngEncoderOptions): Uint8Array {
   const encoder = new PngEncoder(png, options);
   return encoder.encode();
 }
+
 function decodeApng(
   data: DecoderInputType,
   options?: PngDecoderOptions,
@@ -31,4 +32,7 @@ function decodeApng(
   const decoder = new PngDecoder(data, options);
   return decoder.decodeApng();
 }
+
 export { decodePng as decode, encodePng as encode, decodeApng };
+
+export { convertIndexedToRgb } from './convertIndexedToRgb';
