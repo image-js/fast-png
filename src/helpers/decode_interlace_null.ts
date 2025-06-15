@@ -1,4 +1,4 @@
-import type { PngDataArray } from '../types';
+import type { PngDataArray } from '../types.ts';
 
 import {
   unfilterAverage,
@@ -6,7 +6,7 @@ import {
   unfilterPaeth,
   unfilterSub,
   unfilterUp,
-} from './unfilter';
+} from './unfilter.ts';
 
 const uint16 = new Uint16Array([0x00ff]);
 const uint8 = new Uint8Array(uint16.buffer);

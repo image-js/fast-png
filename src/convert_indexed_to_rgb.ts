@@ -1,4 +1,4 @@
-import type { DecodedPng, IndexedColorBitDepth } from './types';
+import type { DecodedPng, IndexedColorBitDepth } from './types.ts';
 
 /**
  * Converts indexed data into RGB/RGBA format

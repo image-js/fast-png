@@ -1,4 +1,4 @@
-import type { PngDataArray } from '../types';
+import type { PngDataArray } from '../types.ts';
 
 export function unfilterNone(
   currentLine: PngDataArray,

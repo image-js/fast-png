@@ -1,23 +1,23 @@
 import { IOBuffer } from 'iobuffer';
 import { deflate } from 'pako';
 
-import { writeCrc } from './helpers/crc';
-import { writeSignature } from './helpers/signature';
-import { encodetEXt } from './helpers/text';
+import { writeCrc } from './helpers/crc.ts';
+import { writeSignature } from './helpers/signature.ts';
+import { encodetEXt } from './helpers/text.ts';
 import {
-  InterlaceMethod,
   ColorType,
   CompressionMethod,
   FilterMethod,
-} from './internalTypes';
+  InterlaceMethod,
+} from './internal_types.ts';
 import type {
-  DeflateFunctionOptions,
-  PngEncoderOptions,
-  ImageData,
-  PngDataArray,
   BitDepth,
+  DeflateFunctionOptions,
+  ImageData,
   IndexedColors,
-} from './types';
+  PngDataArray,
+  PngEncoderOptions,
+} from './types.ts';
 
 const defaultZlibOptions: DeflateFunctionOptions = {
   level: 3,
@@ -263,7 +263,7 @@ function writeDataInterlaced(
     { x: 0, y: 1, xStep: 1, yStep: 2 },
   ];
   const { width, height, channels, depth } = imageData;
-  let pixelSize = 0;
+  let pixelSize: number;
   if (depth === 16) {
     pixelSize = (channels * depth) / 8 / 2;
   } else {

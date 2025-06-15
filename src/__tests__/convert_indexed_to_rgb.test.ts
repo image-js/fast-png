@@ -1,10 +1,9 @@
-import { expect, describe, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
-import { decode, encode } from '..';
-import type { IndexedColors, DecodedPng } from '..';
-import { convertIndexedToRgb } from '../convertIndexedToRgb';
+import type { DecodedPng, IndexedColors } from '../index.ts';
+import { convertIndexedToRgb, decode, encode } from '../index.ts';
 
-import { loadAndDecode } from './decode.test';
+import { loadAndDecode } from './load_and_decode.ts';
 
 describe('rgb', () => {
   it('1 bit', () => {
@@ -193,7 +192,7 @@ describe('rgb', () => {
       data,
     });
     // Uncomment the next line for manual testing
-    // fs.writeFileSync(path.join(__dirname, "../../img/palette.new.png"), newImg, { flag: "w+" });
+    // fs.writeFileSync(path.join(import.meta.dirname, "../../img/palette.new.png"), newImg, { flag: "w+" });
 
     const newImageParsed = decode(newImg);
     expect(newImageParsed.data.byteLength).toStrictEqual(90000);
@@ -212,7 +211,7 @@ describe('rgb', () => {
       data,
     });
     // Uncomment the next line for manual testing
-    // fs.writeFileSync(path.join(__dirname, "../../img/palette.new.png"), newImg, { flag: "w+" });
+    // fs.writeFileSync(path.join(import.meta.dirname, "../../img/palette.new.png"), newImg, { flag: "w+" });
 
     const newImageParsed = decode(newImg);
 

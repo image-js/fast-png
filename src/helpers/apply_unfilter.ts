@@ -4,7 +4,8 @@ import {
   unfilterPaeth,
   unfilterSub,
   unfilterUp,
-} from './unfilter';
+} from './unfilter.ts';
+
 /**
  * Apllies filter on scanline based on the filter type.
  * @param filterType - The filter type to apply.
