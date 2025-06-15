@@ -1,6 +1,6 @@
 {
   "name": "fast-png",
-  "version": "6.4.0",
+  "version": "7.0.0",
   "license": "MIT",
   "description": "PNG image decoder and encoder written entirely in JavaScript",
   "author": "Michaël Zasso",

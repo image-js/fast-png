@@ -1,5 +1,16 @@
 # Changelog
 
+## [7.0.0](https://github.com/image-js/fast-png/compare/v6.4.0...v7.0.0) (2025-06-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* migrate to ESM ([#53](https://github.com/image-js/fast-png/issues/53))
+
+### Code Refactoring
+
+* migrate to ESM ([#53](https://github.com/image-js/fast-png/issues/53)) ([85185d3](https://github.com/image-js/fast-png/commit/85185d38f6be1a4b0c044290b1dc7dfc14de4f5b))
+
 ## [6.4.0](https://github.com/image-js/fast-png/compare/v6.3.0...v6.4.0) (2025-06-11)
 
 
