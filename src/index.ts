@@ -1,16 +1,16 @@
-import PngDecoder from './PngDecoder';
-import PngEncoder from './PngEncoder';
+import PngDecoder from './png_decoder.ts';
+import PngEncoder from './png_encoder.ts';
 import type {
-  DecoderInputType,
-  PngDecoderOptions,
-  DecodedPng,
   DecodedApng,
+  DecodedPng,
+  DecoderInputType,
   ImageData,
+  PngDecoderOptions,
   PngEncoderOptions,
-} from './types';
+} from './types.ts';
 
-export { hasPngSignature } from './helpers/signature';
-export * from './types';
+export { hasPngSignature } from './helpers/signature.ts';
+export * from './types.ts';
 
 function decodePng(
   data: DecoderInputType,
@@ -35,4 +35,4 @@ function decodeApng(
 
 export { decodePng as decode, encodePng as encode, decodeApng };
 
-export { convertIndexedToRgb } from './convertIndexedToRgb';
+export { convertIndexedToRgb } from './convert_indexed_to_rgb.ts';

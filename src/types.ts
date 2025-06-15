@@ -26,16 +26,19 @@ export interface PngResolution {
   unit: ResolutionUnitSpecifier;
 }
 
-export enum ResolutionUnitSpecifier {
+export const ResolutionUnitSpecifier = {
   /**
-   * Unit is unknown
+   * Unit is unknown.
    */
-  UNKNOWN = 0,
+  UNKNOWN: 0,
   /**
-   * Unit is the metre
+   * Unit is the metre.
    */
-  METRE = 1,
-}
+  METRE: 1,
+} as const;
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export type ResolutionUnitSpecifier =
+  (typeof ResolutionUnitSpecifier)[keyof typeof ResolutionUnitSpecifier];
 
 export interface ImageData {
   width: number;

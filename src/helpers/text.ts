@@ -1,6 +1,6 @@
 import type { IOBuffer } from 'iobuffer';
 
-import { writeCrc } from './crc';
+import { writeCrc } from './crc.ts';
 
 // https://www.w3.org/TR/png/#11tEXt
 

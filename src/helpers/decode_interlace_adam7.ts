@@ -1,5 +1,5 @@
-import { applyUnfilter } from './applyUnfilter';
-import type { DecodeInterlaceNullParams } from './decodeInterlaceNull';
+import { applyUnfilter } from './apply_unfilter.ts';
+import type { DecodeInterlaceNullParams } from './decode_interlace_null.ts';
 
 const uint16 = new Uint16Array([0x00ff]);
 const uint8 = new Uint8Array(uint16.buffer);

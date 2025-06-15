@@ -1,13 +1,9 @@
 {
+  "extends": "@zakodium/tsconfig",
   "compilerOptions": {
-    "esModuleInterop": true,
-    "moduleResolution": "node",
-    "sourceMap": true,
-    "strict": true,
-    "target": "es2022",
-    "lib": ["es2022"],
-    "skipLibCheck": true,
-    "allowJs": false
+    "noUncheckedIndexedAccess": false,
+    "types": ["node"],
+    "outDir": "lib"
   },
-  "include": ["./src/**/*"]
+  "include": ["src"]
 }

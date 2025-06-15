@@ -1,29 +1,30 @@
 import { IOBuffer } from 'iobuffer';
 import { inflate, Inflate as Inflator } from 'pako';
 
-import { checkCrc } from './helpers/crc';
-import { decodeInterlaceAdam7 } from './helpers/decodeInterlaceAdam7';
-import { decodeInterlaceNull } from './helpers/decodeInterlaceNull';
-import { checkSignature } from './helpers/signature';
-import { decodetEXt, readKeyword, textChunkName } from './helpers/text';
+import { checkCrc } from './helpers/crc.ts';
+import { decodeInterlaceAdam7 } from './helpers/decode_interlace_adam7.ts';
+import { decodeInterlaceNull } from './helpers/decode_interlace_null.ts';
+import { checkSignature } from './helpers/signature.ts';
+import { decodetEXt, readKeyword, textChunkName } from './helpers/text.ts';
 import {
+  BlendOpType,
   ColorType,
   CompressionMethod,
   DisposeOpType,
   FilterMethod,
   InterlaceMethod,
-  BlendOpType,
-} from './internalTypes';
+} from './internal_types.ts';
 import type {
+  ApngFrame,
   BitDepth,
-  DecodedPng,
   DecodedApng,
   DecodedApngFrame,
-  ApngFrame,
+  DecodedPng,
   DecoderInputType,
   IndexedColors,
   PngDecoderOptions,
-} from './types';
+  ResolutionUnitSpecifier,
+} from './types.ts';
 
 export default class PngDecoder extends IOBuffer {
   private readonly _checkCrc: boolean;
@@ -375,7 +376,11 @@ export default class PngDecoder extends IOBuffer {
     const ppuX = this.readUint32();
     const ppuY = this.readUint32();
     const unitSpecifier = this.readByte();
-    this._png.resolution = { x: ppuX, y: ppuY, unit: unitSpecifier };
+    this._png.resolution = {
+      x: ppuX,
+      y: ppuY,
+      unit: unitSpecifier as ResolutionUnitSpecifier,
+    };
   }
 
   private decodeApngImage() {

@@ -4,8 +4,10 @@ import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import type { PngDecoderOptions, DecodedPng, DecodedApng } from '../index';
-import { decode, decodeApng } from '../index';
+import type { DecodedApng, PngDecoderOptions } from '../index.ts';
+import { decode, decodeApng } from '../index.ts';
+
+import { loadAndDecode } from './load_and_decode.js';
 
 describe('decode', () => {
   it('BW2x2', () => {
@@ -152,7 +154,7 @@ describe('decode', () => {
       depth: 8,
       channels: 3,
     });
-    assert(img.iccEmbeddedProfile);
+    assert.ok(img.iccEmbeddedProfile);
     expect(img.iccEmbeddedProfile.name).toBe('ICC profile');
     expect(img.iccEmbeddedProfile.profile).toHaveLength(672);
   });
@@ -310,17 +312,14 @@ describe('decode', () => {
   });
 });
 
-export function loadAndDecode(
-  img: string,
-  options?: PngDecoderOptions,
-): DecodedPng {
-  return decode(readFileSync(join(__dirname, '../../img', img)), options);
-}
 function loadAndDecodeApng(
   img: string,
   options?: PngDecoderOptions,
 ): DecodedApng {
-  return decodeApng(readFileSync(join(__dirname, '../../img', img)), options);
+  return decodeApng(
+    readFileSync(join(import.meta.dirname, '../../img', img)),
+    options,
+  );
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

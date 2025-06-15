@@ -2,10 +2,10 @@
 import { PNG } from 'pngjs';
 import { describe, expect, it } from 'vitest';
 
-import type { ImageData } from '../index';
-import { encode, decode } from '../index';
+import type { ImageData } from '../index.ts';
+import { decode, encode } from '../index.ts';
 
-import { loadAndDecode } from './decode.test';
+import { loadAndDecode } from './load_and_decode.js';
 
 const simpleRGBAData = new Uint8Array([
   255, 255, 255, 255, 0, 0, 0, 255, 0, 0, 0, 255, 255, 255, 255, 255,
