@@ -15,7 +15,7 @@ export * from './types.ts';
 function decodePng(
   data: DecoderInputType,
   options?: PngDecoderOptions,
-): DecodedPng {
+): number {
   const decoder = new PngDecoder(data, options);
   return decoder.decode();
 }
