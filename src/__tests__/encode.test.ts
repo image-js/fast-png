@@ -19,7 +19,9 @@ const simpleRGBAImageData: ImageData = {
 describe('encode', () => {
   it('simple RGBA', () => {
     const data = encode(simpleRGBAImageData);
+
     expect(data).toBeInstanceOf(Uint8Array);
+
     const decoded = decode(data);
     const expected = {
       width: 2,
@@ -28,6 +30,7 @@ describe('encode', () => {
     };
     check(decoded, expected);
     checkPngJs(data, expected);
+
     expect(decoded.data).toBeInstanceOf(Uint8Array);
     expect(decoded.data).toStrictEqual(simpleRGBAData);
   });
@@ -40,7 +43,9 @@ describe('encode', () => {
       data: dataArray,
       channels: 1,
     });
+
     expect(data).toBeInstanceOf(Uint8Array);
+
     const decoded = decode(data);
     const expected = {
       width: 2,
@@ -49,6 +54,7 @@ describe('encode', () => {
     };
     check(decoded, expected);
     checkPngJs(data, expected);
+
     expect(decoded.data).toBeInstanceOf(Uint8Array);
     expect(decoded.data).toStrictEqual(dataArray);
   });
@@ -76,6 +82,7 @@ describe('encode', () => {
     checkPngJs(data, expected);
     check(decoded, expected);
     checkPngJs(data, expected);
+
     expect(decoded.data).toBeInstanceOf(Uint16Array);
     expect(decoded.data).toStrictEqual(dataArray);
   });
@@ -90,7 +97,9 @@ describe('encode', () => {
       data: dataArray,
       channels: 2,
     });
+
     expect(data).toBeInstanceOf(Uint8Array);
+
     const decoded = decode(data);
     const expected = {
       width: 2,
@@ -99,6 +108,7 @@ describe('encode', () => {
     };
     check(decoded, expected);
     checkPngJs(data, expected);
+
     expect(decoded.data).toBeInstanceOf(Uint8Array);
     expect(decoded.data).toStrictEqual(dataArray);
   });
@@ -112,6 +122,7 @@ describe('encode', () => {
     );
 
     expect(data).toBeInstanceOf(Uint8Array);
+
     const decoded = decode(data);
     const expected = {
       width: 2,
@@ -119,6 +130,7 @@ describe('encode', () => {
       depth: 8,
     };
     check(decoded, expected);
+
     expect(decoded.data).toBeInstanceOf(Uint8Array);
     expect(decoded.data).toStrictEqual(simpleRGBAData);
   });
@@ -138,6 +150,7 @@ describe('encode', () => {
     );
 
     expect(data).toBeInstanceOf(Uint8Array);
+
     const decoded = decode(data);
     const expected = {
       width: 2,
@@ -145,6 +158,7 @@ describe('encode', () => {
       depth: 16,
     };
     check(decoded, expected);
+
     expect(decoded.data).toBeInstanceOf(Uint16Array);
     expect(decoded.data).toStrictEqual(
       new Uint16Array([
@@ -163,6 +177,7 @@ describe('encode', () => {
     });
 
     expect(data).toBeInstanceOf(Uint8Array);
+
     const decoded = decode(data);
     const expected = {
       width: 12,
@@ -170,6 +185,7 @@ describe('encode', () => {
       depth: 1,
     };
     check(decoded, expected);
+
     expect(decoded.data).toBeInstanceOf(Uint8Array);
     expect(decoded.data).toStrictEqual(new Uint8Array([255, 0]));
   });
@@ -182,21 +198,30 @@ describe('encode', () => {
     };
     const encoded = encode({ ...simpleRGBAImageData, text });
     const decoded = decode(encoded);
+
     expect(decoded.text).toStrictEqual(text);
   });
+
   it('PLTE chunk', () => {
     const decoded = loadAndDecode('mud_bricks.png');
     const encoded = encode(decoded);
+
     expect(encoded).toBeInstanceOf(Uint8Array);
+
     const result = decode(encoded);
-    expect(result).toEqual(decoded);
+
+    expect(result).toStrictEqual(decoded);
   });
+
   it('PLTE and tRNS chunks', () => {
     const decoded = loadAndDecode('cocoa_stage2.png');
     const encoded = encode(decoded);
+
     expect(encoded).toBeInstanceOf(Uint8Array);
+
     const result = decode(encoded);
-    expect(result).toEqual(decoded);
+
+    expect(result).toStrictEqual(decoded);
   });
 
   it('tEXt chunk - invalid data', () => {

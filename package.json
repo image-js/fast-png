@@ -36,16 +36,16 @@
     "pako": "^2.1.0"
   },
   "devDependencies": {
-    "@types/node": "^24.0.1",
-    "@vitest/coverage-v8": "^3.2.3",
-    "@zakodium/tsconfig": "^1.0.1",
-    "eslint": "^9.29.0",
-    "eslint-config-cheminfo-typescript": "^18.0.1",
+    "@types/node": "^24.1.0",
+    "@vitest/coverage-v8": "^3.2.4",
+    "@zakodium/tsconfig": "^1.0.2",
+    "eslint": "^9.31.0",
+    "eslint-config-cheminfo-typescript": "^19.0.0",
     "pngjs": "^7.0.0",
-    "prettier": "^3.5.3",
+    "prettier": "^3.6.2",
     "rimraf": "^6.0.1",
     "typescript": "^5.8.3",
-    "vitest": "^3.2.3"
+    "vitest": "^3.2.4"
   },
   "repository": {
     "type": "git",

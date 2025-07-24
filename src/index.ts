@@ -33,6 +33,6 @@ function decodeApng(
   return decoder.decodeApng();
 }
 
-export { decodePng as decode, encodePng as encode, decodeApng };
+export { decodeApng, decodePng as decode, encodePng as encode };
 
 export { convertIndexedToRgb } from './convert_indexed_to_rgb.ts';
