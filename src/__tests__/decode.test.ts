@@ -1,8 +1,7 @@
-import assert from 'node:assert';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { describe, expect, it } from 'vitest';
+import { assert, describe, expect, it } from 'vitest';
 
 import type { DecodedApng, PngDecoderOptions } from '../index.ts';
 import { decode, decodeApng } from '../index.ts';
@@ -18,6 +17,7 @@ describe('decode', () => {
       depth: 8,
       channels: 2,
     });
+
     expect(img.data).toBeInstanceOf(Uint8Array);
     expect(img.data).toStrictEqual(
       new Uint8Array([0, 255, 255, 255, 255, 255, 0, 255]),
@@ -33,7 +33,7 @@ describe('decode', () => {
       channels: 3,
     });
 
-    expect(image.data).toEqual(
+    expect(image.data).toStrictEqual(
       new Uint8Array([
         0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 255, 255, 255, 255, 255, 255,
         0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 255, 255, 255, 255, 0,
@@ -75,6 +75,7 @@ describe('decode', () => {
       depth: 8,
       channels: 4,
     });
+
     expect(img.data).toBeInstanceOf(Uint8Array);
     expect(img.data).toHaveLength(10 * 10 * 4);
   });
@@ -87,6 +88,7 @@ describe('decode', () => {
       depth: 8,
       channels: 1,
     });
+
     expect(img.palette).toBeInstanceOf(Array);
     expect(img.palette).toHaveLength(256);
     // @ts-expect-error Palette should not be undefined
@@ -101,6 +103,7 @@ describe('decode', () => {
       depth: 8,
       channels: 1,
     });
+
     expect(img.palette).toBeInstanceOf(Array);
     expect(img.palette).toHaveLength(256);
     // @ts-expect-error Palette should not be undefined
@@ -117,6 +120,7 @@ describe('decode', () => {
       depth: 16,
       channels: 1,
     });
+
     expect(img.transparency).toBeInstanceOf(Uint16Array);
     expect(img.transparency).toHaveLength(1);
     // @ts-expect-error Transparency should not be undefined
@@ -125,16 +129,19 @@ describe('decode', () => {
 
   it('1bit depth ', () => {
     const decoded = loadAndDecode('bwImage.png');
+
     expect(decoded.data).toBeInstanceOf(Uint8Array);
     // Width of 225/8 = 28.125 so we need 29 bytes. Last pixel will fit on
     // the 29th byte.
-    expect(decoded.data.length).toEqual(6525);
-    expect(decoded.data[28]).toEqual(128);
-    expect(decoded.data[57]).toEqual(128);
+    expect(decoded.data).toHaveLength(6525);
+    expect(decoded.data[28]).toBe(128);
+    expect(decoded.data[57]).toBe(128);
   });
 
   it('should not throw when CRC is correct', () => {
-    loadAndDecode('palette.png', { checkCrc: true });
+    expect(() =>
+      loadAndDecode('palette.png', { checkCrc: true }),
+    ).not.toThrow();
   });
 
   it.each([
@@ -154,21 +161,24 @@ describe('decode', () => {
       depth: 8,
       channels: 3,
     });
-    assert.ok(img.iccEmbeddedProfile);
+    assert(img.iccEmbeddedProfile);
+
     expect(img.iccEmbeddedProfile.name).toBe('ICC profile');
     expect(img.iccEmbeddedProfile.profile).toHaveLength(672);
   });
 
   it('tEXt chunk - ASCII', () => {
     const { text } = loadAndDecode('note.png');
+
     expect(text).toStrictEqual({
       Note: 'Distance to target [Km]: 10',
     });
   });
 
-  it('tEXt chunk - ASCII', () => {
+  it('tEXt chunk - ASCII 2', () => {
     const { text } = loadAndDecode('text-ascii.png');
-    expect(text).toEqual({
+
+    expect(text).toStrictEqual({
       Smiles: 'CCCC',
       'date:create': '2024-02-12T15:56:01+00:00',
       'date:modify': '2024-02-12T15:55:48+00:00',
@@ -181,8 +191,11 @@ describe('decode', () => {
 
   it('tEXt chunk - latin1', () => {
     const { text } = loadAndDecode('text-excalidraw.png');
+
     expect(text).toHaveProperty(['application/vnd.excalidraw+json']);
+
     const json = JSON.parse(text['application/vnd.excalidraw+json']);
+
     expect(json).toMatchObject({
       version: '1',
       encoding: 'bstring',
@@ -195,14 +208,15 @@ describe('decode', () => {
 
   it('APNG small greyscale image', () => {
     const decodedApng = loadAndDecodeApng('testApng.png');
+
     expect(decodedApng).toBeDefined();
-    expect(decodedApng.frames.length).toStrictEqual(2);
+    expect(decodedApng.frames).toHaveLength(2);
 
     const frame1 = decodedApng.frames.at(0);
     const frame2 = decodedApng.frames.at(1);
 
-    expect(frame1?.data.length).toEqual(200);
-    expect(frame2?.data.length).toEqual(200);
+    expect(frame1?.data.length).toBe(200);
+    expect(frame2?.data.length).toBe(200);
     expect(frame1?.data.slice(0, 11)).toStrictEqual(
       new Uint8Array([255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255]),
     );
@@ -210,105 +224,123 @@ describe('decode', () => {
       new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255]),
     );
   });
+
   it('APNG big RGBA image', () => {
     const decodedApng = loadAndDecodeApng('beachBallApng.png');
-    expect(decodedApng).toBeDefined();
-    expect(decodedApng.frames.length).toStrictEqual(decodedApng.numberOfFrames);
 
-    expect(decodedApng.frames[0].data.length).toEqual(40000);
+    expect(decodedApng).toBeDefined();
+    expect(decodedApng.frames).toHaveLength(decodedApng.numberOfFrames);
+
+    expect(decodedApng.frames[0].data).toHaveLength(40000);
 
     const frame1 = decodedApng.frames.at(0);
     const frame2 = decodedApng.frames.at(1);
-    if (frame1 && frame2) {
-      expect(frame1.data.slice(0, 11)).toStrictEqual(
-        new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
-      );
-      expect(frame2.data.length).toEqual(
-        decodedApng.width * decodedApng.height * decodedApng.channels,
-      );
-    }
+    assert(frame1 && frame2);
+
+    expect(frame1.data.slice(0, 11)).toStrictEqual(
+      new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
+    );
+    expect(frame2.data).toHaveLength(
+      decodedApng.width * decodedApng.height * decodedApng.channels,
+    );
   });
+
   it('Minecraft texture with PLTE', () => {
     const decoded = loadAndDecode('polished_basalt_side.png');
-    expect(decoded.width).toEqual(16);
-    expect(decoded.height).toEqual(16);
-    expect(decoded.data.length).toEqual(128);
+
+    expect(decoded.width).toBe(16);
+    expect(decoded.height).toBe(16);
+    expect(decoded.data).toHaveLength(128);
     expect(decoded.palette).toBeDefined();
-    expect(decoded.palette?.length).toEqual(6);
-    expect(decoded.palette?.at(0)).toEqual([116, 116, 116]);
+    expect(decoded.palette?.length).toBe(6);
+    expect(decoded.palette?.at(0)).toStrictEqual([116, 116, 116]);
   });
+
   it('Minecraft texture with PLTE and tRNS', () => {
     const decoded = loadAndDecode('cocoa_stage2.png');
-    expect(decoded.width).toEqual(16);
-    expect(decoded.height).toEqual(16);
-    expect(decoded.data.length).toEqual(128);
-    expect(decoded.data.at(7)).toEqual(18);
+
+    expect(decoded.width).toBe(16);
+    expect(decoded.height).toBe(16);
+    expect(decoded.data).toHaveLength(128);
+    expect(decoded.data.at(7)).toBe(18);
     expect(decoded.palette).toBeDefined();
-    expect(decoded.palette?.length).toEqual(8);
-    expect(decoded.palette?.at(0)).toEqual([0, 0, 0, 0]);
-    expect(decoded.palette?.at(1)).toEqual([226, 177, 124, 255]);
+    expect(decoded.palette?.length).toBe(8);
+    expect(decoded.palette?.at(0)).toStrictEqual([0, 0, 0, 0]);
+    expect(decoded.palette?.at(1)).toStrictEqual([226, 177, 124, 255]);
   });
+
   it('Minecraft texture with PLTE and bitDepth 2', () => {
     const decoded = loadAndDecode('blue_concrete.png');
-    expect(decoded.width).toEqual(160);
-    expect(decoded.height).toEqual(160);
-    expect(decoded.data.length).toEqual(6400);
-    expect(decoded.data.at(1)).toEqual(170);
+
+    expect(decoded.width).toBe(160);
+    expect(decoded.height).toBe(160);
+    expect(decoded.data).toHaveLength(6400);
+    expect(decoded.data.at(1)).toBe(170);
     expect(decoded.palette).toBeDefined();
-    expect(decoded.palette?.length).toEqual(4);
-    expect(decoded.palette?.at(0)).toEqual([44, 46, 142]);
-    expect(decoded.palette?.at(1)).toEqual([44, 46, 143]);
+    expect(decoded.palette?.length).toBe(4);
+    expect(decoded.palette?.at(0)).toStrictEqual([44, 46, 142]);
+    expect(decoded.palette?.at(1)).toStrictEqual([44, 46, 143]);
   });
+
   it('APNG RGB square 8-bit image', () => {
     const decodedApng = loadAndDecodeApng('squareApng.png');
 
     expect(decodedApng).toBeDefined();
-    expect(decodedApng.frames.length).toStrictEqual(decodedApng.numberOfFrames);
-    expect(decodedApng.frames[0].data.length).toEqual(25);
+    expect(decodedApng.frames).toHaveLength(decodedApng.numberOfFrames);
+    expect(decodedApng.frames[0].data).toHaveLength(25);
+
     const frame1 = decodedApng.frames.at(0);
     const frame2 = decodedApng.frames.at(1);
-    if (frame1 && frame2) {
-      expect(frame1.data).toStrictEqual(
-        new Uint8Array([
-          1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 2, 2, 2, 1, 1, 2, 2, 2, 1, 1, 1, 1,
-          1, 1,
-        ]),
-      );
-      expect(frame2.data).toEqual(
-        new Uint8Array([
-          2, 2, 2, 2, 2, 2, 1, 1, 1, 2, 2, 1, 1, 1, 2, 2, 1, 1, 1, 2, 2, 2, 2,
-          2, 2,
-        ]),
-      );
-      expect(decodedApng.palette?.length).toStrictEqual(3);
-      expect(decodedApng.palette?.at(1)).toEqual([0, 0, 255, 255]);
-      expect(decodedApng.palette?.at(2)).toEqual([255, 0, 0, 255]);
-    }
+    assert(frame1 && frame2);
+
+    expect(frame1.data).toStrictEqual(
+      new Uint8Array([
+        1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 2, 2, 2, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1,
+        1,
+      ]),
+    );
+    expect(frame2.data).toStrictEqual(
+      new Uint8Array([
+        2, 2, 2, 2, 2, 2, 1, 1, 1, 2, 2, 1, 1, 1, 2, 2, 1, 1, 1, 2, 2, 2, 2, 2,
+        2,
+      ]),
+    );
+    expect(decodedApng.palette?.length).toBe(3);
+    expect(decodedApng.palette?.at(1)).toStrictEqual([0, 0, 255, 255]);
+    expect(decodedApng.palette?.at(2)).toStrictEqual([255, 0, 0, 255]);
   });
+
   it('APNG RGB blend 8-bit image', () => {
     const decodedApng = loadAndDecodeApng('blendOpApng.png');
-    expect(decodedApng.frames.length).toEqual(decodedApng.numberOfFrames);
-    expect(decodedApng.frames[0].data[0]).toEqual(255);
-    expect(decodedApng.frames[110].data[1]).toEqual(1);
+
+    expect(decodedApng.frames).toHaveLength(decodedApng.numberOfFrames);
+    expect(decodedApng.frames[0].data[0]).toBe(255);
+    expect(decodedApng.frames[110].data[1]).toBe(1);
   });
+
   it('APNG RGBA image with multiple data chunks per frame', async () => {
     const decodedApng = loadAndDecodeApng('rickApng.png');
-    expect(decodedApng.frames.length).toEqual(decodedApng.numberOfFrames);
-    expect(decodedApng.width).toEqual(1300);
-    expect(decodedApng.height).toEqual(1300);
+
+    expect(decodedApng.frames).toHaveLength(decodedApng.numberOfFrames);
+    expect(decodedApng.width).toBe(1300);
+    expect(decodedApng.height).toBe(1300);
   }, 6000);
+
   it('decode APNG image as PNG', () => {
     const decodedPng = loadAndDecode('beachBallApng.png');
+
     expect(decodedPng.data).toBeDefined();
-    expect(decodedPng.width).toEqual(100);
-    expect(decodedPng.height).toEqual(100);
+    expect(decodedPng.width).toBe(100);
+    expect(decodedPng.height).toBe(100);
   });
+
   it('decode PNG image as APNG', () => {
     const decodedApng = loadAndDecodeApng('palette.png');
+
     expect(decodedApng.frames[0]).toBeDefined();
-    expect(decodedApng.frames.length).toEqual(decodedApng.numberOfFrames);
-    expect(decodedApng.width).toEqual(150);
-    expect(decodedApng.height).toEqual(200);
+    expect(decodedApng.frames).toHaveLength(decodedApng.numberOfFrames);
+    expect(decodedApng.width).toBe(150);
+    expect(decodedApng.height).toBe(200);
   });
 });
 

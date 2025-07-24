@@ -18,8 +18,10 @@ describe('rgb', () => {
       text: {},
     };
     const view = convertIndexedToRgb(decodedImage);
+
     expect(view).toStrictEqual(Uint8Array.from([0, 0, 1]));
   });
+
   it('1 bit with multiple rows', () => {
     const palette: IndexedColors = [
       [0, 0, 1],
@@ -36,6 +38,7 @@ describe('rgb', () => {
     };
 
     const view = convertIndexedToRgb(decodedImage);
+
     expect(view).toStrictEqual(
       Uint8Array.from([
         0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2,
@@ -61,6 +64,7 @@ describe('rgb', () => {
     };
 
     const view = convertIndexedToRgb(decodedImage);
+
     expect(view).toStrictEqual(Uint8Array.from([0, 0, 1, 0, 0, 4]));
   });
 
@@ -82,6 +86,7 @@ describe('rgb', () => {
     };
 
     const view = convertIndexedToRgb(decodedImage);
+
     expect(view).toStrictEqual(
       Uint8Array.from([
         0, 0, 4, 0, 0, 4, 0, 0, 4, 0, 0, 3, 0, 0, 1, 0, 0, 4, 0, 0, 4, 0, 0, 4,
@@ -114,6 +119,7 @@ describe('rgb', () => {
     };
 
     const view = convertIndexedToRgb(decodedImage);
+
     expect(view).toStrictEqual(
       Uint8Array.from([
         0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 0, 5, 0, 0, 6, 0, 0, 7, 0, 0, 8,
@@ -145,6 +151,7 @@ describe('rgb', () => {
     };
 
     const view = convertIndexedToRgb(decodedImage);
+
     expect(view).toStrictEqual(
       Uint8Array.from([
         0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 0, 0, 0, 0, 5, 0, 0, 6, 0, 0, 7,
@@ -172,6 +179,7 @@ describe('rgb', () => {
     };
 
     const view = convertIndexedToRgb(decodedImage);
+
     expect(view).toStrictEqual(
       Uint8Array.from([0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4]),
     );
@@ -181,7 +189,7 @@ describe('rgb', () => {
     const img = loadAndDecode('palette.png');
 
     expect(img.palette).toBeDefined();
-    expect(img.depth).toStrictEqual(8);
+    expect(img.depth).toBe(8);
 
     const data = convertIndexedToRgb(img);
     const newImg = encode({
@@ -195,12 +203,15 @@ describe('rgb', () => {
     // fs.writeFileSync(path.join(import.meta.dirname, "../../img/palette.new.png"), newImg, { flag: "w+" });
 
     const newImageParsed = decode(newImg);
-    expect(newImageParsed.data.byteLength).toStrictEqual(90000);
+
+    expect(newImageParsed.data.byteLength).toBe(90000);
   });
+
   it('minecraft texture with tRNS ', () => {
     const img = loadAndDecode('cocoa_stage2.png');
+
     expect(img.palette).toBeDefined();
-    expect(img.depth).toStrictEqual(4);
+    expect(img.depth).toBe(4);
 
     const data = convertIndexedToRgb(img);
     const newImg = encode({
@@ -215,7 +226,7 @@ describe('rgb', () => {
 
     const newImageParsed = decode(newImg);
 
-    expect(newImageParsed.data.byteLength).toStrictEqual(1024);
+    expect(newImageParsed.data.byteLength).toBe(1024);
   });
 });
 
@@ -236,6 +247,7 @@ describe('rgba', () => {
     };
 
     const view = convertIndexedToRgb(decodedImage);
+
     expect(view).toStrictEqual(
       Uint8Array.from(
         [
@@ -251,6 +263,7 @@ describe('rgba', () => {
       ),
     );
   });
+
   it('4 bit with RGBA', () => {
     const palette: IndexedColors = [
       [0, 0, 0, 25],
@@ -275,6 +288,7 @@ describe('rgba', () => {
     };
 
     const view = convertIndexedToRgb(decodedImage);
+
     expect(view).toStrictEqual(
       Uint8Array.from([
         0, 0, 1, 255, 0, 0, 2, 90, 0, 0, 3, 0, 0, 0, 4, 0, 0, 0, 5, 255, 0, 0,
@@ -294,10 +308,12 @@ describe('errors', () => {
       channels: 1,
       text: {},
     };
+
     expect(() => {
       convertIndexedToRgb(decodedImage);
     }).toThrow('Color palette is undefined.');
   });
+
   it('throws if data length is not correct', () => {
     const palette: IndexedColors = [
       [0, 0, 1],

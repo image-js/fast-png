@@ -1,5 +1,5 @@
 import { IOBuffer } from 'iobuffer';
-import { inflate, Inflate as Inflator } from 'pako';
+import { Inflate as Inflator, inflate } from 'pako';
 
 import { checkCrc } from './helpers/crc.ts';
 import { decodeInterlaceAdam7 } from './helpers/decode_interlace_adam7.ts';

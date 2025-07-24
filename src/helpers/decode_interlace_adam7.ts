@@ -6,7 +6,6 @@ const uint8 = new Uint8Array(uint16.buffer);
 const osIsLittleEndian = uint8[0] === 0xff;
 /**
  * Decodes the Adam7 interlaced PNG data.
- *
  * @param params - DecodeInterlaceNullParams
  * @returns - array of pixel data.
  */
