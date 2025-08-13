@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.0.1](https://github.com/image-js/fast-png/compare/v7.0.0...v7.0.1) (2025-08-13)
+
+
+### Bug Fixes
+
+* exports ([#58](https://github.com/image-js/fast-png/issues/58)) ([0f97685](https://github.com/image-js/fast-png/commit/0f976853954d839a54c1d9b7bb597c74ad2cbc0d))
+
 ## [7.0.0](https://github.com/image-js/fast-png/compare/v6.4.0...v7.0.0) (2025-06-15)
 
 
