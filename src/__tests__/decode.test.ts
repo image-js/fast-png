@@ -127,7 +127,7 @@ describe('decode', () => {
     expect(img.transparency[0]).toBe(0);
   });
 
-  it('1bit depth ', () => {
+  it('1bit depth', () => {
     const decoded = loadAndDecode('bwImage.png');
 
     expect(decoded.data).toBeInstanceOf(Uint8Array);
