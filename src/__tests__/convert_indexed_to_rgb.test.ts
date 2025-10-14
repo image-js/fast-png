@@ -207,7 +207,7 @@ describe('rgb', () => {
     expect(newImageParsed.data.byteLength).toBe(90000);
   });
 
-  it('minecraft texture with tRNS ', () => {
+  it('minecraft texture with tRNS', () => {
     const img = loadAndDecode('cocoa_stage2.png');
 
     expect(img.palette).toBeDefined();
