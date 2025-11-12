@@ -33,9 +33,8 @@
     "tsc-build": "tsc --project tsconfig.build.json"
   },
   "dependencies": {
-    "@types/pako": "^2.0.4",
-    "iobuffer": "^6.0.1",
-    "pako": "^2.1.0"
+    "fflate": "^0.8.2",
+    "iobuffer": "^6.0.1"
   },
   "devDependencies": {
     "@types/node": "^24.7.2",

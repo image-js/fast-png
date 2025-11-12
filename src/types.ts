@@ -1,7 +1,5 @@
+import type { ZlibOptions } from 'fflate';
 import type { IOBuffer } from 'iobuffer';
-import type { DeflateFunctionOptions } from 'pako';
-
-export type { DeflateFunctionOptions } from 'pako';
 
 export type PngDataArray = Uint8Array | Uint8ClampedArray | Uint16Array;
 
@@ -105,7 +103,7 @@ export interface PngDecoderOptions {
 
 export interface PngEncoderOptions {
   interlace?: 'null' | 'Adam7';
-  zlib?: DeflateFunctionOptions;
+  zlib?: ZlibOptions;
 }
 
 export type IndexedColors = number[][];

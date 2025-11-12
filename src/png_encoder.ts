@@ -1,5 +1,6 @@
+import type { ZlibOptions } from 'fflate';
+import { zlibSync } from 'fflate';
 import { IOBuffer } from 'iobuffer';
-import { deflate } from 'pako';
 
 import { writeCrc } from './helpers/crc.ts';
 import { writeSignature } from './helpers/signature.ts';
@@ -12,14 +13,13 @@ import {
 } from './internal_types.ts';
 import type {
   BitDepth,
-  DeflateFunctionOptions,
   ImageData,
   IndexedColors,
   PngDataArray,
   PngEncoderOptions,
 } from './types.ts';
 
-const defaultZlibOptions: DeflateFunctionOptions = {
+const defaultZlibOptions: ZlibOptions = {
   level: 3,
 };
 
@@ -35,7 +35,7 @@ interface PngToEncode {
 
 export default class PngEncoder extends IOBuffer {
   private readonly _png: PngToEncode;
-  private readonly _zlibOptions: DeflateFunctionOptions;
+  private readonly _zlibOptions: ZlibOptions;
   private _colorType: ColorType;
   private readonly _interlaceMethod: InterlaceMethod;
   public constructor(data: ImageData, options: PngEncoderOptions = {}) {
@@ -154,7 +154,7 @@ export default class PngEncoder extends IOBuffer {
       offset = writeDataInterlaced(this._png, data, newData, offset);
     }
     const buffer = newData.toArray();
-    const compressed = deflate(buffer, this._zlibOptions);
+    const compressed = zlibSync(buffer, this._zlibOptions);
     this.encodeIDAT(compressed);
   }
 
