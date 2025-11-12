@@ -1,5 +1,5 @@
+import { Unzlib as Inflator, unzlibSync } from 'fflate';
 import { IOBuffer } from 'iobuffer';
-import { Inflate as Inflator, inflate } from 'pako';
 
 import { checkCrc } from './helpers/crc.ts';
 import { decodeInterlaceAdam7 } from './helpers/decode_interlace_adam7.ts';
@@ -45,12 +45,26 @@ export default class PngDecoder extends IOBuffer {
   private _numberOfPlays: number;
   private _frames: ApngFrame[];
   private _writingDataChunks: boolean;
-
+  private _chunks: Uint8Array[];
+  private _inflatorResult: Uint8Array;
   public constructor(data: DecoderInputType, options: PngDecoderOptions = {}) {
     super(data);
     const { checkCrc = false } = options;
     this._checkCrc = checkCrc;
-    this._inflator = new Inflator();
+    this._inflator = new Inflator((chunk, final) => {
+      this._chunks.push(chunk);
+      if (final) {
+        const totalLength = this._chunks.reduce((sum, c) => sum + c.length, 0);
+        this._inflatorResult = new Uint8Array(totalLength);
+        let offset = 0;
+        for (const chunk of this._chunks) {
+          this._inflatorResult.set(chunk, offset);
+          offset += chunk.length;
+        }
+        this._chunks = [];
+      }
+    });
+    this._chunks = [];
     this._png = {
       width: -1,
       height: -1,
@@ -83,6 +97,7 @@ export default class PngDecoder extends IOBuffer {
     this._numberOfPlays = 0;
     this._frames = [];
     this._writingDataChunks = false;
+    this._inflatorResult = new Uint8Array(0);
     // PNG is always big endian
     // https://www.w3.org/TR/PNG/#7Integers-and-byte-order
     this.setBigEndian();
@@ -96,6 +111,8 @@ export default class PngDecoder extends IOBuffer {
 
       this.decodeChunk(length, type);
     }
+    this._inflator.push(new Uint8Array(0), true);
+
     this.decodeImage();
 
     return this._png;
@@ -275,12 +292,13 @@ export default class PngDecoder extends IOBuffer {
     this._writingDataChunks = true;
     const dataLength = length;
     const dataOffset = this.offset + this.byteOffset;
-
-    this._inflator.push(new Uint8Array(this.buffer, dataOffset, dataLength));
-    if (this._inflator.err) {
-      throw new Error(
-        `Error while decompressing the data: ${this._inflator.err}`,
+    try {
+      this._inflator.push(
+        new Uint8Array(this.buffer, dataOffset, dataLength),
+        false,
       );
+    } catch (error) {
+      throw new Error('Error while decompressing the data:', { cause: error });
     }
     this.skip(length);
   }
@@ -290,11 +308,13 @@ export default class PngDecoder extends IOBuffer {
     let dataOffset = this.offset + this.byteOffset;
     dataOffset += 4;
     dataLength -= 4;
-    this._inflator.push(new Uint8Array(this.buffer, dataOffset, dataLength));
-    if (this._inflator.err) {
-      throw new Error(
-        `Error while decompressing the data: ${this._inflator.err}`,
+    try {
+      this._inflator.push(
+        new Uint8Array(this.buffer, dataOffset, dataLength),
+        false,
       );
+    } catch (error) {
+      throw new Error('Error while decompressing the data:', { cause: error });
     }
     this.skip(length);
   }
@@ -367,7 +387,7 @@ export default class PngDecoder extends IOBuffer {
     const compressedProfile = this.readBytes(length - name.length - 2);
     this._png.iccEmbeddedProfile = {
       name,
-      profile: inflate(compressedProfile),
+      profile: unzlibSync(compressedProfile),
     };
   }
 
@@ -517,15 +537,7 @@ export default class PngDecoder extends IOBuffer {
     }
   }
   private decodeImage(): void {
-    if (this._inflator.err) {
-      throw new Error(
-        `Error while decompressing the data: ${this._inflator.err}`,
-      );
-    }
-
-    const data = this._isAnimated
-      ? (this._frames?.at(0) as ApngFrame).data
-      : this._inflator.result;
+    const data = this._inflatorResult;
 
     if (this._filterMethod !== FilterMethod.ADAPTIVE) {
       throw new Error(`Filter method ${this._filterMethod} not supported`);
@@ -533,7 +545,7 @@ export default class PngDecoder extends IOBuffer {
 
     if (this._interlaceMethod === InterlaceMethod.NO_INTERLACE) {
       this._png.data = decodeInterlaceNull({
-        data: data as Uint8Array,
+        data,
         width: this._png.width,
         height: this._png.height,
         channels: this._png.channels,
@@ -541,7 +553,7 @@ export default class PngDecoder extends IOBuffer {
       });
     } else if (this._interlaceMethod === InterlaceMethod.ADAM7) {
       this._png.data = decodeInterlaceAdam7({
-        data: data as Uint8Array,
+        data,
         width: this._png.width,
         height: this._png.height,
         channels: this._png.channels,
@@ -562,10 +574,13 @@ export default class PngDecoder extends IOBuffer {
   }
 
   private pushDataToFrame() {
-    const result = this._inflator.result;
+    // Finalize the current stream
+    this._inflator.push(new Uint8Array(0), true); // This triggers final=true in callback
+
+    const result = this._inflatorResult;
     const lastFrame = this._frames.at(-1);
     if (lastFrame) {
-      lastFrame.data = result as Uint8Array;
+      lastFrame.data = result;
     } else {
       this._frames.push({
         sequenceNumber: 0,
@@ -577,10 +592,25 @@ export default class PngDecoder extends IOBuffer {
         delayDenominator: 0,
         disposeOp: DisposeOpType.NONE,
         blendOp: BlendOpType.SOURCE,
-        data: result as Uint8Array,
+        data: result,
       });
     }
-    this._inflator = new Inflator();
+
+    // Create new inflator for next frame
+    this._inflator = new Inflator((chunk, final) => {
+      this._chunks.push(chunk);
+      if (final) {
+        const totalLength = this._chunks.reduce((sum, c) => sum + c.length, 0);
+        this._inflatorResult = new Uint8Array(totalLength);
+        let offset = 0;
+        for (const chunk of this._chunks) {
+          this._inflatorResult.set(chunk, offset);
+          offset += chunk.length;
+        }
+        this._chunks = [];
+      }
+    });
+    this._chunks = [];
     this._writingDataChunks = false;
   }
 }
