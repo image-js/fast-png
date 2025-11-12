@@ -1,8 +1,6 @@
 import type { ZlibOptions } from 'fflate';
 import type { IOBuffer } from 'iobuffer';
 
-export type { DeflateFunctionOptions } from 'pako';
-
 export type PngDataArray = Uint8Array | Uint8ClampedArray | Uint16Array;
 
 export type DecoderInputType = IOBuffer | ArrayBufferLike | ArrayBufferView;
