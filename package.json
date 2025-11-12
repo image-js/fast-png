@@ -34,6 +34,7 @@
   },
   "dependencies": {
     "@types/pako": "^2.0.4",
+    "fflate": "^0.8.2",
     "iobuffer": "^6.0.1",
     "pako": "^2.1.0"
   },
