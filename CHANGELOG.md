@@ -1,5 +1,16 @@
 # Changelog
 
+## [8.0.0](https://github.com/image-js/fast-png/compare/v7.0.1...v8.0.0) (2025-12-18)
+
+
+### ⚠ BREAKING CHANGES
+
+* zlib encoding options have been changed
+
+### Performance Improvements
+
+* switch from pako to fflate ([#64](https://github.com/image-js/fast-png/issues/64)) ([11571d8](https://github.com/image-js/fast-png/commit/11571d88c0441f1aba7ee08c700ca471e4e54adc))
+
 ## [7.0.1](https://github.com/image-js/fast-png/compare/v7.0.0...v7.0.1) (2025-08-13)
 
 
