@@ -311,7 +311,7 @@ describe('errors', () => {
 
     expect(() => {
       convertIndexedToRgb(decodedImage);
-    }).toThrow('Color palette is undefined.');
+    }).toThrowError('Color palette is undefined.');
   });
 
   it('throws if data length is not correct', () => {
@@ -331,6 +331,6 @@ describe('errors', () => {
 
     expect(() => {
       convertIndexedToRgb(decodedImage);
-    }).toThrow(new RangeError('wrong data size. Found 2, expected 1'));
+    }).toThrowError(new RangeError('wrong data size. Found 2, expected 1'));
   });
 });
