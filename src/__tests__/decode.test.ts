@@ -141,7 +141,7 @@ describe('decode', () => {
   it('should not throw when CRC is correct', () => {
     expect(() =>
       loadAndDecode('palette.png', { checkCrc: true }),
-    ).not.toThrow();
+    ).not.toThrowError();
   });
 
   it.each([
@@ -150,7 +150,7 @@ describe('decode', () => {
     // Not enough values.
     Uint8Array.of(137, 80),
   ])('should throw with a non-png', (value) => {
-    expect(() => decode(value)).toThrow('wrong PNG signature');
+    expect(() => decode(value)).toThrowError('wrong PNG signature');
   });
 
   it('ICC Embeded Profile', () => {

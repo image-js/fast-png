@@ -227,16 +227,16 @@ describe('encode', () => {
   it('tEXt chunk - invalid data', () => {
     expect(() =>
       encode({ ...simpleRGBAImageData, text: { 'InvalidK€yword': 'value' } }),
-    ).toThrow('invalid latin1 text');
+    ).toThrowError('invalid latin1 text');
     expect(() =>
       encode({ ...simpleRGBAImageData, text: { key: 'InvalidValu€' } }),
-    ).toThrow(/invalid latin1 text/);
+    ).toThrowError(/invalid latin1 text/);
     expect(() =>
       encode({
         ...simpleRGBAImageData,
         text: { ['keywordTooLong'.repeat(10)]: 'value' },
       }),
-    ).toThrow(/keyword length/);
+    ).toThrowError(/keyword length/);
   });
 
   it('errors', () => {
@@ -248,7 +248,7 @@ describe('encode', () => {
         data: new Uint8Array(),
         channels: 5,
       }),
-    ).toThrow('unsupported number of channels: 5');
+    ).toThrowError('unsupported number of channels: 5');
     expect(() =>
       encode({
         width: 1.1,
@@ -257,7 +257,7 @@ describe('encode', () => {
         data: new Uint8Array(),
         channels: 3,
       }),
-    ).toThrow('width must be a positive integer');
+    ).toThrowError('width must be a positive integer');
     expect(() =>
       encode({
         width: 1,
@@ -267,7 +267,7 @@ describe('encode', () => {
         data: new Uint8Array(),
         channels: 3,
       }),
-    ).toThrow('height must be a positive integer');
+    ).toThrowError('height must be a positive integer');
     expect(() =>
       encode({
         width: 1,
@@ -276,7 +276,7 @@ describe('encode', () => {
         data: new Uint8Array(10),
         channels: 3,
       }),
-    ).toThrow('wrong data size. Found 10, expected 3');
+    ).toThrowError('wrong data size. Found 10, expected 3');
   });
 });
 

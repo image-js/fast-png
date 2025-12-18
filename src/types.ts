@@ -34,7 +34,6 @@ export const ResolutionUnitSpecifier = {
    */
   METRE: 1,
 } as const;
-// eslint-disable-next-line @typescript-eslint/no-redeclare
 export type ResolutionUnitSpecifier =
   (typeof ResolutionUnitSpecifier)[keyof typeof ResolutionUnitSpecifier];
 
