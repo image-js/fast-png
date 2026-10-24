@@ -314,8 +314,9 @@ describe('decode', () => {
     const decodedApng = loadAndDecodeApng('blendOpApng.png');
 
     expect(decodedApng.frames).toHaveLength(decodedApng.numberOfFrames);
-    expect(decodedApng.frames[0].data[0]).toBe(255);
-    expect(decodedApng.frames[110].data[1]).toBe(1);
+    // The red default image is not part of the animation: frame 0 is green.
+    expect(decodedApng.frames[0].data[0]).toBe(0);
+    expect(decodedApng.frames[110].data[1]).toBe(255);
   });
 
   it('APNG RGBA image with multiple data chunks per frame', async () => {
