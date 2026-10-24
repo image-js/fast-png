@@ -1,6 +1,7 @@
 import { Unzlib as Inflator, unzlibSync } from 'fflate';
 import { IOBuffer } from 'iobuffer';
 
+import { composeApngFrames } from './helpers/compose_apng_frames.ts';
 import { checkCrc } from './helpers/crc.ts';
 import { decodeInterlaceAdam7 } from './helpers/decode_interlace_adam7.ts';
 import { decodeInterlaceNull } from './helpers/decode_interlace_null.ts';
@@ -18,7 +19,6 @@ import type {
   ApngFrame,
   BitDepth,
   DecodedApng,
-  DecodedApngFrame,
   DecodedPng,
   DecoderInputType,
   IndexedColors,
@@ -412,129 +412,25 @@ export default class PngDecoder extends IOBuffer {
     this._apng.numberOfPlays = this._numberOfPlays;
     this._apng.text = this._png.text;
     this._apng.resolution = this._png.resolution;
-    for (let i = 0; i < this._numberOfFrames; i++) {
-      const newFrame: DecodedApngFrame = {
-        sequenceNumber: this._frames[i].sequenceNumber,
-        delayNumber: this._frames[i].delayNumber,
-        delayDenominator: this._frames[i].delayDenominator,
-        data:
-          this._apng.depth === 8
-            ? new Uint8Array(
-                this._apng.width * this._apng.height * this._apng.channels,
-              )
-            : new Uint16Array(
-                this._apng.width * this._apng.height * this._apng.channels,
-              ),
-      };
-
-      const frame = this._frames.at(i);
-
-      if (frame) {
-        frame.data = decodeInterlaceNull({
-          data: frame.data as Uint8Array,
-          width: frame.width,
-          height: frame.height,
-          channels: this._apng.channels,
-          depth: this._apng.depth,
-        });
-
-        if (this._hasPalette) {
-          this._apng.palette = this._palette;
-        }
-        if (this._hasTransparency) {
-          this._apng.transparency = this._transparency;
-        }
-        if (
-          i === 0 ||
-          (frame.xOffset === 0 &&
-            frame.yOffset === 0 &&
-            frame.width === this._png.width &&
-            frame.height === this._png.height)
-        ) {
-          newFrame.data = frame.data;
-        } else {
-          const prevFrame = this._apng.frames.at(i - 1);
-          this.disposeFrame(frame, prevFrame as DecodedApngFrame, newFrame);
-          this.addFrameDataToCanvas(newFrame, frame);
-        }
-        this._apng.frames.push(newFrame);
-      }
+    if (this._hasPalette) {
+      this._apng.palette = this._palette;
     }
+    if (this._hasTransparency) {
+      this._apng.transparency = this._transparency;
+    }
+    this._apng.frames = composeApngFrames(
+      this._frames.slice(0, this._numberOfFrames),
+      {
+        width: this._png.width,
+        height: this._png.height,
+        channels: this._png.channels,
+        depth: this._png.depth,
+        colorType: this._colorType,
+        palette: this._apng.palette,
+        transparency: this._apng.transparency,
+      },
+    );
     return this._apng;
-  }
-  private disposeFrame(
-    frame: ApngFrame,
-    prevFrame: DecodedApngFrame,
-    imageFrame: DecodedApngFrame,
-  ): void {
-    switch (frame.disposeOp) {
-      case DisposeOpType.NONE:
-        break;
-      case DisposeOpType.BACKGROUND:
-        for (let row = 0; row < this._png.height; row++) {
-          for (let col = 0; col < this._png.width; col++) {
-            const index = (row * frame.width + col) * this._png.channels;
-            for (let channel = 0; channel < this._png.channels; channel++) {
-              imageFrame.data[index + channel] = 0;
-            }
-          }
-        }
-        break;
-      case DisposeOpType.PREVIOUS:
-        imageFrame.data.set(prevFrame.data);
-        break;
-      default:
-        throw new Error('Unknown disposeOp');
-    }
-  }
-  private addFrameDataToCanvas(
-    imageFrame: DecodedApngFrame,
-    frame: ApngFrame,
-  ): void {
-    const maxValue = 1 << this._png.depth;
-    const calculatePixelIndices = (row: number, col: number) => {
-      const index =
-        ((row + frame.yOffset) * this._png.width + frame.xOffset + col) *
-        this._png.channels;
-      const frameIndex = (row * frame.width + col) * this._png.channels;
-      return { index, frameIndex };
-    };
-    switch (frame.blendOp) {
-      case BlendOpType.SOURCE:
-        for (let row = 0; row < frame.height; row++) {
-          for (let col = 0; col < frame.width; col++) {
-            const { index, frameIndex } = calculatePixelIndices(row, col);
-            for (let channel = 0; channel < this._png.channels; channel++) {
-              imageFrame.data[index + channel] =
-                frame.data[frameIndex + channel];
-            }
-          }
-        }
-        break;
-      // https://www.w3.org/TR/png-3/#13Alpha-channel-processing
-      case BlendOpType.OVER:
-        for (let row = 0; row < frame.height; row++) {
-          for (let col = 0; col < frame.width; col++) {
-            const { index, frameIndex } = calculatePixelIndices(row, col);
-            for (let channel = 0; channel < this._png.channels; channel++) {
-              const sourceAlpha =
-                frame.data[frameIndex + this._png.channels - 1] / maxValue;
-              const foregroundValue =
-                channel % (this._png.channels - 1) === 0
-                  ? 1
-                  : frame.data[frameIndex + channel];
-              const value = Math.floor(
-                sourceAlpha * foregroundValue +
-                  (1 - sourceAlpha) * imageFrame.data[index + channel],
-              );
-              imageFrame.data[index + channel] += value;
-            }
-          }
-        }
-        break;
-      default:
-        throw new Error('Unknown blendOp');
-    }
   }
   private decodeImage(): void {
     const data = this._inflatorResult;
@@ -581,7 +477,9 @@ export default class PngDecoder extends IOBuffer {
     const lastFrame = this._frames.at(-1);
     if (lastFrame) {
       lastFrame.data = result;
-    } else {
+    } else if (!this._isAnimated) {
+      // A plain PNG read as an APNG is its one frame. In an APNG, image data
+      // before the first fcTL is a default image outside the animation.
       this._frames.push({
         sequenceNumber: 0,
         width: this._png.width,
