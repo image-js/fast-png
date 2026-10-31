@@ -8,7 +8,16 @@ export const textChunkName = 'tEXt';
 
 const NULL = 0;
 
-const latin1Decoder = new TextDecoder('latin1');
+// TextDecoder('latin1') is not available in every runtime, and per the WHATWG
+// Encoding standard it decodes as windows-1252 instead of ISO 8859-1.
+const CHUNK_SIZE = 0x2000;
+function decodeLatin1(bytes: Uint8Array): string {
+  let result = '';
+  for (let i = 0; i < bytes.length; i += CHUNK_SIZE) {
+    result += String.fromCodePoint(...bytes.subarray(i, i + CHUNK_SIZE));
+  }
+  return result;
+}
 
 function validateKeyword(keyword: string) {
   validateLatin1(keyword);
@@ -55,9 +64,7 @@ export function readKeyword(buffer: IOBuffer): string {
   }
   const end = buffer.offset;
   buffer.reset();
-  const keyword = latin1Decoder.decode(
-    buffer.readBytes(end - buffer.offset - 1),
-  );
+  const keyword = decodeLatin1(buffer.readBytes(end - buffer.offset - 1));
   // NULL
   buffer.skip(1);
 
@@ -67,5 +74,5 @@ export function readKeyword(buffer: IOBuffer): string {
 }
 
 export function readLatin1(buffer: IOBuffer, length: number): string {
-  return latin1Decoder.decode(buffer.readBytes(length));
+  return decodeLatin1(buffer.readBytes(length));
 }
