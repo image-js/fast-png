@@ -202,6 +202,19 @@ describe('encode', () => {
     expect(decoded.text).toStrictEqual(text);
   });
 
+  it('tEXt chunk - all latin1 characters round trip', () => {
+    let allChars = '';
+    for (let i = 0; i < 256; i++) {
+      allChars += String.fromCodePoint(i);
+    }
+    // Longer than a single decoding chunk.
+    const text = { all: allChars.repeat(100) };
+    const encoded = encode({ ...simpleRGBAImageData, text });
+    const decoded = decode(encoded);
+
+    expect(decoded.text).toStrictEqual(text);
+  });
+
   it('PLTE chunk', () => {
     const decoded = loadAndDecode('mud_bricks.png');
     const encoded = encode(decoded);
