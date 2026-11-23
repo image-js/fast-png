@@ -329,11 +329,10 @@ export default class PngDecoder extends IOBuffer {
             `tRNS chunk length must be a multiple of 2. Got ${length}`,
           );
         }
-        if (length / 2 > this._png.width * this._png.height) {
+        // A single colour: one sample per channel (grey, or red, green and blue).
+        if (length / 2 !== this._png.channels) {
           throw new Error(
-            `tRNS chunk contains more alpha values than there are pixels (${
-              length / 2
-            } vs ${this._png.width * this._png.height})`,
+            `tRNS chunk must contain ${this._png.channels} values for color type ${this._colorType}. Got ${length / 2}`,
           );
         }
         this._hasTransparency = true;

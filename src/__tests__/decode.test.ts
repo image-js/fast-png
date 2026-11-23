@@ -127,6 +127,19 @@ describe('decode', () => {
     expect(img.transparency[0]).toBe(0);
   });
 
+  it('1x1 RGB image with tRNS', () => {
+    const img = loadAndDecode('trns_rgb_1x1.png');
+    check(img, {
+      width: 1,
+      height: 1,
+      depth: 8,
+      channels: 3,
+    });
+
+    expect(img.data).toStrictEqual(new Uint8Array([1, 2, 3]));
+    expect(img.transparency).toStrictEqual(new Uint16Array([1, 2, 3]));
+  });
+
   it('1bit depth', () => {
     const decoded = loadAndDecode('bwImage.png');
 
