@@ -24,7 +24,8 @@ export function decodeInterlaceAdam7(params: DecodeInterlaceNullParams) {
   ];
 
   const bytesPerPixel = Math.ceil(depth / 8) * channels;
-  const resultData = new Uint8Array(height * width * bytesPerPixel);
+  const bytesPerLine = Math.ceil((depth / 8) * channels * width);
+  const resultData = new Uint8Array(height * bytesPerLine);
 
   let offset = 0;
 
@@ -38,7 +39,7 @@ export function decodeInterlaceAdam7(params: DecodeInterlaceNullParams) {
 
     if (passWidth <= 0 || passHeight <= 0) continue;
 
-    const passLineBytes = passWidth * bytesPerPixel;
+    const passLineBytes = Math.ceil((depth / 8) * channels * passWidth);
     const prevLine = new Uint8Array(passLineBytes);
 
     // Process each scanline in this pass
@@ -66,9 +67,22 @@ export function decodeInterlaceAdam7(params: DecodeInterlaceNullParams) {
         const outputX = pass.x + x * pass.xStep;
         const outputY = pass.y + y * pass.yStep;
         if (outputX >= width || outputY >= height) continue;
-        for (let i = 0; i < bytesPerPixel; i++) {
-          resultData[(outputY * width + outputX) * bytesPerPixel + i] =
-            newLine[x * bytesPerPixel + i];
+        if (depth < 8) {
+          // Samples are packed in bytes, leftmost pixel in the high-order bits.
+          const pixelsPerByte = 8 / depth;
+          const mask = (1 << depth) - 1;
+          const inShift = 8 - depth * ((x % pixelsPerByte) + 1);
+          const value =
+            (newLine[Math.floor(x / pixelsPerByte)] >> inShift) & mask;
+          const outShift = 8 - depth * ((outputX % pixelsPerByte) + 1);
+          resultData[
+            outputY * bytesPerLine + Math.floor(outputX / pixelsPerByte)
+          ] |= value << outShift;
+        } else {
+          for (let i = 0; i < bytesPerPixel; i++) {
+            resultData[outputY * bytesPerLine + outputX * bytesPerPixel + i] =
+              newLine[x * bytesPerPixel + i];
+          }
         }
       }
     }

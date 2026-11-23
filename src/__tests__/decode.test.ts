@@ -67,6 +67,21 @@ describe('decode', () => {
     });
   });
 
+  it.each([1, 2, 4])('interlaced with bit depth %i', (depth) => {
+    const image = loadAndDecode(`${depth}bitInterlace10x10.png`);
+    check(image, {
+      width: 10,
+      height: 10,
+      depth,
+      channels: 1,
+    });
+
+    // Same pixels without interlacing.
+    const expected = loadAndDecode(`${depth}bit10x10.png`);
+
+    expect(image.data).toStrictEqual(expected.data);
+  });
+
   it('ColorGrid5x5', () => {
     const img = loadAndDecode('ColorGrid5x5.png');
     check(img, {
